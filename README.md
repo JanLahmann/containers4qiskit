@@ -38,27 +38,21 @@ Two flavors per Qiskit version:
 | 2.0    | xl     | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/2.0-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.0-xl` |
 | 1.4     | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/1.4-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.4-small` |
 | 1.4     | xl\*   | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/1.4-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.4-xl` |
-| 1.3     | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/1.3-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.3-small` |
-| 1.3     | xl\*   | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/1.3-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.3-xl` |
-| 1.2     | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/1.2-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.2-small` |
-| 1.2     | xl\*   | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/1.2-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.2-xl` |
-| 1.1     | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/1.1-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.1-small` |
-| 1.1     | xl\*   | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/1.1-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.1-xl` |
 
 `latest` aliases the current Qiskit minor (today: `2.4`); the alias is
 updated when a new minor ships. The bare `:latest` tag (what Docker
 pulls when no tag is specified) is `latest-small`.
 
-\* `1.x-xl` is a reduced set: `qiskit-addon-*`, `qiskit-serverless`,
+\* `1.4-xl` is a reduced set: `qiskit-addon-*`, `qiskit-serverless`,
 `qiskit-ibm-catalog`, and `qiskit-ibm-transpiler` are 2.x-only and not
-included. Contents: qiskit 1.x core + aer + ibm-runtime + experiments
+included. Contents: qiskit 1.4 core + aer + ibm-runtime + experiments
 (unpinned, resolved against 1.x) + the same scientific stack as 2.x-xl.
 
-⚠ The `1.1`/`1.2`/`1.3` images carry an unfixable Qiskit QPY arbitrary
-code execution vulnerability (CVE-2025-2000, fixed in 1.4.2). These
-tags exist for historical reproducibility — do not load untrusted
-`.qpy` files in them. Use `2.x` images for any new work. Qiskit `1.0`
-is no longer published.
+Older Qiskit minors `1.0`/`1.1`/`1.2`/`1.3` are no longer published.
+They carried unfixable QPY-deserialisation CVEs (RCE in `< 1.4.2`,
+DoS in `< 1.3.0`) and were holding the base image back to a
+python-3.12 stream with a much larger CVE backlog. Use `1.4` if you
+need a 1.x environment, or one of the 2.x tags for any new work.
 
 Images are published as multi-arch manifests covering `linux/amd64` and
 `linux/arm64` (Apple Silicon, Graviton). Both arches must build for a
