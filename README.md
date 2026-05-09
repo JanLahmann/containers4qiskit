@@ -56,6 +56,12 @@ pulls when no tag is specified) is `latest-small`.
 included. Contents: qiskit 1.x core + aer + ibm-runtime + experiments
 (unpinned, resolved against 1.x) + the same scientific stack as 2.x-xl.
 
+⚠ The `1.0`/`1.1`/`1.2` images carry an unfixable Qiskit QPY arbitrary
+code execution vulnerability (CVE-2025-2000, fixed in 1.4.2); `1.3`
+inherits the same. These tags exist for historical reproducibility —
+do not load untrusted `.qpy` files in them. Use `2.x` images for any
+new work.
+
 Images are published as multi-arch manifests covering `linux/amd64` and
 `linux/arm64` (Apple Silicon, Graviton). Both arches must build for a
 release to publish; addons that lack arm64 wheels are arch-gated in the

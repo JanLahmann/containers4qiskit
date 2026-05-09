@@ -10,3 +10,22 @@
 # Re-evaluate when the upstream base image bumps nbclassic / drops
 # the vendored underscore.
 CVE-2026-27601
+
+# CVE-2025-2000 - qiskit QPY arbitrary code execution (CRITICAL).
+# CVE-2025-1403 - qiskit QPY denial of service (HIGH).
+#
+# These affect Qiskit < 1.4.2 (RCE) and < 1.3.0 (DoS) respectively.
+# We deliberately publish the 1.0/1.1/1.2/1.3 images for historical
+# reproducibility of notebooks/tutorials/papers from those eras; there
+# is no 1.0/1.1/1.2 release with the fixes, and bumping qiskit would
+# defeat the purpose. The CVEs require a user to load a malicious
+# .qpy file (no network exposure), and the README warns users pulling
+# 1.x tags about the inherited risk.
+#
+# Trivy reports these as "fixed" against newer versions, so the
+# entries here only suppress findings for the old qiskit minors we
+# ship by design; a future qiskit 2.x or current-stream regression
+# would not silently slip through unless it shared the same CVE id.
+CVE-2025-2000
+CVE-2025-1403
+
