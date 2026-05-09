@@ -39,13 +39,20 @@ pip install "qiskit~=2.4.0"
 ## How it works
 
 `Dockerfile.template` is parameterised by `QISKIT_VERSION` (which is really a
-`<qiskit-minor>-<flavor>` build target) and reads pinned dependencies from
-`versions/<target>/requirements.txt`. The `build-matrix.yml` workflow builds
-one image per matrix entry, pushes to `ghcr.io`, and force-syncs a
-per-target stub branch containing only `binder/Dockerfile` (a one-line
-`FROM ghcr.io/...` reference). mybinder consumes that branch and pulls the
-pre-built image instead of rebuilding the dep tree from scratch (cold start
-~30s).
+`<qiskit-minor>-<flavor>` build target) and installs the dependency list at
+`versions/<target>/requirements.txt`. The `build-matrix.yml` workflow has
+two stages:
+
+1. **build** — for each `<target>`, build an image per architecture on a
+   native runner (`ubuntu-latest` for amd64, `ubuntu-24.04-arm` for arm64)
+   and push as `ghcr.io/.../qiskit:<target>-<arch>`.
+2. **manifest** — combine the per-arch tags into a multi-arch
+   `ghcr.io/.../qiskit:<target>` with `docker buildx imagetools create`,
+   then force-sync a per-target stub branch containing only
+   `binder/Dockerfile` (a one-line `FROM ghcr.io/...` reference).
+
+mybinder consumes the stub branch and pulls the pre-built image instead of
+rebuilding the dep tree from scratch (cold start ~30s).
 
 To add a new Qiskit version:
 
