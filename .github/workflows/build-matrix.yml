@@ -83,19 +83,24 @@ jobs:
 
       - name: Scan published image with Trivy
         if: env.PUBLISH == 'true'
-        uses: aquasecurity/trivy-action@v0.36.0
         env:
           # build-push-action v6 emits an OCI index (image + provenance
           # attestation) even for single-platform builds, so trivy must
-          # be told which child manifest to scan; otherwise it defaults
-          # to linux/amd64 and arm64 cells fail with "no child with
-          # platform linux/amd64".
-          TRIVY_PLATFORM: ${{ matrix.platform.name }}
-        with:
-          image-ref: ghcr.io/${{ steps.repo.outputs.owner_lc }}/${{ env.IMAGE }}:${{ matrix.version }}-${{ matrix.platform.arch }}
-          severity: 'HIGH,CRITICAL'
-          exit-code: '1'
-          ignore-unfixed: true
+          # be told which child manifest to scan. The trivy-action
+          # wrapper doesn't expose --platform and TRIVY_PLATFORM is not
+          # honoured, so install trivy and call it directly.
+          IMAGE_REF: ghcr.io/${{ steps.repo.outputs.owner_lc }}/${{ env.IMAGE }}:${{ matrix.version }}-${{ matrix.platform.arch }}
+          PLATFORM: ${{ matrix.platform.name }}
+        run: |
+          set -euo pipefail
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
+            | sudo sh -s -- -b /usr/local/bin v0.70.0
+          trivy image \
+            --platform "$PLATFORM" \
+            --severity HIGH,CRITICAL \
+            --ignore-unfixed \
+            --exit-code 1 \
+            "$IMAGE_REF"
 
   manifest:
     name: manifest ${{ matrix.version }}
