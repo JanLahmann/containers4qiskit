@@ -1,4 +1,4 @@
-FROM quay.io/jupyter/base-notebook:python-3.12
+FROM quay.io/jupyter/base-notebook:python-3.13
 
 ARG QISKIT_VERSION
 ENV QISKIT_VERSION=${QISKIT_VERSION}
