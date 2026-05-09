@@ -10,7 +10,8 @@ Two flavors per Qiskit version:
 - **xl** — broad environment based on
   [Qiskit-documentation's notebook tester](https://github.com/JanLahmann/Qiskit-documentation/blob/main/scripts/nb-tester/requirements.txt):
   `qiskit[all]`, all `qiskit-addon-*`, `qiskit-experiments`,
-  `qiskit-ibm-transpiler`, `qiskit-serverless`, `qiskit-ibm-catalog`,
+  `qiskit-ibm-transpiler` (with `[ai-local-mode]` on amd64),
+  `qiskit-serverless`, `qiskit-ibm-catalog`,
   a scientific stack (`scipy`, `scikit-learn`,
   `pyscf`, `plotly`, `sympy`, `ffsim`, `gem-suite`, `python-sat`,
   `pandas`), plus `pylatexenc` for LaTeX rendering and `nbgitpuller`
