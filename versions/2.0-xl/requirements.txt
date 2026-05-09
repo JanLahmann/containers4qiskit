@@ -1,0 +1,34 @@
+# Pinned reproducible environment for Qiskit 2.0 (XL flavor).
+# Same arch-gated pin set as 2.3-xl (Qiskit-documentation's nb-tester
+# requirements + pylatexenc/pandas/nbgitpuller), with qiskit pinned to
+# 2.0. The addon/runtime pins were originally validated against 2.3 —
+# if any are incompatible with 2.0, drop or relax them.
+#
+# arm64 omits qiskit-ibm-transpiler and gem-suite (no aarch64 wheels;
+# need toolchain to build).
+
+qiskit[all]~=2.0.0
+qiskit-ibm-runtime~=0.43.1
+qiskit-ibm-transpiler[ai-local-mode]~=0.15.0; platform_machine == "x86_64"
+qiskit-aer~=0.17
+qiskit-serverless~=0.27.1
+qiskit-ibm-catalog~=0.11.0
+qiskit-addon-sqd~=0.12.0
+qiskit-addon-utils~=0.3.0
+qiskit-addon-mpf~=0.3.0
+qiskit-addon-aqc-tensor[aer,quimb-jax]~=0.2.0; sys.platform != 'darwin'
+qiskit-addon-obp~=0.3.0
+qiskit-addon-cutting~=0.10.0
+qiskit-experiments~=0.13.0
+
+scipy
+scikit-learn
+pyscf; sys.platform != 'win32'
+python-sat
+plotly
+gem-suite; platform_machine == "x86_64"
+ffsim; sys.platform != 'win32'
+sympy
+pylatexenc
+pandas
+nbgitpuller

@@ -32,6 +32,15 @@ Two flavors per Qiskit version:
 | 2.2    | xl     | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/2.2-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.2-xl` |
 | 2.1    | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/2.1-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.1-small` |
 | 2.1    | xl     | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/2.1-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.1-xl` |
+| 2.0    | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/2.0-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.0-small` |
+| 2.0    | xl     | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/2.0-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.0-xl` |
+| 1.4    | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/1.4-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.4-small` |
+| 1.4    | xl\*   | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/1.4-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.4-xl` |
+
+\* `1.4-xl` is a reduced set: `qiskit-addon-*`, `qiskit-serverless`,
+`qiskit-ibm-catalog`, and `qiskit-ibm-transpiler` are 2.x-only and not
+included. Contents: qiskit 1.4 core + aer + ibm-runtime + experiments
+(unpinned, resolved against 1.x) + the same scientific stack as 2.x-xl.
 
 Images are published as multi-arch manifests covering `linux/amd64` and
 `linux/arm64` (Apple Silicon, Graviton). `2.4-xl` arm64 is best-effort —

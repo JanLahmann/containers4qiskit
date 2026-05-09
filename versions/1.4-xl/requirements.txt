@@ -1,0 +1,26 @@
+# Pinned reproducible environment for Qiskit 1.4 (XL flavor).
+#
+# 1.x is a different API generation from the docs-tester pin set
+# (which targets 2.3+). The qiskit-addon-* packages, qiskit-serverless,
+# qiskit-ibm-catalog, qiskit-ibm-transpiler, and the docs-tester pinned
+# versions of qiskit-aer/-ibm-runtime/-experiments all require qiskit
+# >=2.x and are dropped here. What's left: a qiskit 1.4 core, the older
+# resolved versions of aer/runtime/experiments, plus the same scientific
+# stack as 2.x-xl.
+
+qiskit~=1.4.0
+qiskit-aer
+qiskit-ibm-runtime
+qiskit-experiments
+
+scipy
+scikit-learn
+pyscf; sys.platform != 'win32'
+python-sat
+plotly
+ffsim; sys.platform != 'win32'
+sympy
+matplotlib
+pylatexenc
+pandas
+nbgitpuller
