@@ -7,13 +7,16 @@ Two flavors per Qiskit version:
 
 - **small** — `qiskit` + `qiskit-aer` + `qiskit-ibm-runtime`. Lean image,
   fast `docker pull`.
-- **xl** — full pinned environment matching
+- **xl** — broad environment based on
   [Qiskit-documentation's notebook tester](https://github.com/JanLahmann/Qiskit-documentation/blob/main/scripts/nb-tester/requirements.txt):
   `qiskit[all]`, all `qiskit-addon-*`, `qiskit-experiments`,
   `qiskit-ibm-transpiler[ai-local-mode]`, `qiskit-serverless`,
-  `qiskit-ibm-catalog`, plus a scientific stack (`scipy`, `scikit-learn`,
-  `pyscf`, `plotly`, `sympy`, `ffsim`, `gem-suite`, `python-sat`).
-  Notebooks from the Qiskit documentation site should run unmodified.
+  `qiskit-ibm-catalog`, a scientific stack (`scipy`, `scikit-learn`,
+  `pyscf`, `plotly`, `sympy`, `ffsim`, `gem-suite`, `python-sat`,
+  `pandas`), plus `pylatexenc` for LaTeX rendering and `nbgitpuller`
+  for git-backed notebook distribution. Qiskit-ecosystem packages are
+  pinned; the rest is resolved by pip. Notebooks from the Qiskit
+  documentation site should run unmodified.
 
 ## Versions
 
