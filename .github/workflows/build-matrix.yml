@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: ['2.4-small', '2.4-xl', '2.3-small', '2.3-xl']
+        version: ['2.4-small', '2.4-xl', '2.3-small', '2.3-xl', '2.2-small', '2.2-xl', '2.1-small', '2.1-xl']
         platform:
           - { name: linux/amd64, runner: ubuntu-latest,    arch: amd64 }
           - { name: linux/arm64, runner: ubuntu-24.04-arm, arch: arm64 }
@@ -62,7 +62,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: ['2.4-small', '2.4-xl', '2.3-small', '2.3-xl']
+        version: ['2.4-small', '2.4-xl', '2.3-small', '2.3-xl', '2.2-small', '2.2-xl', '2.1-small', '2.1-xl']
     steps:
       - uses: actions/checkout@v4
 
