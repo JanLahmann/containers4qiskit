@@ -13,8 +13,51 @@ permissions:
   contents: write
   packages: write
 
+env:
+  IMAGE: qiskit
+
 jobs:
   build:
+    name: build ${{ matrix.version }} (${{ matrix.platform.arch }})
+    runs-on: ${{ matrix.platform.runner }}
+    continue-on-error: ${{ matrix.version == '2.4-xl' && matrix.platform.arch == 'arm64' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ['2.4-small', '2.4-xl']
+        platform:
+          - { name: linux/amd64, runner: ubuntu-latest,    arch: amd64 }
+          - { name: linux/arm64, runner: ubuntu-24.04-arm, arch: arm64 }
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute lowercase owner
+        id: repo
+        run: echo "owner_lc=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push per-arch tag
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.template
+          build-args: QISKIT_VERSION=${{ matrix.version }}
+          platforms: ${{ matrix.platform.name }}
+          tags: ghcr.io/${{ steps.repo.outputs.owner_lc }}/${{ env.IMAGE }}:${{ matrix.version }}-${{ matrix.platform.arch }}
+          push: true
+          cache-from: type=gha,scope=${{ matrix.version }}-${{ matrix.platform.arch }}
+          cache-to: type=gha,scope=${{ matrix.version }}-${{ matrix.platform.arch }},mode=max
+
+  manifest:
+    name: manifest ${{ matrix.version }}
+    needs: build
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -35,16 +78,27 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: Dockerfile.template
-          build-args: QISKIT_VERSION=${{ matrix.version }}
-          tags: ghcr.io/${{ steps.repo.outputs.owner_lc }}/qiskit:${{ matrix.version }}
-          push: true
-          cache-from: type=gha,scope=qiskit-${{ matrix.version }}
-          cache-to: type=gha,scope=qiskit-${{ matrix.version }},mode=max
+      - name: Combine per-arch tags into multi-arch manifest
+        env:
+          REPO: ghcr.io/${{ steps.repo.outputs.owner_lc }}/${{ env.IMAGE }}
+          VERSION: ${{ matrix.version }}
+        run: |
+          set -euo pipefail
+          sources=()
+          for arch in amd64 arm64; do
+            tag="${REPO}:${VERSION}-${arch}"
+            if docker buildx imagetools inspect "$tag" >/dev/null 2>&1; then
+              echo "Found $tag"
+              sources+=("$tag")
+            else
+              echo "Skipping $tag (not built)"
+            fi
+          done
+          if [ ${#sources[@]} -eq 0 ]; then
+            echo "No per-arch images found for $VERSION; failing." >&2
+            exit 1
+          fi
+          docker buildx imagetools create -t "${REPO}:${VERSION}" "${sources[@]}"
 
       - name: Sync stub branch for mybinder
         env:
@@ -58,7 +112,7 @@ jobs:
           git rm -rf --cached . >/dev/null
           find . -mindepth 1 -maxdepth 1 -not -name .git -exec rm -rf {} +
           mkdir -p binder
-          printf 'FROM ghcr.io/%s/qiskit:%s\n' "$OWNER_LC" "$VERSION" > binder/Dockerfile
+          printf 'FROM ghcr.io/%s/%s:%s\n' "$OWNER_LC" "$IMAGE" "$VERSION" > binder/Dockerfile
           git add binder/Dockerfile
           git commit -m "Sync stub branch for qiskit $VERSION"
           git push -f origin "$VERSION"
