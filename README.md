@@ -70,23 +70,42 @@ pip install "qiskit~=2.4.0"
 
 ## How it works
 
-`Dockerfile.template` is parameterised by `QISKIT_VERSION` (which is really a
+`Dockerfile` is parameterised by `QISKIT_VERSION` (which is really a
 `<qiskit-minor>-<flavor>` build target) and installs the dependency list at
 `versions/<target>/requirements.txt`. The `build-matrix.yml` workflow has
 two stages:
 
 1. **build** — for each `<target>`, build an image per architecture on a
-   native runner (`ubuntu-latest` for amd64, `ubuntu-24.04-arm` for arm64)
-   and push as `ghcr.io/.../qiskit:<target>-<arch>`.
+   native runner (`ubuntu-latest` for amd64, `ubuntu-24.04-arm` for arm64),
+   push as `ghcr.io/.../qiskit:<target>-<arch>`, and run a Trivy scan
+   (HIGH/CRITICAL with available fixes block the run).
 2. **manifest** — combine the per-arch tags into a multi-arch
    `ghcr.io/.../qiskit:<target>` with `docker buildx imagetools create`,
-   then force-sync a per-target stub branch containing only
-   `binder/Dockerfile` (a one-line `FROM ghcr.io/...` reference).
-   Targets matching the `LATEST_QISKIT` env var also get a
-   `latest-<flavor>` tag and stub branch.
+   sign the manifest with cosign keyless, then force-sync a per-target
+   stub branch containing only `binder/Dockerfile` (a one-line
+   `FROM ghcr.io/...` reference). Targets matching the `LATEST_QISKIT`
+   env var also get a `latest-<flavor>` tag and stub branch.
+
+Pushes to GHCR and stub-branch syncs only happen on `main` (or manual
+workflow dispatch); feature-branch pushes only run the build for CI
+signal.
 
 mybinder consumes the stub branch and pulls the pre-built image instead of
 rebuilding the dep tree from scratch (cold start ~30s).
+
+## Verifying images
+
+Every multi-arch tag is signed via cosign keyless OIDC:
+
+```
+cosign verify ghcr.io/janlahmann/qiskit:2.4-small \
+  --certificate-identity-regexp='^https://github.com/JanLahmann/containers4qiskit/' \
+  --certificate-oidc-issuer=https://token.actions.githubusercontent.com
+```
+
+Build provenance attestations are produced automatically by
+`docker/build-push-action`; see them via `docker buildx imagetools
+inspect ghcr.io/.../qiskit:<tag> --format '{{ json .Provenance }}'`.
 
 To add a new Qiskit version:
 
