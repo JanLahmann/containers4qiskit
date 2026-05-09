@@ -3,17 +3,24 @@
 Docker images and Binder URLs for specific Qiskit versions, so you can spin up
 a Jupyter environment running exactly the Qiskit version you need.
 
-For each supported Qiskit version, this repo publishes:
+Two flavors per Qiskit version:
 
-- A Docker image at `ghcr.io/janlahmann/qiskit:<version>`
-- A `<version>` stub branch consumed by [mybinder.org](https://mybinder.org)
-  that pulls the pre-built image (cold start ~30s)
+- **small** — `qiskit` + `qiskit-aer` + `qiskit-ibm-runtime`. Lean image,
+  fast `docker pull`.
+- **xl** — full pinned environment matching
+  [Qiskit-documentation's notebook tester](https://github.com/JanLahmann/Qiskit-documentation/blob/main/scripts/nb-tester/requirements.txt):
+  `qiskit[all]`, all `qiskit-addon-*`, `qiskit-experiments`,
+  `qiskit-ibm-transpiler[ai-local-mode]`, `qiskit-serverless`,
+  `qiskit-ibm-catalog`, plus a scientific stack (`scipy`, `scikit-learn`,
+  `pyscf`, `plotly`, `sympy`, `ffsim`, `gem-suite`, `python-sat`).
+  Notebooks from the Qiskit documentation site should run unmodified.
 
 ## Versions
 
-| Version | Binder | Docker |
-| ------- | ------ | ------ |
-| 2.4     | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/2.4) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.4` |
+| Qiskit | Flavor | Binder | Docker |
+| ------ | ------ | ------ | ------ |
+| 2.4    | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/2.4-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.4-small` |
+| 2.4    | xl     | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/2.4-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.4-xl` |
 
 For users not using Docker or Binder:
 
@@ -23,21 +30,22 @@ pip install "qiskit~=2.4.0"
 
 ## How it works
 
-`Dockerfile.template` is parameterised by `QISKIT_VERSION` and reads pinned
-dependencies from `versions/<version>/requirements.txt`. The
-`build-matrix.yml` workflow builds one image per matrix entry, pushes to
-`ghcr.io`, and force-syncs a per-version stub branch containing only
-`binder/Dockerfile` (a one-line `FROM ghcr.io/...` reference). mybinder
-consumes that branch and pulls the pre-built image instead of rebuilding the
-Qiskit pip layer from scratch.
+`Dockerfile.template` is parameterised by `QISKIT_VERSION` (which is really a
+`<qiskit-minor>-<flavor>` build target) and reads pinned dependencies from
+`versions/<target>/requirements.txt`. The `build-matrix.yml` workflow builds
+one image per matrix entry, pushes to `ghcr.io`, and force-syncs a
+per-target stub branch containing only `binder/Dockerfile` (a one-line
+`FROM ghcr.io/...` reference). mybinder consumes that branch and pulls the
+pre-built image instead of rebuilding the dep tree from scratch (cold start
+~30s).
 
-To add a version:
+To add a new Qiskit version:
 
-1. Create `versions/<X.Y>/requirements.txt` with `qiskit~=<X.Y>.0` and any
-   pinned addons (`qiskit-aer`, `qiskit-ibm-runtime`, ...).
-2. Add `<X.Y>` to the `matrix.version` list in
+1. Create `versions/<X.Y>-small/requirements.txt` and
+   `versions/<X.Y>-xl/requirements.txt`.
+2. Add `<X.Y>-small` and `<X.Y>-xl` to the `matrix.version` list in
    `.github/workflows/build-matrix.yml`.
-3. Add a row to the table above.
+3. Add two rows to the table above.
 
 ## License
 
