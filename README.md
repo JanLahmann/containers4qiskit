@@ -10,14 +10,15 @@ Two flavors per Qiskit version:
 - **xl** — broad environment based on
   [Qiskit-documentation's notebook tester](https://github.com/JanLahmann/Qiskit-documentation/blob/main/scripts/nb-tester/requirements.txt):
   `qiskit[all]`, all `qiskit-addon-*`, `qiskit-experiments`,
-  `qiskit-ibm-transpiler[ai-local-mode]` (amd64 only — no aarch64 wheels
-  for its torch-based deps), `qiskit-serverless`, `qiskit-ibm-catalog`,
-  a scientific stack (`scipy`, `scikit-learn`,
+  `qiskit-ibm-transpiler[ai-local-mode]`, `qiskit-serverless`,
+  `qiskit-ibm-catalog`, a scientific stack (`scipy`, `scikit-learn`,
   `pyscf`, `plotly`, `sympy`, `ffsim`, `gem-suite`, `python-sat`,
   `pandas`), plus `pylatexenc` for LaTeX rendering and `nbgitpuller`
   for git-backed notebook distribution. Qiskit-ecosystem packages are
   pinned; the rest is resolved by pip. Notebooks from the Qiskit
-  documentation site should run unmodified.
+  documentation site should run unmodified. On arm64,
+  `qiskit-ibm-transpiler` and `gem-suite` are omitted because they
+  lack aarch64 wheels and need a Rust/C++ toolchain to build.
 
 ## Versions
 

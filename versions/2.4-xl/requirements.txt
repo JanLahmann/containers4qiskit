@@ -5,9 +5,15 @@
 # Pins are kept on Qiskit-ecosystem packages (tightly coupled, validated as a
 # set). Scientific-stack packages are unpinned and resolved by pip.
 #
-# qiskit-ibm-transpiler is amd64-only: every 0.15.x release hard-depends
-# on qiskit_ibm_ai_local_transpiler~=0.5, whose torch-based dep chain has
-# no aarch64 wheels. arm64 users who want it can pip install on demand.
+# Some packages are amd64-only because no aarch64 wheels exist and the
+# base image has no Rust/C++ toolchain to build from source:
+#   - qiskit-ibm-transpiler: every 0.15.x hard-depends on
+#     qiskit_ibm_ai_local_transpiler~=0.5, whose torch chain has no
+#     aarch64 wheels.
+#   - gem-suite: Rust extension, sdist only on aarch64. (Also pulls
+#     pymatching, which is sdist only on aarch64 and needs cmake + g++.)
+# arm64 users who want these can pip install them on demand after
+# adding the relevant toolchain.
 
 qiskit[all]~=2.4.0
 qiskit-ibm-runtime~=0.43.1
@@ -28,7 +34,7 @@ scikit-learn
 pyscf; sys.platform != 'win32'
 python-sat
 plotly
-gem-suite
+gem-suite; platform_machine == "x86_64"
 ffsim; sys.platform != 'win32'
 sympy
 pylatexenc
