@@ -77,18 +77,21 @@ two stages:
 
 1. **build** — for each `<target>`, build an image per architecture on a
    native runner (`ubuntu-latest` for amd64, `ubuntu-24.04-arm` for arm64),
-   push as `ghcr.io/.../qiskit:<target>-<arch>`, and run a Trivy scan
-   (HIGH/CRITICAL with available fixes block the run).
-2. **manifest** — combine the per-arch tags into a multi-arch
-   `ghcr.io/.../qiskit:<target>` with `docker buildx imagetools create`,
-   sign the manifest with cosign keyless, then force-sync a per-target
-   stub branch containing only `binder/Dockerfile` (a one-line
-   `FROM ghcr.io/...` reference). Targets matching the `LATEST_QISKIT`
-   env var also get a `latest-<flavor>` tag and stub branch.
-
-Pushes to GHCR and stub-branch syncs only happen on `main` (or manual
-workflow dispatch); feature-branch pushes only run the build for CI
-signal.
+   load the result into the local docker daemon, and run Trivy against
+   it (HIGH/CRITICAL with available fixes block the run). The base image
+   is force-pulled so security fixes flow through instead of riding on
+   the GHA layer cache. The scan runs on every branch.
+2. **publish to GHCR** (only on `main` / `workflow_dispatch`) — re-run
+   the build with `push: true` so `docker/build-push-action` produces
+   the SLSA provenance attestation alongside `ghcr.io/.../qiskit:<target>-<arch>`.
+   All layers are cache hits from step 1, so this is fast.
+3. **manifest** (only on `main` / `workflow_dispatch`) — combine the
+   per-arch tags into a multi-arch `ghcr.io/.../qiskit:<target>` with
+   `docker buildx imagetools create`, sign the manifest with cosign
+   keyless, then force-sync a per-target stub branch containing only
+   `binder/Dockerfile` (a one-line `FROM ghcr.io/...` reference).
+   Targets matching the `LATEST_QISKIT` env var also get a
+   `latest-<flavor>` tag and stub branch.
 
 mybinder consumes the stub branch and pulls the pre-built image instead of
 rebuilding the dep tree from scratch (cold start ~30s).
