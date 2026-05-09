@@ -18,7 +18,8 @@ scikit-learn
 pyscf; sys.platform != 'win32'
 python-sat
 plotly
-ffsim; sys.platform != 'win32'
+# ffsim's qiskit floor exceeds 1.1; older sdist-only versions
+# would require a Rust toolchain to build, which the base image lacks.
 sympy
 matplotlib
 pylatexenc
