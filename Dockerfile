@@ -5,7 +5,7 @@
 # pull: true in the workflow forces a fresh digest of this tag every
 # build, so security fixes still flow through without us pinning a
 # specific digest.
-FROM quay.io/jupyter/base-notebook:python-3.12
+FROM quay.io/jupyter/base-notebook:python-3.13
 
 ARG QISKIT_VERSION
 ENV QISKIT_VERSION=${QISKIT_VERSION}
