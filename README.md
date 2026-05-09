@@ -48,7 +48,8 @@ Two flavors per Qiskit version:
 | 1.0     | xl\*   | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/1.0-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.0-xl` |
 
 `latest` aliases the current Qiskit minor (today: `2.4`); the alias is
-updated when a new minor ships.
+updated when a new minor ships. The bare `:latest` tag (what Docker
+pulls when no tag is specified) is `latest-small`.
 
 \* `1.x-xl` is a reduced set: `qiskit-addon-*`, `qiskit-serverless`,
 `qiskit-ibm-catalog`, and `qiskit-ibm-transpiler` are 2.x-only and not

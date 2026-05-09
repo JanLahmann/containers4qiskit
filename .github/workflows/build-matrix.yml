@@ -143,10 +143,14 @@ jobs:
           docker buildx imagetools create -t "${REPO}:${VERSION}" "${sources[@]}"
 
           # If this is the current "latest" Qiskit minor, also publish
-          # an alias tag latest-<flavor>.
+          # an alias tag latest-<flavor>. The small flavor additionally
+          # gets the bare :latest tag (the docker default).
           if [[ "${VERSION%-*}" == "${LATEST_QISKIT}" ]]; then
             flavor="${VERSION#*-}"
             docker buildx imagetools create -t "${REPO}:latest-${flavor}" "${sources[@]}"
+            if [[ "$flavor" == "small" ]]; then
+              docker buildx imagetools create -t "${REPO}:latest" "${sources[@]}"
+            fi
           fi
 
       - name: Sync stub branch(es) for mybinder
