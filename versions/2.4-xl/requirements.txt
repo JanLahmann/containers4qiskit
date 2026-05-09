@@ -1,6 +1,6 @@
-# Pinned to exact versions for reproducible builds.
-# Mirrors github.com/JanLahmann/Qiskit-documentation/scripts/nb-tester/requirements.txt
-# but bumped from qiskit[all]~=2.3.0 to ~=2.4.0 for this image's Qiskit minor.
+# Pinned reproducible environment for Qiskit 2.4 (XL flavor).
+# Based on Qiskit-documentation's nb-tester requirements (bumped to qiskit 2.4)
+# plus pylatexenc, pandas, and nbgitpuller for notebook authoring/distribution.
 
 qiskit[all]~=2.4.0
 qiskit-ibm-runtime~=0.43.1
@@ -23,3 +23,7 @@ plotly~=6.5.1
 gem-suite~=0.1.6
 ffsim~=0.0.64; sys.platform != 'win32'
 sympy~=1.14.0
+
+pylatexenc
+pandas
+nbgitpuller
