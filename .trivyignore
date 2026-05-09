@@ -1,0 +1,12 @@
+# CVE-2026-27601 - underscore.js DoS via flatten with recursive structures.
+#
+# The flagged 1.13.7 copy is a vendored static JS asset inside
+# nbclassic/static/components/underscore/package.json, not the
+# server-side underscore Python package (we don't depend on either).
+# It comes from the quay.io/jupyter/base-notebook base image; no
+# released nbclassic refreshes the bundled underscore yet, and we
+# don't expose nbclassic's classic UI in these notebooks.
+#
+# Re-evaluate when the upstream base image bumps nbclassic / drops
+# the vendored underscore.
+CVE-2026-27601
