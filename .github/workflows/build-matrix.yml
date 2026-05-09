@@ -23,7 +23,6 @@ jobs:
   build:
     name: build ${{ matrix.version }} (${{ matrix.platform.arch }})
     runs-on: ${{ matrix.platform.runner }}
-    continue-on-error: ${{ endsWith(matrix.version, '-xl') && matrix.platform.arch == 'arm64' }}
     strategy:
       fail-fast: false
       matrix:

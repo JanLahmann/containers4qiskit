@@ -56,9 +56,10 @@ included. Contents: qiskit 1.x core + aer + ibm-runtime + experiments
 (unpinned, resolved against 1.x) + the same scientific stack as 2.x-xl.
 
 Images are published as multi-arch manifests covering `linux/amd64` and
-`linux/arm64` (Apple Silicon, Graviton). `2.4-xl` arm64 is best-effort —
-if a pinned addon lacks arm64 wheels, only the `linux/amd64` variant is
-published for that tag.
+`linux/arm64` (Apple Silicon, Graviton). Both arches must build for a
+release to publish; addons that lack arm64 wheels are arch-gated in the
+relevant `requirements.txt` (e.g. `qiskit-ibm-transpiler` and `gem-suite`
+in 2.x-xl).
 
 For users not using Docker or Binder:
 
