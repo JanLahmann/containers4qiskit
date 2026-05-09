@@ -5,17 +5,17 @@
 # Pins are kept on Qiskit-ecosystem packages (tightly coupled, validated as a
 # set). Scientific-stack packages are unpinned and resolved by pip.
 #
-# qiskit-ibm-transpiler[ai-local-mode] and qiskit-serverless 0.27 are amd64
-# only; arm64 lacks aarch64 wheels for qiskit_ibm_ai_local_transpiler's
-# transitive deps, so it uses the leaner transpiler and serverless 0.28.
+# The qiskit-ibm-transpiler [ai-local-mode] extra is amd64-only; arm64
+# lacks aarch64 wheels for qiskit_ibm_ai_local_transpiler's torch deps.
+# The bare transpiler resolves to 0.15.0/0.15.1 on arm64 (0.15.2 made
+# ai_local_transpiler a hard dep, so pip can't pick it on arm64 either).
 
 qiskit[all]~=2.4.0
 qiskit-ibm-runtime~=0.43.1
 qiskit-ibm-transpiler[ai-local-mode]~=0.15.0; platform_machine == "x86_64"
 qiskit-ibm-transpiler~=0.15.0;                platform_machine != "x86_64"
 qiskit-aer~=0.17
-qiskit-serverless~=0.27.1; platform_machine == "x86_64"
-qiskit-serverless~=0.28.0; platform_machine != "x86_64"
+qiskit-serverless~=0.27.1
 qiskit-ibm-catalog~=0.11.0
 qiskit-addon-sqd~=0.12.0
 qiskit-addon-utils~=0.3.0
