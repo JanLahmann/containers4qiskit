@@ -1,6 +1,9 @@
 # Pinned reproducible environment for Qiskit 2.4 (XL flavor).
 # Based on Qiskit-documentation's nb-tester requirements (bumped to qiskit 2.4)
 # plus pylatexenc, pandas, and nbgitpuller for notebook authoring/distribution.
+#
+# Pins are kept on Qiskit-ecosystem packages (tightly coupled, validated as a
+# set). Scientific-stack packages are unpinned and resolved by pip.
 
 qiskit[all]~=2.4.0
 qiskit-ibm-runtime~=0.43.1
@@ -15,15 +18,15 @@ qiskit-addon-aqc-tensor[aer,quimb-jax]~=0.2.0; sys.platform != 'darwin'
 qiskit-addon-obp~=0.3.0
 qiskit-addon-cutting~=0.10.0
 qiskit-experiments~=0.13.0
-scipy~=1.16.3
-scikit-learn~=1.8.0
-pyscf~=2.11.0; sys.platform != 'win32'
-python-sat~=1.8.dev24
-plotly~=6.5.1
-gem-suite~=0.1.6
-ffsim~=0.0.64; sys.platform != 'win32'
-sympy~=1.14.0
 
+scipy
+scikit-learn
+pyscf; sys.platform != 'win32'
+python-sat
+plotly
+gem-suite
+ffsim; sys.platform != 'win32'
+sympy
 pylatexenc
 pandas
 nbgitpuller
