@@ -1,8 +1,17 @@
 version: 2
 updates:
-  # Bump the digest pin on quay.io/jupyter/base-notebook so accumulated
-  # OS-level CVEs don't ride along forever in published images.
+  # The Dockerfile uses an unpinned python-3.12 tag plus pull: true in
+  # the workflow, so security fixes from the upstream base image flow
+  # through on every build without any commit churn. We ask Dependabot
+  # not to bump the tag itself: a python-minor bump (e.g. to
+  # python-3.13) would break the 1.x Qiskit images, since qiskit 1.x
+  # pins numpy<2 and there is no numpy<2 with cp3.13 wheels.
+  #
+  # If we ever pin to a specific digest, switch this back to letting
+  # Dependabot bump the digest within the python-3.12 tag stream.
   - package-ecosystem: docker
     directory: /
     schedule:
       interval: weekly
+    ignore:
+      - dependency-name: quay.io/jupyter/base-notebook

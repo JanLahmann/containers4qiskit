@@ -44,8 +44,6 @@ Two flavors per Qiskit version:
 | 1.2     | xl\*   | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/1.2-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.2-xl` |
 | 1.1     | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/1.1-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.1-small` |
 | 1.1     | xl\*   | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/1.1-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.1-xl` |
-| 1.0     | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/1.0-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.0-small` |
-| 1.0     | xl\*   | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/1.0-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.0-xl` |
 
 `latest` aliases the current Qiskit minor (today: `2.4`); the alias is
 updated when a new minor ships. The bare `:latest` tag (what Docker
@@ -56,11 +54,11 @@ pulls when no tag is specified) is `latest-small`.
 included. Contents: qiskit 1.x core + aer + ibm-runtime + experiments
 (unpinned, resolved against 1.x) + the same scientific stack as 2.x-xl.
 
-⚠ The `1.0`/`1.1`/`1.2` images carry an unfixable Qiskit QPY arbitrary
-code execution vulnerability (CVE-2025-2000, fixed in 1.4.2); `1.3`
-inherits the same. These tags exist for historical reproducibility —
-do not load untrusted `.qpy` files in them. Use `2.x` images for any
-new work.
+⚠ The `1.1`/`1.2`/`1.3` images carry an unfixable Qiskit QPY arbitrary
+code execution vulnerability (CVE-2025-2000, fixed in 1.4.2). These
+tags exist for historical reproducibility — do not load untrusted
+`.qpy` files in them. Use `2.x` images for any new work. Qiskit `1.0`
+is no longer published.
 
 Images are published as multi-arch manifests covering `linux/amd64` and
 `linux/arm64` (Apple Silicon, Graviton). Both arches must build for a
