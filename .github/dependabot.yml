@@ -1,0 +1,8 @@
+version: 2
+updates:
+  # Bump the digest pin on quay.io/jupyter/base-notebook so accumulated
+  # OS-level CVEs don't ride along forever in published images.
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly

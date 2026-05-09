@@ -1,0 +1,212 @@
+name: Build matrix
+
+on:
+  push:
+    branches: [main, 'claude/**']
+    paths:
+      - 'Dockerfile'
+      - 'versions/**'
+      - '.github/workflows/build-matrix.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write     # stub-branch force-pushes (main only)
+  packages: write     # GHCR push (main only)
+  id-token: write     # cosign keyless signing via OIDC
+
+env:
+  IMAGE: qiskit
+  # Qiskit minor that the :latest-<flavor> tags and latest-<flavor> stub
+  # branches alias to. Bump when a new minor ships.
+  LATEST_QISKIT: '2.4'
+  # Only main and manual dispatch publish to GHCR or update stub
+  # branches; feature branches build for CI signal but stay sandboxed.
+  PUBLISH: ${{ github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' }}
+
+jobs:
+  build:
+    name: build ${{ matrix.version }} (${{ matrix.platform.arch }})
+    runs-on: ${{ matrix.platform.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        version:
+          - '2.4-small'
+          - '2.4-xl'
+          - '2.3-small'
+          - '2.3-xl'
+          - '2.2-small'
+          - '2.2-xl'
+          - '2.1-small'
+          - '2.1-xl'
+          - '2.0-small'
+          - '2.0-xl'
+          - '1.4-small'
+          - '1.4-xl'
+          - '1.3-small'
+          - '1.3-xl'
+          - '1.2-small'
+          - '1.2-xl'
+          - '1.1-small'
+          - '1.1-xl'
+          - '1.0-small'
+          - '1.0-xl'
+        platform:
+          - { name: linux/amd64, runner: ubuntu-latest,    arch: amd64 }
+          - { name: linux/arm64, runner: ubuntu-24.04-arm, arch: arm64 }
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute lowercase owner
+        id: repo
+        run: echo "owner_lc=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push per-arch tag
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          build-args: QISKIT_VERSION=${{ matrix.version }}
+          platforms: ${{ matrix.platform.name }}
+          tags: ghcr.io/${{ steps.repo.outputs.owner_lc }}/${{ env.IMAGE }}:${{ matrix.version }}-${{ matrix.platform.arch }}
+          push: ${{ env.PUBLISH }}
+          cache-from: type=gha,scope=${{ matrix.version }}-${{ matrix.platform.arch }}
+          cache-to: type=gha,scope=${{ matrix.version }}-${{ matrix.platform.arch }},mode=max
+
+      - name: Scan published image with Trivy
+        if: env.PUBLISH == 'true'
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ghcr.io/${{ steps.repo.outputs.owner_lc }}/${{ env.IMAGE }}:${{ matrix.version }}-${{ matrix.platform.arch }}
+          severity: 'HIGH,CRITICAL'
+          exit-code: '1'
+          ignore-unfixed: true
+
+  manifest:
+    name: manifest ${{ matrix.version }}
+    needs: build
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        version:
+          - '2.4-small'
+          - '2.4-xl'
+          - '2.3-small'
+          - '2.3-xl'
+          - '2.2-small'
+          - '2.2-xl'
+          - '2.1-small'
+          - '2.1-xl'
+          - '2.0-small'
+          - '2.0-xl'
+          - '1.4-small'
+          - '1.4-xl'
+          - '1.3-small'
+          - '1.3-xl'
+          - '1.2-small'
+          - '1.2-xl'
+          - '1.1-small'
+          - '1.1-xl'
+          - '1.0-small'
+          - '1.0-xl'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute lowercase owner
+        id: repo
+        run: echo "owner_lc=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: sigstore/cosign-installer@v3
+
+      - name: Combine per-arch tags into multi-arch manifest
+        env:
+          REPO: ghcr.io/${{ steps.repo.outputs.owner_lc }}/${{ env.IMAGE }}
+          VERSION: ${{ matrix.version }}
+        run: |
+          set -euo pipefail
+          sources=()
+          for arch in amd64 arm64; do
+            tag="${REPO}:${VERSION}-${arch}"
+            if docker buildx imagetools inspect "$tag" >/dev/null 2>&1; then
+              echo "Found $tag"
+              sources+=("$tag")
+            else
+              echo "Skipping $tag (not built)"
+            fi
+          done
+          if [ ${#sources[@]} -eq 0 ]; then
+            echo "No per-arch images found for $VERSION; failing." >&2
+            exit 1
+          fi
+          # Track every tag we publish so we can sign them all below.
+          tags=("${REPO}:${VERSION}")
+          docker buildx imagetools create -t "${REPO}:${VERSION}" "${sources[@]}"
+
+          # If this is the current "latest" Qiskit minor, also publish
+          # an alias tag latest-<flavor>. The small flavor additionally
+          # gets the bare :latest tag (the docker default).
+          if [[ "${VERSION%-*}" == "${LATEST_QISKIT}" ]]; then
+            flavor="${VERSION#*-}"
+            docker buildx imagetools create -t "${REPO}:latest-${flavor}" "${sources[@]}"
+            tags+=("${REPO}:latest-${flavor}")
+            if [[ "$flavor" == "small" ]]; then
+              docker buildx imagetools create -t "${REPO}:latest" "${sources[@]}"
+              tags+=("${REPO}:latest")
+            fi
+          fi
+
+          # Cosign keyless signing via GitHub Actions OIDC. Verifiers can
+          # run: cosign verify <tag> \
+          #   --certificate-identity-regexp='^https://github.com/${{ github.repository }}/' \
+          #   --certificate-oidc-issuer=https://token.actions.githubusercontent.com
+          for tag in "${tags[@]}"; do
+            cosign sign --yes "$tag"
+          done
+
+      - name: Sync stub branch(es) for mybinder
+        env:
+          OWNER_LC: ${{ steps.repo.outputs.owner_lc }}
+          VERSION: ${{ matrix.version }}
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          sync_branch() {
+            local branch="$1"
+            local image="$2"
+            git checkout --orphan "$branch"
+            git rm -rf --cached . >/dev/null
+            find . -mindepth 1 -maxdepth 1 -not -name .git -exec rm -rf {} +
+            mkdir -p binder
+            printf 'FROM %s\n' "$image" > binder/Dockerfile
+            git add binder/Dockerfile
+            git commit -m "Sync stub branch for $branch"
+            git push -f origin "$branch"
+          }
+
+          REPO="ghcr.io/${OWNER_LC}/${IMAGE}"
+          sync_branch "$VERSION" "${REPO}:${VERSION}"
+
+          if [[ "${VERSION%-*}" == "${LATEST_QISKIT}" ]]; then
+            flavor="${VERSION#*-}"
+            sync_branch "latest-${flavor}" "${REPO}:latest-${flavor}"
+          fi
