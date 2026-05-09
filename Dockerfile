@@ -1,10 +1,3 @@
-# Stay on python-3.12 until we either drop 1.x Qiskit support or numpy
-# back-ports cp3.13+ wheels to the 1.x stream. Qiskit 1.x pins
-# numpy<2; the newest numpy<2 (1.26.4) has no cp3.13 wheel, and the
-# base image carries no C compiler to build from source.
-# pull: true in the workflow forces a fresh digest of this tag every
-# build, so security fixes still flow through without us pinning a
-# specific digest.
 FROM quay.io/jupyter/base-notebook:python-3.13
 
 ARG QISKIT_VERSION
