@@ -22,10 +22,12 @@ Two flavors per Qiskit version:
 
 ## Versions
 
-| Qiskit | Flavor | Binder | Docker |
-| ------ | ------ | ------ | ------ |
-| 2.4    | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/2.4-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.4-small` |
-| 2.4    | xl     | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/2.4-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.4-xl` |
+| Qiskit  | Flavor | Binder | Docker |
+| ------- | ------ | ------ | ------ |
+| latest  | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/latest-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:latest-small` |
+| latest  | xl     | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/latest-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:latest-xl` |
+| 2.4     | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/2.4-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.4-small` |
+| 2.4     | xl     | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/2.4-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.4-xl` |
 | 2.3    | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/2.3-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.3-small` |
 | 2.3    | xl     | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/2.3-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.3-xl` |
 | 2.2    | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/2.2-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.2-small` |
@@ -34,12 +36,23 @@ Two flavors per Qiskit version:
 | 2.1    | xl     | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/2.1-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.1-xl` |
 | 2.0    | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/2.0-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.0-small` |
 | 2.0    | xl     | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/2.0-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.0-xl` |
-| 1.4    | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/1.4-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.4-small` |
-| 1.4    | xl\*   | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/1.4-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.4-xl` |
+| 1.4     | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/1.4-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.4-small` |
+| 1.4     | xl\*   | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/1.4-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.4-xl` |
+| 1.3     | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/1.3-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.3-small` |
+| 1.3     | xl\*   | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/1.3-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.3-xl` |
+| 1.2     | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/1.2-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.2-small` |
+| 1.2     | xl\*   | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/1.2-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.2-xl` |
+| 1.1     | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/1.1-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.1-small` |
+| 1.1     | xl\*   | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/1.1-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.1-xl` |
+| 1.0     | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/1.0-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.0-small` |
+| 1.0     | xl\*   | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/1.0-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.0-xl` |
 
-\* `1.4-xl` is a reduced set: `qiskit-addon-*`, `qiskit-serverless`,
+`latest` aliases the current Qiskit minor (today: `2.4`); the alias is
+updated when a new minor ships.
+
+\* `1.x-xl` is a reduced set: `qiskit-addon-*`, `qiskit-serverless`,
 `qiskit-ibm-catalog`, and `qiskit-ibm-transpiler` are 2.x-only and not
-included. Contents: qiskit 1.4 core + aer + ibm-runtime + experiments
+included. Contents: qiskit 1.x core + aer + ibm-runtime + experiments
 (unpinned, resolved against 1.x) + the same scientific stack as 2.x-xl.
 
 Images are published as multi-arch manifests covering `linux/amd64` and
@@ -67,6 +80,8 @@ two stages:
    `ghcr.io/.../qiskit:<target>` with `docker buildx imagetools create`,
    then force-sync a per-target stub branch containing only
    `binder/Dockerfile` (a one-line `FROM ghcr.io/...` reference).
+   Targets matching the `LATEST_QISKIT` env var also get a
+   `latest-<flavor>` tag and stub branch.
 
 mybinder consumes the stub branch and pulls the pre-built image instead of
 rebuilding the dep tree from scratch (cold start ~30s).
@@ -78,6 +93,8 @@ To add a new Qiskit version:
 2. Add `<X.Y>-small` and `<X.Y>-xl` to the `matrix.version` list in
    `.github/workflows/build-matrix.yml`.
 3. Add two rows to the table above.
+4. To make the new version the `latest` alias, bump `LATEST_QISKIT` at
+   the top of `.github/workflows/build-matrix.yml`.
 
 ## License
 
