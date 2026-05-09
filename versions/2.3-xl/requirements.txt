@@ -1,0 +1,43 @@
+# Pinned reproducible environment for Qiskit 2.3 (XL flavor).
+# Mirrors Qiskit-documentation's nb-tester requirements (which was authored
+# against qiskit 2.3) plus pylatexenc, pandas, and nbgitpuller for notebook
+# authoring/distribution.
+#
+# Pins are kept on Qiskit-ecosystem packages (tightly coupled, validated as a
+# set). Scientific-stack packages are unpinned and resolved by pip.
+#
+# Some packages are amd64-only because no aarch64 wheels exist and the
+# base image has no Rust/C++ toolchain to build from source:
+#   - qiskit-ibm-transpiler: every 0.15.x hard-depends on
+#     qiskit_ibm_ai_local_transpiler~=0.5, whose torch chain has no
+#     aarch64 wheels.
+#   - gem-suite: Rust extension, sdist only on aarch64. (Also pulls
+#     pymatching, which is sdist only on aarch64 and needs cmake + g++.)
+# arm64 users who want these can pip install them on demand after
+# adding the relevant toolchain.
+
+qiskit[all]~=2.3.0
+qiskit-ibm-runtime~=0.43.1
+qiskit-ibm-transpiler[ai-local-mode]~=0.15.0; platform_machine == "x86_64"
+qiskit-aer~=0.17
+qiskit-serverless~=0.27.1
+qiskit-ibm-catalog~=0.11.0
+qiskit-addon-sqd~=0.12.0
+qiskit-addon-utils~=0.3.0
+qiskit-addon-mpf~=0.3.0
+qiskit-addon-aqc-tensor[aer,quimb-jax]~=0.2.0; sys.platform != 'darwin'
+qiskit-addon-obp~=0.3.0
+qiskit-addon-cutting~=0.10.0
+qiskit-experiments~=0.13.0
+
+scipy
+scikit-learn
+pyscf; sys.platform != 'win32'
+python-sat
+plotly
+gem-suite; platform_machine == "x86_64"
+ffsim; sys.platform != 'win32'
+sympy
+pylatexenc
+pandas
+nbgitpuller
