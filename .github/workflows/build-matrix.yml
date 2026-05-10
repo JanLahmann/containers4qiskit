@@ -7,6 +7,15 @@ on:
       - 'Dockerfile'
       - 'versions/**'
       - '.github/workflows/build-matrix.yml'
+  # PRs from any branch (Dependabot's `dependabot/...` branches don't
+  # match the push filter above, so without this they'd merge without
+  # ever exercising the build + Trivy gate).
+  pull_request:
+    branches: [main]
+    paths:
+      - 'Dockerfile'
+      - 'versions/**'
+      - '.github/workflows/build-matrix.yml'
   schedule:
     # Daily rebuild + scan + republish at 04:00 UTC (= 05:00 CET, 06:00
     # CEST). Catches upstream base-image CVEs and dependency drift
