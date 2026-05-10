@@ -2,10 +2,11 @@ name: Detect new Qiskit release
 
 on:
   schedule:
-    # 05:00 UTC = 06:00 CET / 07:00 CEST. Runs an hour after the
-    # build-matrix daily cron (04:00 UTC) so the morning's images are
-    # already fresh by the time we look for a new minor.
-    - cron: '0 5 * * *'
+    # 04:00 UTC = 05:00 CET / 06:00 CEST. Same slot as the
+    # build-matrix daily cron; the two workflows are independent
+    # (detector pushes a feature branch + opens a PR, build cron
+    # only runs against main) so they don't need to be ordered.
+    - cron: '0 4 * * *'
   workflow_dispatch:
 
 permissions:
