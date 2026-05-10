@@ -14,11 +14,11 @@ From a local checkout with `gh` available:
 
 ```sh
 for b in 1.0-small 1.0-xl 1.1-small 1.1-xl 1.2-small 1.2-xl 1.3-small 1.3-xl; do
-  gh api -X DELETE "/repos/JanLahmann/containers4qiskit/git/refs/heads/$b"
+  gh api -X DELETE "/repos/JanLahmann/qubins/git/refs/heads/$b"
 done
 ```
 
-Or via the UI: <https://github.com/JanLahmann/containers4qiskit/branches>
+Or via the UI: <https://github.com/JanLahmann/qubins/branches>
 → filter for `1.`, click the trash icon on each.
 
 - [ ] `1.0-small`
@@ -51,9 +51,26 @@ takes the children with it, but verify):
 - [ ] `1.3-small`, `1.3-small-amd64`, `1.3-small-arm64`
 - [ ] `1.3-xl`, `1.3-xl-amd64`, `1.3-xl-arm64`
 
+## Repo rename + landing page
+
+- [ ] Rename the GitHub repo `containers4qiskit` → `qubins`. UI:
+  Settings → Repository name → "Rename". Or:
+  `gh repo rename qubins --repo JanLahmann/containers4qiskit`.
+  GitHub auto-redirects clones from the old URL; the README's
+  mybinder URLs were already rewritten to point at the new name.
+- [ ] Register `qubins.org`.
+- [ ] Set up GitHub Pages for `qubins.org`:
+  - Settings → Pages → set source (branch + `/docs` or `/` root).
+  - Add `CNAME` file in the docs source with `qubins.org`.
+  - Configure DNS at the registrar: `A` records to GitHub Pages
+    IPs (185.199.108.153, .109.153, .110.153, .111.153) and an
+    `AAAA` set, or a `CNAME` for `www.qubins.org` →
+    `janlahmann.github.io`.
+  - Enable "Enforce HTTPS" once DNS resolves.
+
 ## After all cleanup
 
 - [ ] Delete this file (`git rm CLEANUP.md`)
 - [ ] Delete the long-lived `claude/review-qiskit-versions-sketch-n5ecU`
   branch if it's served its purpose:
-  `gh api -X DELETE /repos/JanLahmann/containers4qiskit/git/refs/heads/claude/review-qiskit-versions-sketch-n5ecU`
+  `gh api -X DELETE /repos/JanLahmann/qubins/git/refs/heads/claude/review-qiskit-versions-sketch-n5ecU`

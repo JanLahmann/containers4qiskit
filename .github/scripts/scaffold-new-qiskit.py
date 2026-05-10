@@ -102,11 +102,11 @@ readme = readme_path.read_text()
 new_rows = (
     f"| {MINOR}     | small  | "
     f"[![Binder](https://mybinder.org/badge_logo.svg)]"
-    f"(https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/{MINOR}-small) | "
+    f"(https://mybinder.org/v2/gh/JanLahmann/qubins/{MINOR}-small) | "
     f"`docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:{MINOR}-small` |\n"
     f"| {MINOR}     | xl     | "
     f"[![Binder](https://mybinder.org/badge_logo.svg)]"
-    f"(https://mybinder.org/v2/gh/JanLahmann/containers4qiskit/{MINOR}-xl) | "
+    f"(https://mybinder.org/v2/gh/JanLahmann/qubins/{MINOR}-xl) | "
     f"`docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:{MINOR}-xl` |\n"
 )
 readme = re.sub(
