@@ -17,7 +17,7 @@
 
 qiskit[all]~=2.4.0
 qiskit-ibm-runtime~=0.46.1
-qiskit-ibm-transpiler[ai-local-mode]~=0.15.0; platform_machine == "x86_64"
+qiskit-ibm-transpiler[ai-local-mode]~=0.14.4; platform_machine == "x86_64"
 qiskit-aer~=0.17
 qiskit-serverless~=0.31.0
 qiskit-ibm-catalog~=0.15.0
