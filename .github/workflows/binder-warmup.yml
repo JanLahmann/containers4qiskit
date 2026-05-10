@@ -71,11 +71,20 @@ jobs:
           REPO_NAME:  ${{ github.event.repository.name }}
           TARGETS:    ${{ steps.targets.outputs.list }}
         # mybinder's /build/gh/<owner>/<repo>/<ref> endpoint serves a
-        # text/event-stream. Read it until we see `phase: ready`, then
-        # close. Per-target timeout is 5 minutes; our stubs are
-        # `FROM <prebuilt>` so a warm or warm-ish backend resolves in
-        # under a minute. Cold backends may exceed that, in which case
-        # we move on — partial coverage is still useful.
+        # text/event-stream — but only when the client sends an
+        # Accept: text/event-stream header. Without it the server
+        # closes the connection without streaming any phase events at
+        # all (which is what an earlier version of this workflow hit:
+        # every target "succeeded" in <300ms because awk saw nothing).
+        #
+        # We read the stream until we see `phase: ready`, then close.
+        # Per-target timeout is 5 minutes; our stubs are `FROM
+        # <prebuilt>` so a warm or warm-ish backend resolves in well
+        # under a minute. Cold backends may exceed that, in which
+        # case we move on — partial coverage is still useful.
+        #
+        # 10s pacing between targets to be polite to a shared
+        # community service.
         run: |
           set -euo pipefail
           warm_one() {
@@ -84,26 +93,40 @@ jobs:
             echo "::group::Warming ${target}"
             echo "GET ${url}"
             local rc=0
-            # Pipe curl into awk so we can match on the stream and
-            # exit as soon as phase=ready is seen. awk's `exit` closes
-            # stdin, which causes curl to terminate via SIGPIPE.
-            curl -sS -N --max-time 300 "${url}" | awk '
-              { print }
-              /"phase": *"ready"/   { print "READY"; exit 0 }
-              /"phase": *"failed"/  { print "FAILED"; exit 2 }
-            ' || rc=$?
+            # awk exit codes: 0 = saw phase:ready, 2 = saw phase:failed,
+            # 3 = stream ended without either (timeout, network drop,
+            # or server hang-up). Default 'exit' at END is 3 unless an
+            # earlier rule fired.
+            curl -sS -N --max-time 300 \
+                -H 'Accept: text/event-stream' \
+                "${url}" \
+              | awk '
+                  { print }
+                  /"phase": *"ready"/  { exit 0 }
+                  /"phase": *"failed"/ { exit 2 }
+                  END                  { exit 3 }
+                ' || rc=$?
             echo "::endgroup::"
+            case "${rc}" in
+              0) echo "::notice::${target} reached phase=ready" ;;
+              2) echo "::warning::${target} reported phase=failed" ;;
+              3) echo "::warning::${target} stream ended without phase=ready (timeout or no events)" ;;
+              *) echo "::warning::${target} warm-up exited rc=${rc}" ;;
+            esac
             return "${rc}"
           }
           fail=0
           total=0
+          first=1
           while IFS= read -r target; do
             [ -z "${target}" ] && continue
             total=$((total + 1))
-            if ! warm_one "${target}"; then
-              echo "::warning::warm-up for ${target} did not reach ready"
-              fail=$((fail + 1))
+            if [ "${first}" -eq 0 ]; then
+              echo "Sleeping 10s before next target..."
+              sleep 10
             fi
+            first=0
+            warm_one "${target}" || fail=$((fail + 1))
           done <<< "${TARGETS}"
           echo "Warmed $((total - fail))/${total} targets."
           # Best-effort: never fail the workflow on warm-up issues.
