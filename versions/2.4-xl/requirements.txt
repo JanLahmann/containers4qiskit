@@ -26,7 +26,7 @@ qiskit-serverless~=0.30.0
 # catalog 0.15 demands serverless ~=0.31, but no transpiler release supports
 # serverless 0.31 yet; the latest mutually-consistent set is catalog 0.14 +
 # serverless 0.30 + transpiler 0.18 + runtime 0.45.
-qiskit-ibm-catalog~=0.14.0
+qiskit-ibm-catalog~=0.15.0
 qiskit-addon-sqd~=0.12.1
 qiskit-addon-utils~=0.3.1
 qiskit-addon-mpf~=0.3.0
