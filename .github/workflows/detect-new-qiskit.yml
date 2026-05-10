@@ -1,0 +1,74 @@
+name: Detect new Qiskit release
+
+on:
+  schedule:
+    # Daily at 07:00 UTC — runs after the build-matrix cron (06:00) so
+    # if a new minor is detected the human can scaffold it before the
+    # next day's build run.
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  detect:
+    name: Detect
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Look up latest qiskit release on PyPI
+        id: pypi
+        run: |
+          set -euo pipefail
+          version=$(curl -sf https://pypi.org/pypi/qiskit/json | jq -r '.info.version')
+          minor=$(printf '%s' "$version" | cut -d. -f1-2)
+          echo "Latest qiskit on PyPI: $version (minor $minor)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "minor=$minor"     >> "$GITHUB_OUTPUT"
+
+      - name: Decide whether scaffolding is needed
+        id: check
+        env:
+          MINOR: ${{ steps.pypi.outputs.minor }}
+        run: |
+          set -euo pipefail
+          if [ -d "versions/${MINOR}-small" ]; then
+            echo "versions/${MINOR}-small already exists; nothing to do."
+            echo "needs_issue=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "versions/${MINOR}-small does not exist; opening issue."
+            echo "needs_issue=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open tracking issue (idempotent)
+        if: steps.check.outputs.needs_issue == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MINOR:   ${{ steps.pypi.outputs.minor }}
+          VERSION: ${{ steps.pypi.outputs.version }}
+        run: |
+          set -euo pipefail
+          title="Add Qiskit ${MINOR}"
+          existing=$(gh issue list --search "in:title \"${title}\"" --state open --json number --jq 'length')
+          if [ "$existing" -gt 0 ]; then
+            echo "An open issue with title '${title}' already exists; skipping."
+            exit 0
+          fi
+          gh issue create \
+            --title "$title" \
+            --label "qiskit-release" \
+            --body "Qiskit \`${VERSION}\` is on PyPI and there is no \`versions/${MINOR}-small\` directory in this repo yet.
+
+          To add support:
+
+          - [ ] Create \`versions/${MINOR}-small/requirements.txt\` (\`qiskit~=${MINOR}.0\`, \`qiskit-aer\`, \`qiskit-ibm-runtime\`)
+          - [ ] Create \`versions/${MINOR}-xl/requirements.txt\` (mirror the previous minor's xl pin set with \`qiskit[all]~=${MINOR}.0\`)
+          - [ ] Add \`${MINOR}-small\` and \`${MINOR}-xl\` to the build + manifest matrices in \`.github/workflows/build-matrix.yml\`
+          - [ ] Bump \`LATEST_QISKIT\` in \`build-matrix.yml\` to \`${MINOR}\`
+          - [ ] Update the \`dependabot.yml\` pip directories to point at \`/versions/${MINOR}-small\` and \`/versions/${MINOR}-xl\`
+          - [ ] Add a row to the README table
+
+          Auto-opened by \`.github/workflows/detect-new-qiskit.yml\`."

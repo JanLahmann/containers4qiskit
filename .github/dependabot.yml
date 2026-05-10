@@ -1,6 +1,32 @@
 version: 2
 updates:
+  # Base image. Bumps when quay.io/jupyter/base-notebook publishes a
+  # newer python-3.X tag (or, if we ever pin to a digest, a newer
+  # digest of the current tag).
   - package-ecosystem: docker
     directory: /
     schedule:
       interval: weekly
+
+  # Workflow action versions. Tracks docker/build-push-action,
+  # sigstore/cosign-installer, actions/checkout etc.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+
+  # Qiskit-ecosystem pins in the LATEST_QISKIT minor's requirements.
+  # When LATEST_QISKIT changes (a new minor ships), update the
+  # directories below to point at the new minor — older minors are
+  # pinned for historical reproducibility and shouldn't get bumps.
+  - package-ecosystem: pip
+    directories:
+      - /versions/2.4-small
+      - /versions/2.4-xl
+    schedule:
+      interval: weekly
+    ignore:
+      # qiskit itself stays pinned by minor; new minors are handled
+      # by .github/workflows/detect-new-qiskit.yml which scaffolds a
+      # new versions/<X.Y>-* directory rather than bumping in place.
+      - dependency-name: qiskit
