@@ -74,6 +74,55 @@ For users not using Docker or Binder:
 pip install "qiskit~=2.4.0"
 ```
 
+## Run on your laptop (Docker)
+
+Pull and start any tag, mapping Jupyter's port:
+
+```sh
+docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:latest-small
+```
+
+Watch the container's stdout — Jupyter prints a tokenised URL once
+ready, looking like:
+
+```
+http://127.0.0.1:8888/lab?token=<long-hex-string>
+```
+
+Open that URL in your browser. The token is required on first connect.
+
+To work on notebooks already on your laptop, mount your folder into
+the container's workspace:
+
+```sh
+docker run --rm -p 8888:8888 \
+  -v "$PWD:/home/jovyan/work" \
+  ghcr.io/janlahmann/qiskit:latest-small
+```
+
+Jupyter runs as the unprivileged `jovyan` user (UID 1000); on Linux,
+either make the host directory readable/writable by that UID or pass
+`--user $(id -u):$(id -g)` to match your own. Add `-d` if you want it
+detached, and `--name qubins` if you want to `docker stop qubins` later.
+
+## Pull your own notebook repo (nbgitpuller)
+
+The **xl** images bundle [nbgitpuller](https://github.com/jupyterhub/nbgitpuller),
+which lets a Binder URL auto-clone a notebook repo into the running
+session on first launch. The URL shape:
+
+```
+https://mybinder.org/v2/gh/JanLahmann/qubins/latest-xl?urlpath=git-pull%3Frepo%3Dhttps%253A%252F%252Fgithub.com%252FYOU%252FYOUR-REPO%26urlpath%3Dlab%252Ftree%252FYOUR-REPO%252Fnotebook.ipynb
+```
+
+The least-painful way to build one is the
+[nbgitpuller link generator](https://nbgitpuller.readthedocs.io/en/latest/link.html):
+set *JupyterHub URL* to `https://mybinder.org/v2/gh/JanLahmann/qubins/<tag>`
+(e.g. `latest-xl` or `2.4-xl`), paste your notebook repo URL, optionally
+add a default file path, and copy the result. Share that URL — anyone
+who clicks lands in a fresh QuBins session with your notebooks already
+checked out.
+
 ## How it works
 
 `Dockerfile` is parameterised by `QISKIT_VERSION` (which is really a
