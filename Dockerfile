@@ -13,5 +13,11 @@ RUN pip install --no-cache-dir --no-compile -r /tmp/req.txt \
  && fix-permissions "${CONDA_DIR}" \
  && fix-permissions "/home/${NB_USER}"
 
+# Smoke test: catches wheels that resolve cleanly but break at import
+# time (e.g. a python-version bump where pip picked a wheel that
+# doesn't actually load). Runs at build time so the gate is the
+# build itself.
+RUN python -c 'import qiskit; from qiskit import QuantumCircuit; QuantumCircuit(2).measure_all()'
+
 USER ${NB_UID}
 WORKDIR /home/${NB_USER}

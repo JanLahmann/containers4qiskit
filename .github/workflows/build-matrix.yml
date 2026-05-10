@@ -7,6 +7,11 @@ on:
       - 'Dockerfile'
       - 'versions/**'
       - '.github/workflows/build-matrix.yml'
+  schedule:
+    # Daily rebuild + scan + republish at 04:00 UTC (= 05:00 CET, 06:00
+    # CEST). Catches upstream base-image CVEs and dependency drift
+    # without waiting for a human-driven push.
+    - cron: '0 4 * * *'
   workflow_dispatch:
 
 permissions:
