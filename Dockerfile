@@ -4,6 +4,20 @@ ARG QISKIT_VERSION
 ENV QISKIT_VERSION=${QISKIT_VERSION}
 
 USER root
+
+# xl images bundle nbgitpuller, which shells out to `git` at runtime
+# to clone the user's notebook repo into the running session. The
+# Jupyter base-notebook image is intentionally minimal and ships
+# without git, so without this step nbgitpuller raises FileNotFoundError
+# on every git-pull URL. small images don't ship nbgitpuller and stay
+# git-less to preserve the "small = small" property.
+RUN if [[ "${QISKIT_VERSION}" == *-xl ]]; then \
+      apt-get update \
+      && apt-get install -y --no-install-recommends git \
+      && apt-get clean \
+      && rm -rf /var/lib/apt/lists/* ; \
+    fi
+
 COPY versions/${QISKIT_VERSION}/requirements.txt /tmp/req.txt
 # jupyter-server upgrade patches CVE-2026-35397 / -40110 / -40934 that the
 # base image still ships at 2.17.0; remove once the base bumps it.
