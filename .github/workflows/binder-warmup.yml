@@ -1,0 +1,110 @@
+name: Binder warm-up
+
+# Pre-warm the mybinder.org image cache for the latest two Qiskit minors
+# (small + xl) plus the `latest-{small,xl}` aliases, so the first user
+# after a fresh image publish lands on a warm cache instead of paying
+# the ~30s cold-pull cost. mybinder.org has no official warm-up API;
+# we drive it via the public /build endpoint, which serves a
+# text/event-stream while it builds (or simply pulls, when the stub
+# branch already references a prebuilt GHCR image). Once we see
+# `phase: ready` we close the connection and move on.
+#
+# Triggered after a successful main-branch run of "Build matrix" (push
+# or workflow_dispatch only — daily cron runs are filtered out, since
+# the cache typically survives long enough that re-warming every day
+# is just noise on a shared free service).
+#
+# Best-effort: warm-up failures do not fail the workflow. mybinder is
+# a shared community service and a flaky backend is not our problem
+# to escalate.
+on:
+  workflow_run:
+    workflows: ["Build matrix"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  warmup:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      (github.event.workflow_run.event == 'push' ||
+       github.event.workflow_run.event == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Resolve targets
+        id: targets
+        # Targets = first 4 entries from build-matrix.yml's build-job
+        # matrix (= latest minor's small+xl and previous minor's
+        # small+xl, in scaffolder order) + the latest-* aliases.
+        # Hard fail if the count is wrong; that means the matrix file
+        # changed shape and someone needs to look at it.
+        run: |
+          set -euo pipefail
+          mapfile -t all_versions < <(yq '.jobs.build.strategy.matrix.version[]' \
+                                            .github/workflows/build-matrix.yml)
+          if [ "${#all_versions[@]}" -lt 4 ]; then
+            echo "Expected at least 4 versions in matrix; got ${#all_versions[@]}" >&2
+            exit 1
+          fi
+          # First 4 are latest minor (small, xl) + previous minor (small, xl),
+          # in scaffolder order.
+          targets=("${all_versions[0]}" "${all_versions[1]}" \
+                   "${all_versions[2]}" "${all_versions[3]}" \
+                   "latest-small" "latest-xl")
+          printf 'target: %s\n' "${targets[@]}"
+          {
+            echo "list<<EOF"
+            printf '%s\n' "${targets[@]}"
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Warm mybinder cache
+        env:
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME:  ${{ github.event.repository.name }}
+          TARGETS:    ${{ steps.targets.outputs.list }}
+        # mybinder's /build/gh/<owner>/<repo>/<ref> endpoint serves a
+        # text/event-stream. Read it until we see `phase: ready`, then
+        # close. Per-target timeout is 5 minutes; our stubs are
+        # `FROM <prebuilt>` so a warm or warm-ish backend resolves in
+        # under a minute. Cold backends may exceed that, in which case
+        # we move on — partial coverage is still useful.
+        run: |
+          set -euo pipefail
+          warm_one() {
+            local target="$1"
+            local url="https://mybinder.org/build/gh/${REPO_OWNER}/${REPO_NAME}/${target}"
+            echo "::group::Warming ${target}"
+            echo "GET ${url}"
+            local rc=0
+            # Pipe curl into awk so we can match on the stream and
+            # exit as soon as phase=ready is seen. awk's `exit` closes
+            # stdin, which causes curl to terminate via SIGPIPE.
+            curl -sS -N --max-time 300 "${url}" | awk '
+              { print }
+              /"phase": *"ready"/   { print "READY"; exit 0 }
+              /"phase": *"failed"/  { print "FAILED"; exit 2 }
+            ' || rc=$?
+            echo "::endgroup::"
+            return "${rc}"
+          }
+          fail=0
+          total=0
+          while IFS= read -r target; do
+            [ -z "${target}" ] && continue
+            total=$((total + 1))
+            if ! warm_one "${target}"; then
+              echo "::warning::warm-up for ${target} did not reach ready"
+              fail=$((fail + 1))
+            fi
+          done <<< "${TARGETS}"
+          echo "Warmed $((total - fail))/${total} targets."
+          # Best-effort: never fail the workflow on warm-up issues.
+          exit 0
