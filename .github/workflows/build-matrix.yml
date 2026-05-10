@@ -52,7 +52,7 @@ jobs:
           - { name: linux/amd64, runner: ubuntu-latest,    arch: amd64 }
           - { name: linux/arm64, runner: ubuntu-24.04-arm, arch: arm64 }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Compute lowercase owner
         id: repo
@@ -135,7 +135,7 @@ jobs:
           - '1.4-small'
           - '1.4-xl'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Compute lowercase owner
         id: repo
