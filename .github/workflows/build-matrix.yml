@@ -19,9 +19,19 @@ on:
   schedule:
     # Daily rebuild + scan + republish at 04:00 UTC (= 05:00 CET, 06:00
     # CEST). Catches upstream base-image CVEs and dependency drift
-    # without waiting for a human-driven push.
+    # without waiting for a human-driven push. Always builds the full
+    # matrix — that's the whole point of the cron.
     - cron: '0 4 * * *'
   workflow_dispatch:
+    inputs:
+      versions:
+        description: >-
+          Versions to (re)build, comma-separated (e.g. "2.4-xl,2.3-small")
+          or "all". Default "all" rebuilds everything, matching the
+          previous behavior.
+        type: string
+        default: 'all'
+        required: false
 
 permissions:
   contents: write     # stub-branch force-pushes (main only)
@@ -38,25 +48,159 @@ env:
   PUBLISH: ${{ github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' }}
 
 jobs:
+  # Decide which versions to (re)build for this run. The full matrix is
+  # ~30 builds × both arches, so blindly rebuilding everything on a
+  # single-version dependabot bump is wasteful. Rules:
+  #   - schedule (cron): full matrix — that's the whole point.
+  #   - push/PR touching Dockerfile or this workflow: full matrix —
+  #     a Dockerfile change affects every image.
+  #   - push/PR touching only versions/<v>/**: just the affected <v>s.
+  #   - workflow_dispatch: honor the `versions` input (default "all").
+  #   - any other event (shouldn't happen): full matrix as a safe fallback.
+  # Output is a JSON array consumed by build.strategy.matrix.version
+  # via fromJSON. An empty array would skip the build job entirely;
+  # the planner enforces a non-empty result by falling back to full.
+  plan:
+    name: plan
+    runs-on: ubuntu-latest
+    outputs:
+      versions: ${{ steps.plan.outputs.versions }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          # Need history to diff against the merge-base / push base.
+          # fetch-depth: 0 is heavy but cheap on this small repo.
+          fetch-depth: 0
+
+      - name: Resolve versions to build
+        id: plan
+        env:
+          EVENT_NAME:    ${{ github.event_name }}
+          DISPATCH_ARG:  ${{ inputs.versions }}
+          BEFORE_SHA:    ${{ github.event.before }}
+          PR_BASE_SHA:   ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA:      ${{ github.sha }}
+        # Canonical list of build targets. Keep this in sync with the
+        # version directories under versions/ and with the README. The
+        # scaffolder (.github/scripts/scaffold-new-qiskit.py) prepends
+        # to this list, so newest minor stays at the top.
+        run: |
+          set -euo pipefail
+          ALL=(
+            '2.4-small' '2.4-xl'
+            '2.3-small' '2.3-xl'
+            '2.2-small' '2.2-xl'
+            '2.1-small' '2.1-xl'
+            '2.0-small' '2.0-xl'
+            '1.4-small' '1.4-xl'
+          )
+          to_json_array() {
+            printf '%s\n' "$@" | jq -R . | jq -sc .
+          }
+
+          full() {
+            # Announce on stderr so it appears in the live log but
+            # doesn't get captured by `$(full ...)`. The JSON array
+            # is the only thing on stdout.
+            echo "Full matrix selected: ${1}" >&2
+            to_json_array "${ALL[@]}"
+          }
+
+          case "${EVENT_NAME}" in
+            schedule)
+              versions_json=$(full "scheduled cron")
+              ;;
+            workflow_dispatch)
+              if [ -z "${DISPATCH_ARG}" ] || [ "${DISPATCH_ARG}" = "all" ]; then
+                versions_json=$(full "workflow_dispatch (default 'all')")
+              else
+                # Comma-separated list. Validate each entry against ALL
+                # so a typo fails loudly instead of silently building
+                # nothing.
+                IFS=',' read -ra requested <<< "${DISPATCH_ARG}"
+                selected=()
+                for v in "${requested[@]}"; do
+                  v="${v// /}"
+                  [ -z "${v}" ] && continue
+                  found=0
+                  for known in "${ALL[@]}"; do
+                    [ "${v}" = "${known}" ] && { found=1; break; }
+                  done
+                  if [ "${found}" -ne 1 ]; then
+                    echo "Unknown version '${v}' in dispatch input; valid: ${ALL[*]}" >&2
+                    exit 1
+                  fi
+                  selected+=("${v}")
+                done
+                if [ "${#selected[@]}" -eq 0 ]; then
+                  echo "Dispatch input parsed to empty list; rebuilding nothing." >&2
+                  exit 1
+                fi
+                echo "Dispatch matrix: ${selected[*]}"
+                versions_json=$(to_json_array "${selected[@]}")
+              fi
+              ;;
+            push|pull_request)
+              # Compute the base SHA to diff against.
+              if [ "${EVENT_NAME}" = "pull_request" ]; then
+                base="${PR_BASE_SHA}"
+              else
+                base="${BEFORE_SHA}"
+              fi
+              # First push to a branch has BEFORE_SHA = 000...0 — there
+              # is no "previous" state to diff. Build everything.
+              if [ -z "${base}" ] || [ "${base}" = "0000000000000000000000000000000000000000" ]; then
+                versions_json=$(full "no base SHA available")
+              else
+                # Make sure we have the base locally.
+                git fetch --no-tags --prune --depth=1 origin "${base}" 2>/dev/null || true
+                changed=$(git diff --name-only "${base}" "${HEAD_SHA}" || git diff --name-only "${base}")
+                echo "Changed files:"
+                echo "${changed}" | sed 's/^/  /'
+                # Universal-rebuild triggers: Dockerfile or this workflow.
+                if echo "${changed}" | grep -qE '^(Dockerfile|\.github/workflows/build-matrix\.yml)$'; then
+                  versions_json=$(full "Dockerfile or workflow changed")
+                else
+                  # Filter to versions/<v>/** changes and map back to
+                  # canonical names; preserve ALL ordering and de-dupe.
+                  selected=()
+                  for v in "${ALL[@]}"; do
+                    if echo "${changed}" | grep -qE "^versions/${v}/"; then
+                      selected+=("${v}")
+                    fi
+                  done
+                  if [ "${#selected[@]}" -eq 0 ]; then
+                    # No version-affecting changes at all. The path
+                    # filter on the trigger should have prevented this
+                    # event from firing the workflow, but if we get
+                    # here anyway (e.g. force-push reshapes history),
+                    # build nothing rather than wasting runners.
+                    echo "No version directories touched; building nothing."
+                    versions_json='[]'
+                  else
+                    echo "Versions to rebuild: ${selected[*]}"
+                    versions_json=$(to_json_array "${selected[@]}")
+                  fi
+                fi
+              fi
+              ;;
+            *)
+              versions_json=$(full "unrecognized event ${EVENT_NAME}")
+              ;;
+          esac
+
+          echo "versions=${versions_json}" >> "$GITHUB_OUTPUT"
+          echo "Final matrix JSON: ${versions_json}"
+
   build:
     name: build ${{ matrix.version }} (${{ matrix.platform.arch }})
+    needs: plan
+    if: needs.plan.outputs.versions != '[]'
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       fail-fast: false
       matrix:
-        version:
-          - '2.4-small'
-          - '2.4-xl'
-          - '2.3-small'
-          - '2.3-xl'
-          - '2.2-small'
-          - '2.2-xl'
-          - '2.1-small'
-          - '2.1-xl'
-          - '2.0-small'
-          - '2.0-xl'
-          - '1.4-small'
-          - '1.4-xl'
+        version: ${{ fromJSON(needs.plan.outputs.versions) }}
         platform:
           - { name: linux/amd64, runner: ubuntu-latest,    arch: amd64 }
           - { name: linux/arm64, runner: ubuntu-24.04-arm, arch: arm64 }
@@ -124,54 +268,34 @@ jobs:
 
   manifest:
     name: manifest ${{ matrix.version }}
-    needs: build
+    needs: [plan, build]
+    # Only runs for versions actually built this run, and only when
+    # PUBLISH is true (main + workflow_dispatch). PR runs skip the
+    # manifest job entirely.
+    if: needs.plan.outputs.versions != '[]' && (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
-    # The job runs on every event so that branch-protection sees the
-    # check as successful (a job whose steps all skip-via-`if` reports
-    # success, whereas a job-level `if: false` reports as `skipped` —
-    # which can be treated as "missing required check" and block the
-    # merge). Each step gates itself on env.PUBLISH so PR runs are
-    # cheap no-ops.
     strategy:
       fail-fast: false
       matrix:
-        version:
-          - '2.4-small'
-          - '2.4-xl'
-          - '2.3-small'
-          - '2.3-xl'
-          - '2.2-small'
-          - '2.2-xl'
-          - '2.1-small'
-          - '2.1-xl'
-          - '2.0-small'
-          - '2.0-xl'
-          - '1.4-small'
-          - '1.4-xl'
+        version: ${{ fromJSON(needs.plan.outputs.versions) }}
     steps:
-      - if: env.PUBLISH == 'true'
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
 
-      - if: env.PUBLISH == 'true'
-        name: Compute lowercase owner
+      - name: Compute lowercase owner
         id: repo
         run: echo "owner_lc=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
 
-      - if: env.PUBLISH == 'true'
-        uses: docker/setup-buildx-action@v4
+      - uses: docker/setup-buildx-action@v4
 
-      - if: env.PUBLISH == 'true'
-        uses: docker/login-action@v4
+      - uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - if: env.PUBLISH == 'true'
-        uses: sigstore/cosign-installer@v3
+      - uses: sigstore/cosign-installer@v3
 
-      - if: env.PUBLISH == 'true'
-        name: Combine per-arch tags into multi-arch manifest
+      - name: Combine per-arch tags into multi-arch manifest
         env:
           REPO: ghcr.io/${{ steps.repo.outputs.owner_lc }}/${{ env.IMAGE }}
           VERSION: ${{ matrix.version }}
@@ -216,8 +340,7 @@ jobs:
             cosign sign --yes "$tag"
           done
 
-      - if: env.PUBLISH == 'true'
-        name: Sync stub branch(es) for mybinder
+      - name: Sync stub branch(es) for mybinder
         env:
           OWNER_LC: ${{ steps.repo.outputs.owner_lc }}
           VERSION: ${{ matrix.version }}

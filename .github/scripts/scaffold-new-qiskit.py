@@ -74,13 +74,16 @@ wf = re.sub(
     f"LATEST_QISKIT: '{MINOR}'",
     wf,
 )
-new_entries = (
-    f"          - '{MINOR}-small'\n"
-    f"          - '{MINOR}-xl'\n"
+# The canonical version list lives in the planner job's `ALL` bash
+# array; both build and manifest matrices read from the planner's
+# JSON output. Prepend the new minor as its own line so the
+# scaffolder ordering convention holds (newest first).
+wf = re.sub(
+    r"(\n          ALL=\(\n)",
+    rf"\g<1>            '{MINOR}-small' '{MINOR}-xl'\n",
+    wf,
+    count=1,
 )
-# Two `version:` lists exist (build job + manifest job); both get the
-# new minor at the top so check_runs reflect freshest first.
-wf = re.sub(r"(        version:\n)", rf"\g<1>{new_entries}", wf)
 
 wf_path.write_text(wf)
 
