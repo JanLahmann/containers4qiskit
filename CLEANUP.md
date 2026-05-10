@@ -14,11 +14,11 @@ From a local checkout with `gh` available:
 
 ```sh
 for b in 1.0-small 1.0-xl 1.1-small 1.1-xl 1.2-small 1.2-xl 1.3-small 1.3-xl; do
-  gh api -X DELETE "/repos/JanLahmann/containers4qiskit/git/refs/heads/$b"
+  gh api -X DELETE "/repos/JanLahmann/qubins/git/refs/heads/$b"
 done
 ```
 
-Or via the UI: <https://github.com/JanLahmann/containers4qiskit/branches>
+Or via the UI: <https://github.com/JanLahmann/qubins/branches>
 → filter for `1.`, click the trash icon on each.
 
 - [ ] `1.0-small`
@@ -56,4 +56,4 @@ takes the children with it, but verify):
 - [ ] Delete this file (`git rm CLEANUP.md`)
 - [ ] Delete the long-lived `claude/review-qiskit-versions-sketch-n5ecU`
   branch if it's served its purpose:
-  `gh api -X DELETE /repos/JanLahmann/containers4qiskit/git/refs/heads/claude/review-qiskit-versions-sketch-n5ecU`
+  `gh api -X DELETE /repos/JanLahmann/qubins/git/refs/heads/claude/review-qiskit-versions-sketch-n5ecU`
