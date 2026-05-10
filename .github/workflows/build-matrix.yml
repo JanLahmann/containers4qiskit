@@ -99,7 +99,10 @@ jobs:
           }
 
           full() {
-            echo "Full matrix selected: ${1}"
+            # Announce on stderr so it appears in the live log but
+            # doesn't get captured by `$(full ...)`. The JSON array
+            # is the only thing on stdout.
+            echo "Full matrix selected: ${1}" >&2
             to_json_array "${ALL[@]}"
           }
 
