@@ -30,9 +30,15 @@ updates:
       # by .github/workflows/detect-new-qiskit.yml which scaffolds a
       # new versions/<X.Y>-* directory rather than bumping in place.
       - dependency-name: qiskit
-      # qiskit-ibm-runtime is transitively capped by qiskit-serverless
-      # (which is itself pinned by transpiler 0.18 + catalog 0.14 to
-      # ~=0.30, capping runtime at <0.46.0). Bumping runtime in
-      # isolation produces an unsolvable resolve (see PR #18 fallout).
-      # Re-enable once a transpiler release supports serverless 0.31.
+      # The runtime/transpiler/serverless/catalog quartet is coupled
+      # and only resolves as a set. transpiler 0.18 and catalog 0.14
+      # both hard-pin serverless ~=0.30, which caps runtime at <0.46.0.
+      # Catalog 0.15 needs serverless ~=0.31, but no transpiler release
+      # supports that yet. Bumping any one of these in isolation
+      # produces an unsolvable resolve (see PRs #18, #24, #25). Lift
+      # all four ignores together once a transpiler release supports
+      # serverless 0.31.
       - dependency-name: qiskit-ibm-runtime
+      - dependency-name: qiskit-serverless
+      - dependency-name: qiskit-ibm-catalog
+      - dependency-name: qiskit-ibm-transpiler
