@@ -17,10 +17,13 @@
 
 qiskit[all]~=2.4.0
 qiskit-ibm-runtime~=0.46.1
-qiskit-ibm-transpiler[ai-local-mode]~=0.15.0; platform_machine == "x86_64"
+qiskit-ibm-transpiler[ai-local-mode]~=0.18.0; platform_machine == "x86_64"
 qiskit-aer~=0.17
-qiskit-serverless~=0.31.0
-qiskit-ibm-catalog~=0.15.0
+qiskit-serverless~=0.30.0
+# catalog 0.15 demands serverless ~=0.31, but no transpiler release supports
+# serverless 0.31 yet; the latest mutually-consistent set is catalog 0.14 +
+# serverless 0.30 + transpiler 0.18.
+qiskit-ibm-catalog~=0.14.0
 qiskit-addon-sqd~=0.12.1
 qiskit-addon-utils~=0.3.0
 qiskit-addon-mpf~=0.3.0

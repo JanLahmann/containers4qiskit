@@ -1,7 +1,12 @@
 # QuBins
 
+[![Build matrix](https://github.com/JanLahmann/qubins/actions/workflows/build-matrix.yml/badge.svg)](https://github.com/JanLahmann/qubins/actions/workflows/build-matrix.yml)
+
 > **QuBins** — the place for your QuBits: prebuilt quantum compartments, pick
 > one, run your Qiskit notebook on (my)binder or as a container ("bin").
+
+Currently published: 7 Qiskit minors × 2 flavors × 2 architectures =
+28 multi-arch images, daily-rebuilt, Trivy-gated, cosign-signed.
 
 Docker images and Binder URLs for specific Qiskit versions, so you can spin up
 a Jupyter environment running exactly the Qiskit version you need.
@@ -69,33 +74,101 @@ For users not using Docker or Binder:
 pip install "qiskit~=2.4.0"
 ```
 
+## Run on your laptop (Docker)
+
+Pull and start any tag, mapping Jupyter's port:
+
+```sh
+docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:latest-small
+```
+
+Watch the container's stdout — Jupyter prints a tokenised URL once
+ready, looking like:
+
+```
+http://127.0.0.1:8888/lab?token=<long-hex-string>
+```
+
+Open that URL in your browser. The token is required on first connect.
+
+To work on notebooks already on your laptop, mount your folder into
+the container's workspace:
+
+```sh
+docker run --rm -p 8888:8888 \
+  -v "$PWD:/home/jovyan/work" \
+  ghcr.io/janlahmann/qiskit:latest-small
+```
+
+Jupyter runs as the unprivileged `jovyan` user (UID 1000); on Linux,
+either make the host directory readable/writable by that UID or pass
+`--user $(id -u):$(id -g)` to match your own. Add `-d` if you want it
+detached, and `--name qubins` if you want to `docker stop qubins` later.
+
+## Pull your own notebook repo (nbgitpuller)
+
+The **xl** images bundle [nbgitpuller](https://github.com/jupyterhub/nbgitpuller),
+which lets a Binder URL auto-clone a notebook repo into the running
+session on first launch. The URL shape:
+
+```
+https://mybinder.org/v2/gh/JanLahmann/qubins/latest-xl?urlpath=git-pull%3Frepo%3Dhttps%253A%252F%252Fgithub.com%252FYOU%252FYOUR-REPO%26urlpath%3Dlab%252Ftree%252FYOUR-REPO%252Fnotebook.ipynb
+```
+
+The least-painful way to build one is the
+[nbgitpuller link generator](https://nbgitpuller.readthedocs.io/en/latest/link.html):
+set *JupyterHub URL* to `https://mybinder.org/v2/gh/JanLahmann/qubins/<tag>`
+(e.g. `latest-xl` or `2.4-xl`), paste your notebook repo URL, optionally
+add a default file path, and copy the result. Share that URL — anyone
+who clicks lands in a fresh QuBins session with your notebooks already
+checked out.
+
 ## How it works
 
 `Dockerfile` is parameterised by `QISKIT_VERSION` (which is really a
 `<qiskit-minor>-<flavor>` build target) and installs the dependency list at
 `versions/<target>/requirements.txt`. The `build-matrix.yml` workflow has
-two stages:
+three stages:
 
-1. **build** — for each `<target>`, build an image per architecture on a
-   native runner (`ubuntu-latest` for amd64, `ubuntu-24.04-arm` for arm64),
-   load the result into the local docker daemon, and run Trivy against
-   it (HIGH/CRITICAL with available fixes block the run). The base image
-   is force-pulled so security fixes flow through instead of riding on
-   the GHA layer cache. The scan runs on every branch.
+1. **build + scan** — for each `<target>`, build an image per architecture
+   on a native runner (`ubuntu-latest` for amd64, `ubuntu-24.04-arm` for
+   arm64), load the result into the local docker daemon, and run Trivy
+   against it (HIGH/CRITICAL with available fixes block the run). A
+   final `RUN python -c 'import qiskit; from qiskit import QuantumCircuit;
+   QuantumCircuit(2).measure_all()'` smoke test catches wheels that
+   resolve cleanly but break at import. The base image is force-pulled
+   so security fixes flow through instead of riding on the GHA layer
+   cache. This stage runs on every branch.
 2. **publish to GHCR** (only on `main` / `workflow_dispatch`) — re-run
    the build with `push: true` so `docker/build-push-action` produces
    the SLSA provenance attestation alongside `ghcr.io/.../qiskit:<target>-<arch>`.
    All layers are cache hits from step 1, so this is fast.
-3. **manifest** (only on `main` / `workflow_dispatch`) — combine the
-   per-arch tags into a multi-arch `ghcr.io/.../qiskit:<target>` with
+3. **manifest + sign** (only on `main` / `workflow_dispatch`) — combine
+   the per-arch tags into a multi-arch `ghcr.io/.../qiskit:<target>` with
    `docker buildx imagetools create`, sign the manifest with cosign
-   keyless, then force-sync a per-target stub branch containing only
-   `binder/Dockerfile` (a one-line `FROM ghcr.io/...` reference).
+   keyless OIDC, then force-sync a per-target stub branch containing
+   only `binder/Dockerfile` (a one-line `FROM ghcr.io/...` reference).
    Targets matching the `LATEST_QISKIT` env var also get a
    `latest-<flavor>` tag and stub branch.
 
 mybinder consumes the stub branch and pulls the pre-built image instead of
 rebuilding the dep tree from scratch (cold start ~30s).
+
+### Staying current
+
+- A daily cron at **04:00 UTC** (= 05:00 CET) reruns the full matrix on
+  `main`, so upstream base-image CVE fixes flow into published images
+  within a day even when no one pushes a commit.
+- Dependabot watches three ecosystems: the docker base image, the GHA
+  action versions, and the pip pins in the `LATEST_QISKIT` minor's
+  `requirements.txt` files. Each Dependabot PR runs through the same
+  Trivy + smoke gate.
+- A second daily workflow (`detect-new-qiskit.yml`, also at 04:00 UTC)
+  polls PyPI for the latest qiskit version. If a new minor appears,
+  the workflow auto-scaffolds `versions/<X.Y>-{small,xl}/`, updates
+  the matrix + `LATEST_QISKIT` + `dependabot.yml` directories + README,
+  and opens a PR. The xl flavor commonly needs a human nudge to relax
+  addon pins that don't yet support the new minor.
 
 ## Verifying images
 
@@ -111,16 +184,25 @@ Build provenance attestations are produced automatically by
 `docker/build-push-action`; see them via `docker buildx imagetools
 inspect ghcr.io/.../qiskit:<tag> --format '{{ json .Provenance }}'`.
 
-To add a new Qiskit version:
+## Adding a new Qiskit minor
 
-1. Create `versions/<X.Y>-small/requirements.txt` and
-   `versions/<X.Y>-xl/requirements.txt`.
-2. Add `<X.Y>-small` and `<X.Y>-xl` to the `matrix.version` list in
-   `.github/workflows/build-matrix.yml`.
-3. Add two rows to the table above.
-4. To make the new version the `latest` alias, bump `LATEST_QISKIT` at
-   the top of `.github/workflows/build-matrix.yml`.
+The detector workflow handles this automatically: when PyPI ships a new
+minor, it opens a `bot/qiskit-<X.Y>` PR with the small + xl scaffolding,
+matrix entries, `LATEST_QISKIT` bump, `dependabot.yml` directories, and
+README rows. Review the PR — usually the xl needs a couple of addon
+pins relaxed because addons lag the qiskit minor — and merge.
 
-## License
+If you ever need to scaffold by hand: create
+`versions/<X.Y>-{small,xl}/requirements.txt`, add the entries to both
+matrix lists in `.github/workflows/build-matrix.yml`, bump
+`LATEST_QISKIT`, swap the `dependabot.yml` pip directories, and
+prepend two rows to the table above. `.github/scripts/scaffold-new-qiskit.py`
+does all of this in one shot if you set `MINOR` and `VERSION` in env.
 
-Apache-2.0. Qiskit itself is also Apache-2.0; see [LICENSE](LICENSE).
+## License & acknowledgements
+
+Apache-2.0. See [LICENSE](LICENSE).
+
+Qiskit is a trademark of IBM. This project is independent and not
+affiliated with IBM; it just packages the open-source Qiskit
+distributions for convenient consumption.
