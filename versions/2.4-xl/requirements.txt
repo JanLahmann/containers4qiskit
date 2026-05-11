@@ -46,3 +46,7 @@ sympy
 pylatexenc
 pandas
 nbgitpuller
+# Opens a notebook fetched from a raw URL via the ?fromURL= JupyterLab
+# query parameter — lets users land directly on a single notebook
+# without a full nbgitpuller clone, when the notebook is self-contained.
+jupyterlab-open-url-parameter
