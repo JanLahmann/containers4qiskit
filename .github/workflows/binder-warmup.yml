@@ -22,20 +22,33 @@ on:
     workflows: ["Build matrix"]
     types: [completed]
     branches: [main]
+  # Manual trigger lets us validate this workflow without waiting for
+  # the next Build matrix run on main. Useful after editing this file
+  # itself (since workflow_run only fires after another workflow
+  # completes — there is no way to test from a PR otherwise).
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   warmup:
+    # On workflow_run we filter to successful push/dispatch completions
+    # of Build matrix (skipping scheduled cron — see file-level comment).
+    # On workflow_dispatch we run unconditionally.
     if: >-
-      github.event.workflow_run.conclusion == 'success' &&
-      (github.event.workflow_run.event == 'push' ||
-       github.event.workflow_run.event == 'workflow_dispatch')
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       (github.event.workflow_run.event == 'push' ||
+        github.event.workflow_run.event == 'workflow_dispatch'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
         with:
+          # On workflow_run, pin to the SHA whose build just finished;
+          # on workflow_dispatch, github.event.workflow_run is null so
+          # this resolves to empty and checkout takes its default
+          # (the dispatched ref).
           ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Resolve targets
