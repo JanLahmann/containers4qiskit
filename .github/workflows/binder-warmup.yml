@@ -131,17 +131,45 @@ jobs:
             local rc=0
             # awk exit codes: 0 = saw phase:ready, 2 = saw phase:failed,
             # 3 = stream ended without either (timeout, network drop,
-            # or server hang-up). Default 'exit' at END is 3 unless an
-            # earlier rule fired.
-            curl -sSL -N --max-time 300 \
-                -H 'Accept: text/event-stream' \
-                "${url}" \
-              | awk '
-                  { print }
-                  /"phase": *"ready"/  { exit 0 }
-                  /"phase": *"failed"/ { exit 2 }
-                  END                  { exit 3 }
-                ' || rc=$?
+            # or server hang-up).
+            #
+            # Two subtleties handled below:
+            # 1. awk's `exit N` does NOT skip the END block — END runs
+            #    and its own `exit` overrides. So we record the outcome
+            #    in `matched` and let END consult it. (Earlier version
+            #    `exit 0` then unconditional `exit 3` in END made every
+            #    successful warm-up report rc=3.)
+            # 2. With `set -o pipefail`, the pipeline's rc would be
+            #    curl's, not awk's — awk closes the pipe on match,
+            #    sending SIGPIPE to curl which then exits 23 ("Failure
+            #    writing output"). We want awk's code, not curl's, so
+            #    we read PIPESTATUS[1] directly.
+            # We need awk's exit code (0/2/3), not the pipeline's.
+            # With `pipefail` the pipeline picks the rightmost
+            # non-zero, but curl gets SIGPIPE'd to rc=23 when awk
+            # closes the pipe on match, masking awk's 0. Drop
+            # pipefail locally so the pipeline's rc is just awk's,
+            # and use an if/else so the rc is captured cleanly
+            # without `|| true` clobbering PIPESTATUS.
+            #
+            # Note: with awk closing the pipe early, curl prints
+            # "curl: (23) Failure writing output to destination" to
+            # stderr — that's expected and not an error condition.
+            set +o pipefail
+            if curl -sSL -N --max-time 300 \
+                  -H 'Accept: text/event-stream' \
+                  "${url}" \
+                | awk '
+                    { print }
+                    /"phase": *"ready"/  { matched = 0; exit }
+                    /"phase": *"failed"/ { matched = 2; exit }
+                    END                  { exit (matched == "" ? 3 : matched) }
+                  '; then
+              rc=0
+            else
+              rc=$?
+            fi
+            set -o pipefail
             echo "::endgroup::"
             case "${rc}" in
               0) echo "::notice::${target} reached phase=ready" ;;
