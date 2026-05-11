@@ -1,0 +1,58 @@
+name: Deploy Pages
+
+# Builds versions.json (generated from versions/ + LATEST_QISKIT) and
+# deploys docs/ to GitHub Pages. Runs on pushes to main that change
+# the docs source or anything the data builder consumes; manual
+# dispatch is also enabled for re-deploys without a content change.
+#
+# Not triggered by Build matrix completions: the page references
+# tag *names*, not digests, so a rebuild of an existing tag doesn't
+# require a Pages redeploy.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'versions/**'
+      - '.github/workflows/pages.yml'
+      - '.github/scripts/build-pages-data.py'
+      # build-matrix.yml is the source of truth for LATEST_QISKIT
+      - '.github/workflows/build-matrix.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Pages deployments are intrinsically serial; this prevents two
+# concurrent deploys from racing.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build versions.json
+        run: python3 .github/scripts/build-pages-data.py
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

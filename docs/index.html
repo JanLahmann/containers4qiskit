@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QuBins — prebuilt Qiskit environments for Binder and Docker</title>
+<meta name="description" content="Prebuilt, signed, daily-rebuilt Qiskit container images. Launch in Binder with one click or pull with Docker.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>QuBins</h1>
+  <p class="tagline">
+    Prebuilt Qiskit environments for Binder and Docker — pick a version,
+    pick a flavor, launch.
+  </p>
+  <p class="badges">
+    <a href="https://github.com/JanLahmann/qubins/actions/workflows/build-matrix.yml"><img src="https://github.com/JanLahmann/qubins/actions/workflows/build-matrix.yml/badge.svg" alt="Build matrix status"></a>
+    <a href="https://github.com/JanLahmann/qubins">GitHub repo</a>
+  </p>
+</header>
+
+<main>
+
+  <section id="quickstart">
+    <h2>Quick start</h2>
+    <p>
+      Run the latest Qiskit (<code id="qs-latest">…</code>) in your browser
+      via Binder — no install:
+    </p>
+    <p>
+      <a id="qs-binder-small" class="button" href="#" target="_blank" rel="noopener">
+        Launch latest-small in Binder
+      </a>
+      <a id="qs-binder-xl" class="button" href="#" target="_blank" rel="noopener">
+        Launch latest-xl in Binder
+      </a>
+    </p>
+    <p>
+      Or pull with Docker:
+    </p>
+    <pre><code id="qs-docker">docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:latest-small</code></pre>
+    <p class="hint">
+      <strong>small</strong> = lean (qiskit + aer + ibm-runtime).
+      <strong>xl</strong> = broad, with addons + scientific stack + nbgitpuller +
+      single-file <code>?fromURL=</code> launcher.
+      <a href="https://github.com/JanLahmann/qubins#readme">Full details in the README.</a>
+    </p>
+  </section>
+
+  <section id="catalog">
+    <h2>All images</h2>
+    <p class="hint">
+      Every image is daily-rebuilt, Trivy-scanned (HIGH/CRITICAL gated),
+      and cosign-signed via GitHub Actions OIDC.
+    </p>
+
+    <div class="filters">
+      <label>Qiskit version:
+        <select id="filter-minor"><option value="">All</option></select>
+      </label>
+      <label>Flavor:
+        <select id="filter-flavor">
+          <option value="">All</option>
+          <option value="small">small</option>
+          <option value="xl">xl</option>
+        </select>
+      </label>
+    </div>
+
+    <table id="catalog-table">
+      <thead>
+        <tr>
+          <th>Qiskit</th>
+          <th>Flavor</th>
+          <th>Binder</th>
+          <th>Docker</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <ul id="catalog-notes" class="notes"></ul>
+  </section>
+
+  <section id="launch">
+    <h2>Open a notebook in Binder</h2>
+    <p>
+      Two patterns: a whole repo (cloned into the session via
+      <a href="https://github.com/jupyterhub/nbgitpuller">nbgitpuller</a>),
+      or a single notebook fetched directly by URL
+      (<a href="https://github.com/jupyterlab-contrib/jupyterlab-open-url-parameter">jupyterlab-open-url-parameter</a>,
+      xl flavors only).
+    </p>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="gen-repo">From a GitHub repo</button>
+      <button class="tab" data-tab="gen-file">A single notebook (xl)</button>
+    </div>
+
+    <div id="gen-repo" class="tabpanel active">
+      <form id="form-repo" onsubmit="return false">
+        <label>Repo URL
+          <input type="url" id="repo-url" placeholder="https://github.com/USER/REPO" required>
+        </label>
+        <label>Branch (optional)
+          <input type="text" id="repo-branch" placeholder="main">
+        </label>
+        <label>Path inside repo (optional)
+          <input type="text" id="repo-path" placeholder="notebooks/intro.ipynb">
+        </label>
+        <label>Image
+          <select id="repo-image"></select>
+        </label>
+      </form>
+      <div class="output">
+        <label>Generated URL
+          <textarea id="repo-out" readonly rows="3"></textarea>
+        </label>
+        <div class="actions">
+          <button class="button" id="repo-copy" type="button">Copy</button>
+          <a id="repo-open" class="button secondary" href="#" target="_blank" rel="noopener" hidden>Launch on mybinder ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <div id="gen-file" class="tabpanel">
+      <form id="form-file" onsubmit="return false">
+        <label>Raw notebook URL
+          <input type="url" id="file-url" placeholder="https://raw.githubusercontent.com/USER/REPO/BRANCH/path/to/notebook.ipynb" required>
+        </label>
+        <label>Image (xl only)
+          <select id="file-image"></select>
+        </label>
+        <p class="hint">
+          Use this when the notebook is self-contained (no sibling files,
+          images, or helper modules). For repos with multiple files, use
+          the repo loader on the other tab.
+        </p>
+      </form>
+      <div class="output">
+        <label>Generated URL
+          <textarea id="file-out" readonly rows="3"></textarea>
+        </label>
+        <div class="actions">
+          <button class="button" id="file-copy" type="button">Copy</button>
+          <a id="file-open" class="button secondary" href="#" target="_blank" rel="noopener" hidden>Launch on mybinder ↗</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="howitworks">
+    <h2>How it works</h2>
+    <p>
+      <code>Dockerfile</code> is parameterised by Qiskit version × flavor and
+      installs the matching <code>versions/&lt;target&gt;/requirements.txt</code>.
+      A GitHub Actions workflow builds per-arch (amd64 + arm64), gates
+      on a Trivy scan, publishes the multi-arch manifest to GHCR with
+      a SLSA provenance attestation, signs it with cosign, and
+      force-pushes a tiny stub branch that <code>mybinder.org</code>
+      consumes to skip the dependency-tree rebuild.
+    </p>
+    <p>
+      A daily cron rebuilds everything against the current base image
+      to absorb upstream CVE fixes. Dependabot watches the docker base,
+      GitHub Action versions, and the latest Qiskit minor's pip pins.
+    </p>
+    <p>
+      More in the <a href="https://github.com/JanLahmann/qubins#readme">repository README</a>.
+    </p>
+  </section>
+
+</main>
+
+<footer>
+  <p>
+    Apache-2.0 licensed.
+    Qiskit is a trademark of IBM; this project is independent and not
+    affiliated with IBM — it just packages the open-source Qiskit
+    distributions for convenient consumption.
+  </p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

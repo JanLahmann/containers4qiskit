@@ -5,6 +5,9 @@
 > **QuBins** — the place for your QuBits: prebuilt quantum compartments, pick
 > one, run your Qiskit notebook on (my)binder or as a container ("bin").
 
+**Landing page with image catalog and Binder URL generators:**
+[janlahmann.github.io/qubins](https://janlahmann.github.io/qubins/)
+
 Currently published: 7 Qiskit minors × 2 flavors × 2 architectures =
 28 multi-arch images, daily-rebuilt, Trivy-gated, cosign-signed.
 
