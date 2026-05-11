@@ -101,6 +101,16 @@ jobs:
         # all (which is what an earlier version of this workflow hit:
         # every target "succeeded" in <300ms because awk saw nothing).
         #
+        # The endpoint also 307-redirects to a federation backend
+        # (e.g. bids.mybinder.org). Without -L curl stops at the
+        # redirect and awk sees an empty body, reporting "stream
+        # ended without phase=ready" — this was the second variant
+        # of the same symptom.
+        #
+        # We lowercase owner/repo before building the URL so the
+        # request URL matches what mybinder canonicalises to (avoids
+        # a stray case-sensitive hop on top of the federation one).
+        #
         # We read the stream until we see `phase: ready`, then close.
         # Per-target timeout is 5 minutes; our stubs are `FROM
         # <prebuilt>` so a warm or warm-ish backend resolves in well
@@ -111,9 +121,11 @@ jobs:
         # community service.
         run: |
           set -euo pipefail
+          owner_lc="${REPO_OWNER,,}"
+          repo_lc="${REPO_NAME,,}"
           warm_one() {
             local target="$1"
-            local url="https://mybinder.org/build/gh/${REPO_OWNER}/${REPO_NAME}/${target}"
+            local url="https://mybinder.org/build/gh/${owner_lc}/${repo_lc}/${target}"
             echo "::group::Warming ${target}"
             echo "GET ${url}"
             local rc=0
@@ -121,7 +133,7 @@ jobs:
             # 3 = stream ended without either (timeout, network drop,
             # or server hang-up). Default 'exit' at END is 3 unless an
             # earlier rule fired.
-            curl -sS -N --max-time 300 \
+            curl -sSL -N --max-time 300 \
                 -H 'Accept: text/event-stream' \
                 "${url}" \
               | awk '
