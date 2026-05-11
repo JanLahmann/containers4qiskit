@@ -40,17 +40,28 @@ jobs:
 
       - name: Resolve targets
         id: targets
-        # Targets = first 4 entries from build-matrix.yml's build-job
-        # matrix (= latest minor's small+xl and previous minor's
-        # small+xl, in scaffolder order) + the latest-* aliases.
+        # Targets = first 4 entries from build-matrix.yml's planner
+        # `ALL` bash array (= latest minor's small+xl and previous
+        # minor's small+xl, in scaffolder order) + the latest-* aliases.
         # Hard fail if the count is wrong; that means the matrix file
         # changed shape and someone needs to look at it.
+        #
+        # Before #31 this read jobs.build.strategy.matrix.version via
+        # yq; after #31 that key holds a fromJSON template and the
+        # canonical list moved into the planner job's `ALL` array.
+        # We extract it directly from the YAML rather than spinning up
+        # the planner just to read its output.
         run: |
           set -euo pipefail
-          mapfile -t all_versions < <(yq '.jobs.build.strategy.matrix.version[]' \
-                                            .github/workflows/build-matrix.yml)
+          mapfile -t all_versions < <(
+            awk '/^ *ALL=\(/{f=1;next} f && /^ *\)/{exit} f' \
+              .github/workflows/build-matrix.yml \
+            | grep -oE "'[^']+'" \
+            | tr -d "'"
+          )
           if [ "${#all_versions[@]}" -lt 4 ]; then
-            echo "Expected at least 4 versions in matrix; got ${#all_versions[@]}" >&2
+            echo "Expected at least 4 versions in planner ALL array; got ${#all_versions[@]}" >&2
+            echo "Has build-matrix.yml's planner block changed shape?" >&2
             exit 1
           fi
           # First 4 are latest minor (small, xl) + previous minor (small, xl),
