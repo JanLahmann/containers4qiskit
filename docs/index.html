@@ -11,8 +11,9 @@
 <header>
   <h1>QuBins</h1>
   <p class="tagline">
-    Prebuilt Qiskit environments for Binder and Docker — pick a version,
-    pick a flavor, launch.
+    <strong>QuBins</strong> — the place for your QuBits: prebuilt quantum
+    compartments, pick one, run your Qiskit notebook on (my)binder or as
+    a container (&ldquo;bin&rdquo;).
   </p>
   <p class="badges">
     <a href="https://github.com/JanLahmann/qubins/actions/workflows/build-matrix.yml"><img src="https://github.com/JanLahmann/qubins/actions/workflows/build-matrix.yml/badge.svg" alt="Build matrix status"></a>
@@ -48,6 +49,121 @@
     </p>
   </section>
 
+  <section id="launch">
+    <h2>Open a notebook in Binder</h2>
+    <p>
+      Two ways to launch — pick the one that matches what you need to
+      open. Both produce a Binder URL you can copy and share.
+    </p>
+    <table class="compare">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Clone whole GitHub repo</th>
+          <th>Open one notebook by URL</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>What gets fetched</th>
+          <td>The entire repository (every file at HEAD), via
+            <a href="https://github.com/jupyterhub/nbgitpuller">nbgitpuller</a>.
+          </td>
+          <td>Just the single <code>.ipynb</code> file, via
+            <a href="https://github.com/jupyterlab-contrib/jupyterlab-open-url-parameter">jupyterlab-open-url-parameter</a>.
+          </td>
+        </tr>
+        <tr>
+          <th>Use when</th>
+          <td>The notebook needs sibling files (data, images,
+            helper modules) — or you want a working copy with
+            <code>git pull</code> updates.
+          </td>
+          <td>The notebook is self-contained (only standard imports,
+            no relative <code>open(&hellip;)</code> calls).
+          </td>
+        </tr>
+        <tr>
+          <th>Cold-start cost</th>
+          <td>Image pull + repo clone. Large repos (e.g.
+            <code>Qiskit/documentation</code>, hundreds of MB) take
+            30&ndash;60s on top of the image.
+          </td>
+          <td>Image pull + a single <code>~50 KB</code> file fetch
+            (~10s after image is hot).
+          </td>
+        </tr>
+        <tr>
+          <th>Image flavors</th>
+          <td>Any image (small or xl).</td>
+          <td>xl only — small doesn't ship the
+            <code>jupyterlab-open-url-parameter</code> extension.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="gen-repo">Clone whole repo</button>
+      <button class="tab" data-tab="gen-file">Single notebook (xl)</button>
+    </div>
+
+    <div id="gen-repo" class="tabpanel active">
+      <p class="hint">
+        Builds a Binder URL that clones the entire repository into the
+        session on launch and (optionally) opens a specific file in it.
+      </p>
+      <form id="form-repo" onsubmit="return false">
+        <label>Repo URL
+          <input type="url" id="repo-url" placeholder="https://github.com/USER/REPO" required>
+        </label>
+        <label>Branch (optional)
+          <input type="text" id="repo-branch" placeholder="main">
+        </label>
+        <label>Path inside repo (optional, opens this file on launch)
+          <input type="text" id="repo-path" placeholder="notebooks/intro.ipynb">
+        </label>
+        <label>Image
+          <select id="repo-image"></select>
+        </label>
+      </form>
+      <div class="output">
+        <label>Generated URL
+          <textarea id="repo-out" readonly rows="3"></textarea>
+        </label>
+        <div class="actions">
+          <button class="button" id="repo-copy" type="button">Copy</button>
+          <a id="repo-open" class="button secondary" href="#" target="_blank" rel="noopener" hidden>Launch on mybinder ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <div id="gen-file" class="tabpanel">
+      <p class="hint">
+        Builds a Binder URL that fetches a single notebook by raw URL —
+        no repo clone. Faster cold start, but only works if the
+        notebook doesn't reference any sibling files.
+      </p>
+      <form id="form-file" onsubmit="return false">
+        <label>Raw notebook URL
+          <input type="url" id="file-url" placeholder="https://raw.githubusercontent.com/USER/REPO/BRANCH/path/to/notebook.ipynb" required>
+        </label>
+        <label>Image (xl only)
+          <select id="file-image"></select>
+        </label>
+      </form>
+      <div class="output">
+        <label>Generated URL
+          <textarea id="file-out" readonly rows="3"></textarea>
+        </label>
+        <div class="actions">
+          <button class="button" id="file-copy" type="button">Copy</button>
+          <a id="file-open" class="button secondary" href="#" target="_blank" rel="noopener" hidden>Launch on mybinder ↗</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section id="catalog">
     <h2>All images</h2>
     <p class="hint">
@@ -80,73 +196,6 @@
       <tbody></tbody>
     </table>
     <ul id="catalog-notes" class="notes"></ul>
-  </section>
-
-  <section id="launch">
-    <h2>Open a notebook in Binder</h2>
-    <p>
-      Two patterns: a whole repo (cloned into the session via
-      <a href="https://github.com/jupyterhub/nbgitpuller">nbgitpuller</a>),
-      or a single notebook fetched directly by URL
-      (<a href="https://github.com/jupyterlab-contrib/jupyterlab-open-url-parameter">jupyterlab-open-url-parameter</a>,
-      xl flavors only).
-    </p>
-
-    <div class="tabs">
-      <button class="tab active" data-tab="gen-repo">From a GitHub repo</button>
-      <button class="tab" data-tab="gen-file">A single notebook (xl)</button>
-    </div>
-
-    <div id="gen-repo" class="tabpanel active">
-      <form id="form-repo" onsubmit="return false">
-        <label>Repo URL
-          <input type="url" id="repo-url" placeholder="https://github.com/USER/REPO" required>
-        </label>
-        <label>Branch (optional)
-          <input type="text" id="repo-branch" placeholder="main">
-        </label>
-        <label>Path inside repo (optional)
-          <input type="text" id="repo-path" placeholder="notebooks/intro.ipynb">
-        </label>
-        <label>Image
-          <select id="repo-image"></select>
-        </label>
-      </form>
-      <div class="output">
-        <label>Generated URL
-          <textarea id="repo-out" readonly rows="3"></textarea>
-        </label>
-        <div class="actions">
-          <button class="button" id="repo-copy" type="button">Copy</button>
-          <a id="repo-open" class="button secondary" href="#" target="_blank" rel="noopener" hidden>Launch on mybinder ↗</a>
-        </div>
-      </div>
-    </div>
-
-    <div id="gen-file" class="tabpanel">
-      <form id="form-file" onsubmit="return false">
-        <label>Raw notebook URL
-          <input type="url" id="file-url" placeholder="https://raw.githubusercontent.com/USER/REPO/BRANCH/path/to/notebook.ipynb" required>
-        </label>
-        <label>Image (xl only)
-          <select id="file-image"></select>
-        </label>
-        <p class="hint">
-          Use this when the notebook is self-contained (no sibling files,
-          images, or helper modules). For repos with multiple files, use
-          the repo loader on the other tab.
-        </p>
-      </form>
-      <div class="output">
-        <label>Generated URL
-          <textarea id="file-out" readonly rows="3"></textarea>
-        </label>
-        <div class="actions">
-          <button class="button" id="file-copy" type="button">Copy</button>
-          <a id="file-open" class="button secondary" href="#" target="_blank" rel="noopener" hidden>Launch on mybinder ↗</a>
-        </div>
-      </div>
-    </div>
   </section>
 
   <section id="howitworks">
