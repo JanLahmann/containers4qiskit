@@ -32,11 +32,11 @@ Or via the UI: <https://github.com/QuBins/qiskit-images/branches>
 
 ## Orphan GHCR package versions
 
-The GHCR package `ghcr.io/qubins/qiskit` still has tags + per-arch
+The GHCR package `ghcr.io/qubins/images` still has tags + per-arch
 tags + cosign signatures published from the dropped versions. Delete
 them at:
 
-<https://github.com/orgs/QuBins/packages/container/qiskit/versions>
+<https://github.com/orgs/QuBins/packages/container/images/versions>
 
 Tags to remove (each has an amd64 + arm64 sub-tag and a `sha256-...sig`
 cosign signature; deleting the multi-arch manifest version usually
