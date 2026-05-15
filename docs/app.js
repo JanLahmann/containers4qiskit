@@ -44,6 +44,8 @@
       `https://mybinder.org/v2/gh/${REPO}/latest-small`;
     document.getElementById("qs-binder-xl").href =
       `https://mybinder.org/v2/gh/${REPO}/latest-xl`;
+    document.getElementById("qs-docker-copy").addEventListener("click", (e) =>
+      copyToClipboard(document.getElementById("qs-docker").textContent, e.currentTarget));
   }
 
   // ------------------------------------------------------------ catalog table
