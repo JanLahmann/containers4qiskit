@@ -10,6 +10,7 @@
   "use strict";
 
   const REPO = "JanLahmann/qubins"; // hardcoded — lowercase for mybinder
+  const PAGES = "https://janlahmann.github.io/QuBins";
 
   // ---------------------------------------------------------------- data load
   fetch("versions.json")
@@ -35,7 +36,6 @@
     populateGeneratorImages(images, latest);
     wireGenerators(images);
     wireTabs();
-    wireEmbed(images, latest);
   }
 
   // ------------------------------------------------------------- quick start
@@ -212,6 +212,9 @@
     }
     document.getElementById("repo-copy")
       .addEventListener("click", () => copyOutput("repo-out", "repo-copy", "repo-open"));
+    document.getElementById("repo-badge-copy")
+      .addEventListener("click", (e) =>
+        copyToClipboard(document.getElementById("repo-badge-md").value, e.currentTarget));
 
     // File loader
     const fileInputs = ["file-url", "file-image"];
@@ -221,6 +224,9 @@
     }
     document.getElementById("file-copy")
       .addEventListener("click", () => copyOutput("file-out", "file-copy", "file-open"));
+    document.getElementById("file-badge-copy")
+      .addEventListener("click", (e) =>
+        copyToClipboard(document.getElementById("file-badge-md").value, e.currentTarget));
 
     // Initial render so the boxes aren't empty.
     updateRepoUrl();
@@ -270,6 +276,7 @@
     if (!repoUrl) {
       out.value = "";
       open.hidden = true;
+      clearBadge("repo");
       return;
     }
 
@@ -282,6 +289,7 @@
     } catch {
       out.value = "(invalid Repo URL)";
       open.hidden = true;
+      clearBadge("repo");
       return;
     }
 
@@ -304,6 +312,14 @@
     // the "see the URL before launching" UX choice. Reset on each edit
     // so an in-progress edit doesn't keep a stale launch link visible.
     open.hidden = true;
+
+    // Companion badge markdown + preview for this tab.
+    const launchParams = new URLSearchParams();
+    launchParams.set("image", image);
+    launchParams.set("repo", repoUrl);
+    if (branch) launchParams.set("branch", branch);
+    if (path) launchParams.set("path", path);
+    updateBadge("repo", image, launchParams);
   }
 
   // Build the fromURL launcher (jupyterlab-open-url-parameter).
@@ -319,6 +335,7 @@
     if (!rawUrl) {
       out.value = "";
       open.hidden = true;
+      clearBadge("file");
       return;
     }
 
@@ -329,6 +346,35 @@
     out.value = url;
     open.href = url;
     open.hidden = true; // unhidden only on explicit Copy
+
+    // Companion badge markdown + preview.
+    const launchParams = new URLSearchParams();
+    launchParams.set("image", image);
+    launchParams.set("file", rawUrl);
+    updateBadge("file", image, launchParams);
+  }
+
+  // Render the badge markdown + preview for a given tab. Same image as
+  // the URL generator selected; same query params, but routed through
+  // the /launch/ redirector so the embedded badge survives future
+  // mybinder URL-encoding changes.
+  function updateBadge(prefix, image, launchParams) {
+    const md      = document.getElementById(`${prefix}-badge-md`);
+    const preview = document.getElementById(`${prefix}-badge-preview`);
+    if (!md || !preview) return;
+    const badgeUrl  = `${PAGES}/badges/launch-qubins-${image}.svg`;
+    const launchUrl = `${PAGES}/launch/?${launchParams.toString()}`;
+    md.value = `[![launch QuBins ${image}](${badgeUrl})](${launchUrl})`;
+    preview.src = badgeUrl;
+    preview.alt = `launch QuBins ${image}`;
+  }
+
+  // Reset the badge output to an empty state when the launch URL is
+  // not buildable (empty/invalid inputs). Avoids showing a stale badge
+  // markdown that doesn't match the (missing) URL.
+  function clearBadge(prefix) {
+    const md = document.getElementById(`${prefix}-badge-md`);
+    if (md) md.value = "";
   }
 
   // ------------------------------------------------------------------ utils
@@ -354,46 +400,4 @@
     document.getElementById(openId).hidden = false;
   }
 
-  // ---------------------------------------------------------------- embed
-  // Populates the image picker for the image-specific badge, keeps
-  // the preview + markdown in sync, and wires the copy buttons.
-  function wireEmbed(images, latest) {
-    const sel = document.getElementById("embed-image");
-    if (!sel) return; // section optional
-
-    const PAGES = "https://janlahmann.github.io/QuBins";
-    const tags = [
-      { value: "latest-xl",    label: `latest-xl (=${latest}-xl)` },
-      { value: "latest-small", label: `latest-small (=${latest}-small)` },
-    ];
-    for (const img of images) tags.push({ value: img.binder_tag, label: img.binder_tag });
-    for (const t of tags) {
-      const opt = document.createElement("option");
-      opt.value = t.value;
-      opt.textContent = t.label;
-      sel.appendChild(opt);
-    }
-    sel.value = "latest-xl";
-
-    const previewImg = document.getElementById("embed-badge-preview");
-    const md         = document.getElementById("embed-pinned-md");
-    const test       = document.getElementById("embed-pinned-test");
-
-    function refresh() {
-      const tag = sel.value;
-      const badgeUrl  = `${PAGES}/badges/launch-on-qubins-${tag}.svg`;
-      const launchUrl = `${PAGES}/launch/?image=${encodeURIComponent(tag)}`;
-      previewImg.src = badgeUrl;
-      previewImg.alt = `launch on QuBins ${tag}`;
-      md.textContent = `[![launch on QuBins ${tag}](${badgeUrl})](${launchUrl})`;
-      test.href = launchUrl;
-    }
-    sel.addEventListener("change", refresh);
-    refresh();
-
-    document.getElementById("embed-generic-copy").addEventListener("click", (e) =>
-      copyToClipboard(document.getElementById("embed-generic-md").textContent, e.currentTarget));
-    document.getElementById("embed-pinned-copy").addEventListener("click", (e) =>
-      copyToClipboard(md.textContent, e.currentTarget));
-  }
 })();

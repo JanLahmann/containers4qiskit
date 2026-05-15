@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Generate shields.io-style "launch on QuBins" badges as static SVGs.
+"""Generate shields.io-style "launch QuBins" badges as static SVGs.
 
 Outputs to docs/badges/:
-  - launch-on-qubins.svg                    (generic, no image label)
-  - launch-on-qubins-<tag>.svg              (one per image, e.g. 2.4-xl)
-  - launch-on-qubins-latest-{small,xl}.svg  (aliases of the latest minor)
+  - launch-qubins.svg                    (generic, no image label)
+  - launch-qubins-<tag>.svg              (one per image, e.g. 2.4-xl)
+  - launch-qubins-latest-{small,xl}.svg  (aliases of the latest minor)
 
 Each SVG is hand-laid-out (no rsvg dependency) so anyone can read the
 output. Width is calculated from text length using an approximate
@@ -85,20 +85,20 @@ def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
     print(f"Writing badges to {OUT_DIR.relative_to(REPO_ROOT)}/ ...")
-    # Generic "Launch on QuBins" — for the use case where the embedder
+    # Generic "launch QuBins" — for the use case where the embedder
     # doesn't want to pin a specific image (e.g. a "tap to launch
     # latest-xl" badge in a tutorial README).
-    write("launch-on-qubins.svg", render("launch on", "QuBins"))
+    write("launch-qubins.svg", render("launch", "QuBins"))
 
-    # One per image: "launch on | QuBins 2.4-xl"
+    # One per image: "launch | QuBins 2.4-xl"
     for img in images:
         tag = img["binder_tag"]
-        write(f"launch-on-qubins-{tag}.svg", render("launch on", f"QuBins {tag}"))
+        write(f"launch-qubins-{tag}.svg", render("launch", f"QuBins {tag}"))
 
     # latest-* aliases of the current minor
     for flavor in ("small", "xl"):
         tag = f"latest-{flavor}"
-        write(f"launch-on-qubins-{tag}.svg", render("launch on", f"QuBins {tag}"))
+        write(f"launch-qubins-{tag}.svg", render("launch", f"QuBins {tag}"))
 
     print(f"Done. latest minor = {latest_minor}.")
 
