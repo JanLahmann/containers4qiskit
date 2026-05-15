@@ -126,6 +126,87 @@ add a default file path, and copy the result. Share that URL — anyone
 who clicks lands in a fresh QuBins session with your notebooks already
 checked out.
 
+## Embed a launch badge in your project
+
+If you maintain a tutorial, course, or sample repo that needs a
+specific Qiskit version, you can embed a **"launch on QuBins"** badge
+that opens a chosen notebook in a verified, daily-rebuilt Qiskit
+container on [mybinder.org](https://mybinder.org) — no environment
+setup on the reader's machine, no Qiskit version drift between
+authoring and reading.
+
+The easiest way to build one is the
+**[badge embed picker](https://janlahmann.github.io/QuBins/#embed)**
+on the QuBins landing page: pick an image, copy the markdown.
+
+### What the badge looks like
+
+![launch on QuBins 2.4-xl](https://janlahmann.github.io/QuBins/badges/launch-on-qubins-2.4-xl.svg)
+
+The right half changes per image (`2.4-xl`, `latest-small`, etc.), or
+you can use the generic
+[`launch-on-qubins.svg`](https://janlahmann.github.io/QuBins/badges/launch-on-qubins.svg)
+if you don't want to pin a version in the badge text.
+
+### Markdown snippets
+
+**Open a whole repo in QuBins** (nbgitpuller clones it on launch):
+
+```markdown
+[![launch on QuBins 2.4-xl](https://janlahmann.github.io/QuBins/badges/launch-on-qubins-2.4-xl.svg)](https://janlahmann.github.io/QuBins/launch/?image=2.4-xl&repo=https://github.com/YOU/YOUR-REPO)
+```
+
+Optional extra params: `&branch=BRANCH`, `&path=path/to/notebook.ipynb`.
+
+**Open a single notebook by raw URL** (xl images only — needs the
+`jupyterlab-open-url-parameter` extension):
+
+```markdown
+[![launch on QuBins 2.4-xl](https://janlahmann.github.io/QuBins/badges/launch-on-qubins-2.4-xl.svg)](https://janlahmann.github.io/QuBins/launch/?image=2.4-xl&file=https://raw.githubusercontent.com/YOU/YOUR-REPO/main/notebook.ipynb)
+```
+
+**Bare launch into the image** (no preloaded notebook):
+
+```markdown
+[![launch on QuBins latest-xl](https://janlahmann.github.io/QuBins/badges/launch-on-qubins-latest-xl.svg)](https://janlahmann.github.io/QuBins/launch/?image=latest-xl)
+```
+
+### When to use which
+
+- **Whole repo** — the notebook has sibling files (data, images,
+  helper modules) or you want a working copy with `git pull` updates
+  available from inside the session. Works with any image (small or xl).
+  Cold-start cost: image pull + repo clone.
+- **Single notebook by URL** — the notebook is self-contained (only
+  standard imports, no relative `open()`). Faster cold start because
+  only the `.ipynb` itself is fetched. xl only.
+- **Bare launch** — you just want to drop the reader into a fresh
+  Qiskit environment to experiment.
+
+### Why the `/launch/?…` redirector?
+
+The link target on every badge points at
+`https://janlahmann.github.io/QuBins/launch/?…`, which is a thin
+client-side redirector that builds the actual mybinder URL on the
+fly. Two reasons:
+
+1. The mybinder URL form has subtle double-encoding rules that are
+   easy to get wrong. The redirector keeps that logic in one place.
+2. If the mybinder API or one of the underlying extensions changes
+   its URL shape, only the redirector needs to update — every badge
+   already published in the wild keeps working.
+
+The destination URL is always visible (rendered into the page
+before the JS redirect fires), so the reader sees where they're
+about to be sent.
+
+### Image picker
+
+The catalog table in [Versions](#versions) above lists every published
+image with its badge. The
+[landing page](https://janlahmann.github.io/QuBins/) has a filterable
+version of the same table.
+
 ## How it works
 
 `Dockerfile` is parameterised by `QISKIT_VERSION` (which is really a
