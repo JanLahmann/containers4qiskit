@@ -69,6 +69,28 @@ section {
   margin-bottom: 2.5rem;
 }
 
+/* Quick-start: prose label + action(s) on a single flex row.
+   Wraps below the breakpoint, so it still looks fine on mobile. */
+.qs-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.5rem 0;
+}
+.qs-line > span {
+  flex: 0 1 auto;
+}
+.qs-line > code {
+  flex: 1 1 20rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  white-space: nowrap;
+  overflow-x: auto;
+}
+
 section h2 {
   border-bottom: 1px solid var(--border);
   padding-bottom: 0.25rem;

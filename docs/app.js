@@ -282,33 +282,71 @@
       imageSel.value = "latest-xl";
     }
 
-    // Mode note + the override toggle.
+    // Symmetric mode note + toggle. The form has two launch shapes:
+    //   - clone-the-whole-repo (nbgitpuller)
+    //   - fetch a single .ipynb (jupyterlab-open-url-parameter)
+    // We always show the user which one is active and offer the
+    // other shape when it's applicable — i.e. in clone mode only if
+    // there's a usable .ipynb path; in file mode always (we can
+    // derive owner+repo+branch+path from the raw URL).
+    note.hidden = false;
+    note.innerHTML = ""; // clear any stale link listeners by removing the node
     if (effectiveMode === "file") {
-      note.hidden = false;
-      note.innerHTML =
-        'Detected a raw notebook URL — will launch the single file (no clone). ' +
-        '<a href="#" id="override-to-clone">Clone full repo instead?</a>';
-      document.getElementById("override-to-clone").addEventListener("click", (e) => {
-        e.preventDefault();
-        // Synthesize a github.com URL from the raw URL's pieces so
-        // detectMode + applyDetection re-run in clone mode.
-        if (det.owner && det.repo) {
+      const span = document.createElement("span");
+      span.textContent = "Single-notebook mode — fetches just this .ipynb. ";
+      note.appendChild(span);
+      if (det.owner && det.repo) {
+        note.appendChild(makeOverrideLink("Clone full repo instead?", () => {
+          // Synthesise a github.com URL so detectMode re-runs in clone mode.
           urlField.value = `https://github.com/${det.owner}/${det.repo}`;
           if (det.branch) branchField.value = det.branch;
           if (det.path)   pathField.value   = det.path;
+          overrideMode = "clone";
+          refreshLaunch();
+        }));
+      }
+    } else if (effectiveMode === "clone") {
+      const branchNow = branchField.value.trim();
+      const pathNow   = pathField.value.trim();
+      const canSingle =
+        det.repoUrl &&
+        pathNow.endsWith(".ipynb") &&
+        branchNow.length > 0;
+      const span = document.createElement("span");
+      span.textContent = pathNow
+        ? "Clone-repo mode — clones the whole repo and opens the file at launch. "
+        : "Clone-repo mode — clones the whole repo on launch. ";
+      note.appendChild(span);
+      if (canSingle) {
+        // Synthesise the raw.githubusercontent.com URL from the
+        // pieces we have, so detectMode re-runs in file mode.
+        // det.repoUrl is like https://github.com/OWNER/REPO; pull the
+        // owner+repo back out for the raw URL.
+        const m = det.repoUrl.match(/^https:\/\/github\.com\/([^/]+)\/([^/]+)/);
+        if (m) {
+          const owner = m[1], repo = m[2];
+          note.appendChild(makeOverrideLink("Open just this notebook (no clone) instead?", () => {
+            urlField.value = `https://raw.githubusercontent.com/${owner}/${repo}/${branchNow}/${pathNow}`;
+            overrideMode = "file";
+            refreshLaunch();
+          }));
         }
-        overrideMode = "clone";
-        refreshLaunch();
-      });
-    } else if (effectiveMode === "clone" && overrideMode === "clone") {
-      note.hidden = false;
-      note.textContent = "Cloning full repo (override).";
+      }
     } else {
       note.hidden = true;
-      note.textContent = "";
     }
 
     return effectiveMode;
+  }
+
+  // Build a fresh inline override link (avoids accumulating listeners
+  // since the parent <p>'s innerHTML is cleared on each render).
+  function makeOverrideLink(text, onClick) {
+    const a = document.createElement("a");
+    a.href = "#";
+    a.textContent = text;
+    a.addEventListener("click", (e) => { e.preventDefault(); onClick(); });
+    return a;
   }
 
   // Main render: read the current form, detect mode, apply, then

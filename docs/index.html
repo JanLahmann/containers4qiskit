@@ -25,22 +25,15 @@
 
   <section id="quickstart">
     <h2>Quick start</h2>
-    <p>
-      Run the latest Qiskit (<code id="qs-latest">…</code>) in your browser
-      via Binder — no install:
+    <p class="qs-line">
+      <span>Run the latest Qiskit (<code id="qs-latest">…</code>) in your browser via Binder:</span>
+      <a id="qs-binder-small" class="button" href="#" target="_blank" rel="noopener">Launch latest-small in Binder</a>
+      <a id="qs-binder-xl"    class="button" href="#" target="_blank" rel="noopener">Launch latest-xl in Binder</a>
     </p>
-    <p>
-      <a id="qs-binder-small" class="button" href="#" target="_blank" rel="noopener">
-        Launch latest-small in Binder
-      </a>
-      <a id="qs-binder-xl" class="button" href="#" target="_blank" rel="noopener">
-        Launch latest-xl in Binder
-      </a>
+    <p class="qs-line">
+      <span>Or pull with Docker:</span>
+      <code id="qs-docker">docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:latest-small</code>
     </p>
-    <p>
-      Or pull with Docker:
-    </p>
-    <pre><code id="qs-docker">docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:latest-small</code></pre>
     <p class="hint">
       <strong>small</strong> = lean (qiskit + aer + ibm-runtime).
       <strong>xl</strong> = broad, with addons + scientific stack + nbgitpuller +
