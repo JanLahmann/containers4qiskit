@@ -69,8 +69,10 @@
         session on launch and (optionally) opens a specific file in it.
       </p>
       <form id="form-repo" onsubmit="return false">
-        <label>Repo URL
-          <input type="url" id="repo-url" placeholder="https://github.com/USER/REPO  —  or paste a /blob/ URL to auto-fill branch + path" required>
+        <label>Repo URL <span class="hint">(prefilled with an example — overwrite)</span>
+          <input type="url" id="repo-url" required
+                 placeholder="https://github.com/USER/REPO  —  or paste a /blob/ URL to auto-fill branch + path"
+                 value="https://github.com/Qiskit/documentation/blob/main/learning/courses/use-a-qc-today/build-and-run-your-first-quantum-program.ipynb">
         </label>
         <label>Branch (optional)
           <input type="text" id="repo-branch" placeholder="main">
@@ -95,7 +97,7 @@
         <label>Badge markdown <span class="hint">(paste into a README; goes through /launch/ redirector so it stays current)</span>
           <textarea id="repo-badge-md" readonly rows="2"></textarea>
         </label>
-        <p class="badge-row"><img id="repo-badge-preview" src="badges/launch-on-qubins-latest-xl.svg" alt="launch on QuBins badge preview"></p>
+        <p class="badge-row"><img id="repo-badge-preview" alt="launch QuBins badge preview" hidden></p>
         <div class="actions">
           <button class="button" id="repo-badge-copy" type="button">Copy markdown</button>
         </div>
@@ -109,8 +111,10 @@
         notebook doesn't reference any sibling files.
       </p>
       <form id="form-file" onsubmit="return false">
-        <label>Raw notebook URL
-          <input type="url" id="file-url" placeholder="https://raw.githubusercontent.com/USER/REPO/BRANCH/path/to/notebook.ipynb" required>
+        <label>Raw notebook URL <span class="hint">(prefilled with an example — overwrite)</span>
+          <input type="url" id="file-url" required
+                 placeholder="https://raw.githubusercontent.com/USER/REPO/BRANCH/path/to/notebook.ipynb"
+                 value="https://raw.githubusercontent.com/Qiskit/documentation/main/learning/courses/use-a-qc-today/build-and-run-your-first-quantum-program.ipynb">
         </label>
         <label>Image (xl only)
           <select id="file-image"></select>
@@ -129,7 +133,7 @@
         <label>Badge markdown <span class="hint">(paste into a README; goes through /launch/ redirector so it stays current)</span>
           <textarea id="file-badge-md" readonly rows="2"></textarea>
         </label>
-        <p class="badge-row"><img id="file-badge-preview" src="badges/launch-on-qubins-latest-xl.svg" alt="launch on QuBins badge preview"></p>
+        <p class="badge-row"><img id="file-badge-preview" alt="launch QuBins badge preview" hidden></p>
         <div class="actions">
           <button class="button" id="file-badge-copy" type="button">Copy markdown</button>
         </div>
