@@ -33,6 +33,7 @@
     <p class="qs-line">
       <span>Or pull with Docker:</span>
       <code id="qs-docker">docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:latest-small</code>
+      <button class="button secondary" id="qs-docker-copy" type="button">Copy</button>
     </p>
     <p class="hint">
       <strong>small</strong> = lean (qiskit + aer + ibm-runtime).
@@ -45,6 +46,7 @@
   <section id="launch">
     <h2>Open your repo or your notebook in Binder</h2>
     <p class="hint">Paste a GitHub repo URL (or a /blob/ URL, or a raw .ipynb URL). Output: a Binder URL and a launch-on-QuBins badge markdown.</p>
+    <p id="launch-mode-note" class="hint" hidden></p>
 
     <form id="form-launch" onsubmit="return false">
       <div class="row">
@@ -67,7 +69,6 @@
           </label>
         </div>
       </div>
-      <p id="launch-mode-note" class="hint" hidden></p>
     </form>
 
     <div class="output">
