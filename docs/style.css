@@ -265,6 +265,44 @@ form label select {
   margin-top: 0.25rem;
 }
 
+/* Side-by-side form rows. Stack on narrow screens via flex-wrap. */
+form .row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+form .row > label {
+  /* Default each cell to a sensible minimum so it doesn't collapse. */
+  flex: 1 1 16rem;
+}
+/* Image picker shrinks to fit its short content rather than stretching
+   to fill the row. Don't force-grow it; let neighbours take the slack. */
+form label.image-pick {
+  flex: 0 0 auto;
+}
+form label.image-pick select {
+  width: auto;
+  min-width: 12rem;
+}
+form label.grow { flex: 1 1 16rem; }
+
+/* "Why does this go through /launch/?" — collapsed by default; the
+   one-line summary preserves vertical space without losing the link. */
+details {
+  margin-top: 0.5rem;
+}
+details > summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-size: 0.9em;
+}
+details[open] > summary {
+  margin-bottom: 0.25rem;
+}
+details > p {
+  margin: 0.25rem 0 0 0;
+}
+
 .output {
   margin-top: 1rem;
   padding: 0.75rem;
