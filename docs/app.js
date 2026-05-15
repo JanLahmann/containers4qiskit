@@ -35,7 +35,6 @@
     populateFilters(images);
     populateGeneratorImages(images, latest);
     wireGenerators(images);
-    wireTabs();
   }
 
   // ------------------------------------------------------------- quick start
@@ -151,252 +150,244 @@
     }
   }
 
-  // ----------------------------------------------------- generator dropdowns
+  // ----------------------------------------------------- generator dropdown
+  // Single image picker for the consolidated launch form. Each <option>
+  // carries a data-flavor attribute so we can mark small options as
+  // disabled when the form switches into single-file mode (the
+  // jupyterlab-open-url-parameter extension only ships in xl).
   function populateGeneratorImages(images, latest) {
-    const repoSel = document.getElementById("repo-image");
-    const fileSel = document.getElementById("file-image");
-
-    // Repo generator: all images, plus latest-* aliases.
-    const repoOptions = [
-      { value: "latest-small", label: `latest-small (=${latest}-small)` },
-      { value: "latest-xl",    label: `latest-xl (=${latest}-xl)` },
+    const sel = document.getElementById("launch-image");
+    if (!sel) return;
+    const options = [
+      { value: "latest-xl",    label: `latest-xl (=${latest}-xl)`,    flavor: "xl" },
+      { value: "latest-small", label: `latest-small (=${latest}-small)`, flavor: "small" },
     ];
     for (const img of images) {
-      repoOptions.push({
-        value: img.binder_tag,
-        label: img.binder_tag + (img.is_latest ? "" : ""),
-      });
+      options.push({ value: img.binder_tag, label: img.binder_tag, flavor: img.flavor });
     }
-    for (const o of repoOptions) {
+    for (const o of options) {
       const opt = document.createElement("option");
       opt.value = o.value;
       opt.textContent = o.label;
-      repoSel.appendChild(opt);
+      opt.dataset.flavor = o.flavor;
+      sel.appendChild(opt);
     }
-    repoSel.value = "latest-xl"; // sensible default for the loader
-
-    // File generator: xl flavors only (jupyterlab-open-url-parameter is xl-gated).
-    const fileOptions = [
-      { value: "latest-xl", label: `latest-xl (=${latest}-xl)` },
-    ];
-    for (const img of images) {
-      if (img.flavor !== "xl") continue;
-      fileOptions.push({ value: img.binder_tag, label: img.binder_tag });
-    }
-    for (const o of fileOptions) {
-      const opt = document.createElement("option");
-      opt.value = o.value;
-      opt.textContent = o.label;
-      fileSel.appendChild(opt);
-    }
-    fileSel.value = "latest-xl";
+    sel.value = "latest-xl";
   }
 
-  // ------------------------------------------------------------------- tabs
-  function wireTabs() {
-    for (const btn of document.querySelectorAll(".tab")) {
-      btn.addEventListener("click", () => {
-        const id = btn.dataset.tab;
-        for (const t of document.querySelectorAll(".tab")) t.classList.remove("active");
-        for (const p of document.querySelectorAll(".tabpanel")) p.classList.remove("active");
-        btn.classList.add("active");
-        document.getElementById(id).classList.add("active");
-      });
-    }
-  }
+  // -------------------------------------------------- consolidated form
+  // Single launch form. Detects mode from the URL the user enters:
+  //   raw.githubusercontent.com → "file" mode (uses jupyterlab-open-
+  //                                url-parameter ?fromURL=)
+  //   github.com / anything else → "clone" mode (uses nbgitpuller
+  //                                git-pull on the whole repo)
+  // The user can override file→clone via the "Clone full repo instead?"
+  // link that appears in file mode; we then derive the implicit
+  // owner/repo/branch/path from the raw URL.
+  //
+  // overrideMode is null in the auto state and 'clone'|'file' when
+  // the user has explicitly overridden the detection.
+  let overrideMode = null;
 
-  // ----------------------------------------------------- URL generators
-  function wireGenerators(images) {
-    // Repo loader
-    const repoInputs = ["repo-url", "repo-branch", "repo-path", "repo-image"];
-    for (const id of repoInputs) {
-      document.getElementById(id).addEventListener("input", updateRepoUrl);
-      document.getElementById(id).addEventListener("change", updateRepoUrl);
+  function wireGenerators() {
+    const ids = ["launch-url", "launch-branch", "launch-path", "launch-image"];
+    for (const id of ids) {
+      const el = document.getElementById(id);
+      el.addEventListener("input", refreshLaunch);
+      el.addEventListener("change", refreshLaunch);
     }
-    document.getElementById("repo-copy")
-      .addEventListener("click", () => copyOutput("repo-out", "repo-copy", "repo-open"));
-    document.getElementById("repo-badge-copy")
+    // Editing the URL clears any prior override (the user is starting
+    // over with a fresh URL, so auto-detect should take over again).
+    document.getElementById("launch-url").addEventListener("input", () => {
+      overrideMode = null;
+    });
+    document.getElementById("launch-copy")
+      .addEventListener("click", () => copyOutput("launch-out", "launch-copy", "launch-open"));
+    document.getElementById("launch-badge-copy")
       .addEventListener("click", (e) =>
-        copyToClipboard(document.getElementById("repo-badge-md").value, e.currentTarget));
-
-    // File loader
-    const fileInputs = ["file-url", "file-image"];
-    for (const id of fileInputs) {
-      document.getElementById(id).addEventListener("input", updateFileUrl);
-      document.getElementById(id).addEventListener("change", updateFileUrl);
-    }
-    document.getElementById("file-copy")
-      .addEventListener("click", () => copyOutput("file-out", "file-copy", "file-open"));
-    document.getElementById("file-badge-copy")
-      .addEventListener("click", (e) =>
-        copyToClipboard(document.getElementById("file-badge-md").value, e.currentTarget));
-
-    // Initial render so the boxes aren't empty.
-    updateRepoUrl();
-    updateFileUrl();
+        copyToClipboard(document.getElementById("launch-badge-md").value, e.currentTarget));
+    refreshLaunch();
   }
 
-  // If the user pasted a /blob/<ref>/<path> or /tree/<ref>/<path> URL
-  // into the Repo URL field, split out the ref and path into the
-  // dedicated fields and rewrite the URL field to the bare repo form.
-  // Only fills branch/path when they are currently empty, so it never
-  // clobbers values the user typed deliberately.
-  function maybeSplitFullRepoUrl() {
-    const urlField    = document.getElementById("repo-url");
-    const branchField = document.getElementById("repo-branch");
-    const pathField   = document.getElementById("repo-path");
-    const raw = urlField.value.trim();
-    if (!raw) return;
+  // Detect what launch mode the current URL implies. Returns:
+  //   { mode: "file",   raw }                                    raw .ipynb URL
+  //   { mode: "clone",  repoUrl, branch?, path?, repoName }      github URL
+  //   { mode: "invalid" }                                        unparseable
+  function detectMode(input) {
+    const raw = (input || "").trim();
+    if (!raw) return { mode: "empty" };
     let u;
-    try { u = new URL(raw); } catch { return; }
-    if (u.hostname !== "github.com") return;
-    const parts = u.pathname.replace(/\.git$/, "").split("/").filter(Boolean);
-    // [owner, repo, ("blob"|"tree"), ref, ...subpath]
-    if (parts.length < 4) return;
-    const kind = parts[2];
-    if (kind !== "blob" && kind !== "tree") return;
-    const owner   = parts[0];
-    const repo    = parts[1];
-    const ref     = parts[3];
-    const subpath = parts.slice(4).join("/");
-    urlField.value = `https://github.com/${owner}/${repo}`;
-    if (!branchField.value.trim()) branchField.value = ref;
-    if (!pathField.value.trim()   && subpath) pathField.value = subpath;
-  }
-
-  // Build the nbgitpuller URL. The outer urlpath is single-encoded; the
-  // inner git-pull query string is double-encoded (mybinder unwraps once,
-  // JupyterLab/nbgitpuller unwraps once more).
-  function updateRepoUrl() {
-    maybeSplitFullRepoUrl();
-    const repoUrl = document.getElementById("repo-url").value.trim();
-    const branch  = document.getElementById("repo-branch").value.trim();
-    const path    = document.getElementById("repo-path").value.trim();
-    const image   = document.getElementById("repo-image").value;
-    const out     = document.getElementById("repo-out");
-    const open    = document.getElementById("repo-open");
-
-    if (!repoUrl) {
-      out.value = "";
-      open.hidden = true;
-      clearBadge("repo");
-      return;
+    try { u = new URL(raw); } catch { return { mode: "invalid" }; }
+    if (u.hostname === "raw.githubusercontent.com") {
+      // raw.githubusercontent.com/USER/REPO/BRANCH/path/file.ipynb
+      const parts = u.pathname.split("/").filter(Boolean);
+      const out = { mode: "file", raw };
+      if (parts.length >= 3) {
+        out.owner = parts[0];
+        out.repo  = parts[1];
+        out.branch = parts[2];
+        out.path = parts.slice(3).join("/");
+        out.repoName = parts[1];
+      }
+      return out;
     }
-
-    // Extract reponame from the URL (for the lab/tree landing path).
-    let repoName;
-    try {
-      const u = new URL(repoUrl);
+    if (u.hostname === "github.com") {
       const parts = u.pathname.replace(/\.git$/, "").split("/").filter(Boolean);
-      repoName = parts[parts.length - 1] || "repo";
-    } catch {
-      out.value = "(invalid Repo URL)";
-      open.hidden = true;
-      clearBadge("repo");
-      return;
+      if (parts.length < 2) return { mode: "invalid" };
+      const repoName = parts[1];
+      const out = { mode: "clone", repoUrl: `https://github.com/${parts[0]}/${parts[1]}`, repoName };
+      if (parts.length >= 4 && (parts[2] === "blob" || parts[2] === "tree")) {
+        out.branch = parts[3];
+        out.path   = parts.slice(4).join("/");
+      }
+      return out;
     }
-
-    // Build inner git-pull params (double-encoded).
-    const innerParams = new URLSearchParams();
-    innerParams.set("repo", repoUrl);
-    if (branch) innerParams.set("branch", branch);
-    innerParams.set(
-      "urlpath",
-      path ? `lab/tree/${repoName}/${path}` : `lab/tree/${repoName}`
-    );
-    // URLSearchParams encodes once; we need to encode the result again
-    // so mybinder forwards it intact to nbgitpuller.
-    const innerEncoded = encodeURIComponent("git-pull?" + innerParams.toString());
-
-    const url = `https://mybinder.org/v2/gh/${REPO}/${image}?urlpath=${innerEncoded}`;
-    out.value = url;
-    open.href = url;
-    // Open link stays hidden until the user explicitly Copies — that's
-    // the "see the URL before launching" UX choice. Reset on each edit
-    // so an in-progress edit doesn't keep a stale launch link visible.
-    open.hidden = true;
-
-    // Companion badge markdown + preview for this tab.
-    const launchParams = new URLSearchParams();
-    launchParams.set("image", image);
-    launchParams.set("repo", repoUrl);
-    if (branch) launchParams.set("branch", branch);
-    if (path) launchParams.set("path", path);
-    updateBadge("repo", image, launchParams);
+    return { mode: "invalid" };
   }
 
-  // Build the fromURL launcher (jupyterlab-open-url-parameter).
-  // urlpath is single-encoded; the value of the urlpath itself is
-  // `lab?fromURL=<raw>` where <raw> is the literal raw URL (the inner
-  // query string is not double-encoded the way nbgitpuller's is).
-  function updateFileUrl() {
-    const rawUrl = document.getElementById("file-url").value.trim();
-    const image  = document.getElementById("file-image").value;
-    const out    = document.getElementById("file-out");
-    const open   = document.getElementById("file-open");
+  // Apply a detection result to the form: split a /blob/ URL into its
+  // pieces (matching the previous maybeSplitFullRepoUrl behaviour),
+  // show/hide Branch + Path, set the mode note, and gate image
+  // options to xl when in file mode.
+  function applyDetection(det) {
+    const urlField    = document.getElementById("launch-url");
+    const branchField = document.getElementById("launch-branch");
+    const pathField   = document.getElementById("launch-path");
+    const cloneFields = document.getElementById("launch-clone-fields");
+    const note        = document.getElementById("launch-mode-note");
+    const imageSel    = document.getElementById("launch-image");
 
-    if (!rawUrl) {
+    const effectiveMode =
+      overrideMode ||
+      (det.mode === "file" || det.mode === "clone" ? det.mode : null);
+
+    // Auto-split /blob/ URLs into clone fields. Only when we're in
+    // clone mode AND the field has a /blob/ form; preserve user-typed
+    // branch/path values if non-empty.
+    if (effectiveMode === "clone" && det.mode === "clone" && det.branch) {
+      urlField.value = det.repoUrl;
+      if (!branchField.value.trim()) branchField.value = det.branch;
+      if (!pathField.value.trim() && det.path) pathField.value = det.path;
+    }
+
+    // Show clone-only fields only in clone mode.
+    cloneFields.hidden = effectiveMode !== "clone";
+
+    // xl-only when in file mode.
+    for (const opt of imageSel.options) {
+      const disabled = effectiveMode === "file" && opt.dataset.flavor !== "xl";
+      opt.disabled = disabled;
+    }
+    if (effectiveMode === "file" && imageSel.selectedOptions[0]?.disabled) {
+      imageSel.value = "latest-xl";
+    }
+
+    // Mode note + the override toggle.
+    if (effectiveMode === "file") {
+      note.hidden = false;
+      note.innerHTML =
+        'Detected a raw notebook URL — will launch the single file (no clone). ' +
+        '<a href="#" id="override-to-clone">Clone full repo instead?</a>';
+      document.getElementById("override-to-clone").addEventListener("click", (e) => {
+        e.preventDefault();
+        // Synthesize a github.com URL from the raw URL's pieces so
+        // detectMode + applyDetection re-run in clone mode.
+        if (det.owner && det.repo) {
+          urlField.value = `https://github.com/${det.owner}/${det.repo}`;
+          if (det.branch) branchField.value = det.branch;
+          if (det.path)   pathField.value   = det.path;
+        }
+        overrideMode = "clone";
+        refreshLaunch();
+      });
+    } else if (effectiveMode === "clone" && overrideMode === "clone") {
+      note.hidden = false;
+      note.textContent = "Cloning full repo (override).";
+    } else {
+      note.hidden = true;
+      note.textContent = "";
+    }
+
+    return effectiveMode;
+  }
+
+  // Main render: read the current form, detect mode, apply, then
+  // build the Binder URL + badge markdown for that mode.
+  function refreshLaunch() {
+    const det     = detectMode(document.getElementById("launch-url").value);
+    const out     = document.getElementById("launch-out");
+    const open    = document.getElementById("launch-open");
+    const image   = document.getElementById("launch-image").value;
+
+    if (det.mode === "empty") {
       out.value = "";
       open.hidden = true;
-      clearBadge("file");
+      clearLaunchBadge();
+      document.getElementById("launch-clone-fields").hidden = true;
+      document.getElementById("launch-mode-note").hidden = true;
+      return;
+    }
+    if (det.mode === "invalid") {
+      out.value = "(unrecognised URL — paste a github.com or raw.githubusercontent.com URL)";
+      open.hidden = true;
+      clearLaunchBadge();
       return;
     }
 
-    // We build `lab?fromURL=<rawUrl>` and percent-encode the whole thing
-    // for urlpath=.
-    const inner = `lab?fromURL=${encodeURIComponent(rawUrl)}`;
-    const url = `https://mybinder.org/v2/gh/${REPO}/${image}?urlpath=${encodeURIComponent(inner)}`;
+    const mode = applyDetection(det);
+
+    let url, launchParams = new URLSearchParams();
+    launchParams.set("image", image);
+    if (mode === "file") {
+      const raw = det.raw;
+      const inner = `lab?fromURL=${encodeURIComponent(raw)}`;
+      url = `https://mybinder.org/v2/gh/${REPO}/${image}?urlpath=${encodeURIComponent(inner)}`;
+      launchParams.set("file", raw);
+    } else { // clone
+      // Read live values (applyDetection may have just populated them).
+      const branch = document.getElementById("launch-branch").value.trim();
+      const path   = document.getElementById("launch-path").value.trim();
+      // Resolve the bare repo URL: prefer detection's repoUrl (handles
+      // /blob/ etc.), otherwise use the field as-is.
+      const repoUrl  = det.repoUrl || document.getElementById("launch-url").value.trim();
+      const repoName = det.repoName || "repo";
+      const innerParams = new URLSearchParams();
+      innerParams.set("repo", repoUrl);
+      if (branch) innerParams.set("branch", branch);
+      innerParams.set("urlpath", path ? `lab/tree/${repoName}/${path}` : `lab/tree/${repoName}`);
+      url = `https://mybinder.org/v2/gh/${REPO}/${image}?urlpath=${encodeURIComponent("git-pull?" + innerParams.toString())}`;
+      launchParams.set("repo", repoUrl);
+      if (branch) launchParams.set("branch", branch);
+      if (path)   launchParams.set("path", path);
+    }
     out.value = url;
     open.href = url;
-    open.hidden = true; // unhidden only on explicit Copy
-
-    // Companion badge markdown + preview.
-    const launchParams = new URLSearchParams();
-    launchParams.set("image", image);
-    launchParams.set("file", rawUrl);
-    updateBadge("file", image, launchParams);
+    open.hidden = true;
+    updateLaunchBadge(image, launchParams);
   }
 
-  // Render the badge markdown + preview for a given tab. Same image as
-  // the URL generator selected; same query params, but routed through
-  // the /launch/ redirector so the embedded badge survives future
-  // mybinder URL-encoding changes.
-  // The launch tabs always embed a notebook (repo or single .ipynb),
-  // so we use the "launch on QuBins" badge variant ("on" makes the
-  // grammar work: "launch [your notebook] on QuBins"). The catalog
-  // table's per-row badge uses the bare "launch QuBins" variant
-  // (no notebook context — just launches the environment).
-  function updateBadge(prefix, image, launchParams) {
-    const md      = document.getElementById(`${prefix}-badge-md`);
-    const preview = document.getElementById(`${prefix}-badge-preview`);
-    const link    = document.getElementById(`${prefix}-badge-link`);
-    if (!md || !preview || !link) return;
+  // The launch form always embeds a notebook (repo or single .ipynb),
+  // so we use the "launch on QuBins" badge variant; same as before,
+  // but with single-form IDs.
+  function updateLaunchBadge(image, launchParams) {
+    const md      = document.getElementById("launch-badge-md");
+    const preview = document.getElementById("launch-badge-preview");
+    const link    = document.getElementById("launch-badge-link");
     const badgeUrl  = `${PAGES}/badges/launch-on-qubins-${image}.svg`;
     const launchUrl = `${PAGES}/launch/?${launchParams.toString()}`;
     md.value = `[![launch on QuBins ${image}](${badgeUrl})](${launchUrl})`;
     preview.src = badgeUrl;
     preview.alt = `launch on QuBins ${image}`;
-    // The preview is wrapped in <a target="_blank"> so clicking it
-    // actually tests the redirect — no more "looks like a badge but
-    // does nothing" confusion.
     link.href = launchUrl;
     link.hidden = false;
   }
 
-  // Reset the badge output to an empty state when the launch URL is
-  // not buildable (empty/invalid inputs). Avoids showing a stale badge
-  // markdown that doesn't match the (missing) URL, and hides the
-  // clickable preview so users don't click a stale link.
-  function clearBadge(prefix) {
-    const md = document.getElementById(`${prefix}-badge-md`);
-    if (md) md.value = "";
-    const link = document.getElementById(`${prefix}-badge-link`);
-    if (link) {
-      link.removeAttribute("href");
-      link.hidden = true;
-    }
-    const preview = document.getElementById(`${prefix}-badge-preview`);
-    if (preview) preview.removeAttribute("src");
+  function clearLaunchBadge() {
+    document.getElementById("launch-badge-md").value = "";
+    const link = document.getElementById("launch-badge-link");
+    link.removeAttribute("href");
+    link.hidden = true;
+    document.getElementById("launch-badge-preview").removeAttribute("src");
   }
 
   // ------------------------------------------------------------------ utils
