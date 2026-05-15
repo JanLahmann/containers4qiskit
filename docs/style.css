@@ -286,6 +286,39 @@ form label.image-pick select {
 }
 form label.grow { flex: 1 1 16rem; }
 
+/* Branch is a short identifier; Path is a long sub-path. Bias the
+   shared row so Branch takes only what it needs and Path gets the
+   rest. Stacks below the 16rem floor on narrow screens. */
+form label.branch { flex: 0 1 12rem; }
+
+/* Image dropdown should visually match the text input next to it. The
+   `<select>` and `<input>` have slightly different default vertical
+   metrics; set a single line-height + box-sizing so they line up. */
+form label.image-pick select,
+form .row input[type="url"],
+form .row input[type="text"] {
+  height: 2.25rem;
+  box-sizing: border-box;
+}
+
+/* Badge action row: preview, copy button, and the why-redirector
+   <details> all live on one line to save vertical space. The
+   <details> grows to fill remaining width so its expanded panel
+   wraps nicely beneath. */
+.badge-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+.badge-actions details {
+  flex: 1 1 16rem;
+  margin-top: 0;
+}
+.badge-actions img {
+  vertical-align: middle;
+}
+
 /* "Why does this go through /launch/?" — collapsed by default; the
    one-line summary preserves vertical space without losing the link. */
 details {
