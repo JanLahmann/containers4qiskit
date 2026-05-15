@@ -13,7 +13,7 @@ Schema (one entry per published image):
       "flavor":       "small" | "xl",
       "is_latest":    true,      # current LATEST_QISKIT minor
       "binder_tag":   "2.4-small",
-      "docker_tag":   "ghcr.io/qubins/qiskit:2.4-small",
+      "docker_tag":   "ghcr.io/qubins/images:2.4-small",
       "notes":        "reduced set: ..."   # optional
     }
 
@@ -43,7 +43,7 @@ NOTES: dict[tuple[str, str], str] = {
 REPO_ROOT = Path(__file__).resolve().parents[2]
 VERSIONS_DIR = REPO_ROOT / "versions"
 WORKFLOW_PATH = REPO_ROOT / ".github" / "workflows" / "build-matrix.yml"
-DOCKER_PREFIX = "ghcr.io/qubins/qiskit"
+DOCKER_PREFIX = "ghcr.io/qubins/images"
 
 
 def latest_qiskit() -> str:

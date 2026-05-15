@@ -35,20 +35,20 @@ Two flavors per Qiskit version:
 
 | Qiskit  | Flavor | Binder | Docker |
 | ------- | ------ | ------ | ------ |
-| latest  | small  | [![launch QuBins latest-small](https://qubins.org/badges/launch-qubins-latest-small.svg)](https://qubins.org/launch/?image=latest-small) | `docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:latest-small` |
-| latest  | xl     | [![launch QuBins latest-xl](https://qubins.org/badges/launch-qubins-latest-xl.svg)](https://qubins.org/launch/?image=latest-xl) | `docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:latest-xl` |
-| 2.4     | small  | [![launch QuBins 2.4-small](https://qubins.org/badges/launch-qubins-2.4-small.svg)](https://qubins.org/launch/?image=2.4-small) | `docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:2.4-small` |
-| 2.4     | xl     | [![launch QuBins 2.4-xl](https://qubins.org/badges/launch-qubins-2.4-xl.svg)](https://qubins.org/launch/?image=2.4-xl) | `docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:2.4-xl` |
-| 2.3    | small  | [![launch QuBins 2.3-small](https://qubins.org/badges/launch-qubins-2.3-small.svg)](https://qubins.org/launch/?image=2.3-small) | `docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:2.3-small` |
-| 2.3    | xl     | [![launch QuBins 2.3-xl](https://qubins.org/badges/launch-qubins-2.3-xl.svg)](https://qubins.org/launch/?image=2.3-xl) | `docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:2.3-xl` |
-| 2.2    | small  | [![launch QuBins 2.2-small](https://qubins.org/badges/launch-qubins-2.2-small.svg)](https://qubins.org/launch/?image=2.2-small) | `docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:2.2-small` |
-| 2.2    | xl     | [![launch QuBins 2.2-xl](https://qubins.org/badges/launch-qubins-2.2-xl.svg)](https://qubins.org/launch/?image=2.2-xl) | `docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:2.2-xl` |
-| 2.1    | small  | [![launch QuBins 2.1-small](https://qubins.org/badges/launch-qubins-2.1-small.svg)](https://qubins.org/launch/?image=2.1-small) | `docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:2.1-small` |
-| 2.1    | xl     | [![launch QuBins 2.1-xl](https://qubins.org/badges/launch-qubins-2.1-xl.svg)](https://qubins.org/launch/?image=2.1-xl) | `docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:2.1-xl` |
-| 2.0    | small  | [![launch QuBins 2.0-small](https://qubins.org/badges/launch-qubins-2.0-small.svg)](https://qubins.org/launch/?image=2.0-small) | `docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:2.0-small` |
-| 2.0    | xl     | [![launch QuBins 2.0-xl](https://qubins.org/badges/launch-qubins-2.0-xl.svg)](https://qubins.org/launch/?image=2.0-xl) | `docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:2.0-xl` |
-| 1.4     | small  | [![launch QuBins 1.4-small](https://qubins.org/badges/launch-qubins-1.4-small.svg)](https://qubins.org/launch/?image=1.4-small) | `docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:1.4-small` |
-| 1.4     | xl\*   | [![launch QuBins 1.4-xl](https://qubins.org/badges/launch-qubins-1.4-xl.svg)](https://qubins.org/launch/?image=1.4-xl) | `docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:1.4-xl` |
+| latest  | small  | [![launch QuBins latest-small](https://qubins.org/badges/launch-qubins-latest-small.svg)](https://qubins.org/launch/?image=latest-small) | `docker run --rm -p 8888:8888 ghcr.io/qubins/images:latest-small` |
+| latest  | xl     | [![launch QuBins latest-xl](https://qubins.org/badges/launch-qubins-latest-xl.svg)](https://qubins.org/launch/?image=latest-xl) | `docker run --rm -p 8888:8888 ghcr.io/qubins/images:latest-xl` |
+| 2.4     | small  | [![launch QuBins 2.4-small](https://qubins.org/badges/launch-qubins-2.4-small.svg)](https://qubins.org/launch/?image=2.4-small) | `docker run --rm -p 8888:8888 ghcr.io/qubins/images:2.4-small` |
+| 2.4     | xl     | [![launch QuBins 2.4-xl](https://qubins.org/badges/launch-qubins-2.4-xl.svg)](https://qubins.org/launch/?image=2.4-xl) | `docker run --rm -p 8888:8888 ghcr.io/qubins/images:2.4-xl` |
+| 2.3    | small  | [![launch QuBins 2.3-small](https://qubins.org/badges/launch-qubins-2.3-small.svg)](https://qubins.org/launch/?image=2.3-small) | `docker run --rm -p 8888:8888 ghcr.io/qubins/images:2.3-small` |
+| 2.3    | xl     | [![launch QuBins 2.3-xl](https://qubins.org/badges/launch-qubins-2.3-xl.svg)](https://qubins.org/launch/?image=2.3-xl) | `docker run --rm -p 8888:8888 ghcr.io/qubins/images:2.3-xl` |
+| 2.2    | small  | [![launch QuBins 2.2-small](https://qubins.org/badges/launch-qubins-2.2-small.svg)](https://qubins.org/launch/?image=2.2-small) | `docker run --rm -p 8888:8888 ghcr.io/qubins/images:2.2-small` |
+| 2.2    | xl     | [![launch QuBins 2.2-xl](https://qubins.org/badges/launch-qubins-2.2-xl.svg)](https://qubins.org/launch/?image=2.2-xl) | `docker run --rm -p 8888:8888 ghcr.io/qubins/images:2.2-xl` |
+| 2.1    | small  | [![launch QuBins 2.1-small](https://qubins.org/badges/launch-qubins-2.1-small.svg)](https://qubins.org/launch/?image=2.1-small) | `docker run --rm -p 8888:8888 ghcr.io/qubins/images:2.1-small` |
+| 2.1    | xl     | [![launch QuBins 2.1-xl](https://qubins.org/badges/launch-qubins-2.1-xl.svg)](https://qubins.org/launch/?image=2.1-xl) | `docker run --rm -p 8888:8888 ghcr.io/qubins/images:2.1-xl` |
+| 2.0    | small  | [![launch QuBins 2.0-small](https://qubins.org/badges/launch-qubins-2.0-small.svg)](https://qubins.org/launch/?image=2.0-small) | `docker run --rm -p 8888:8888 ghcr.io/qubins/images:2.0-small` |
+| 2.0    | xl     | [![launch QuBins 2.0-xl](https://qubins.org/badges/launch-qubins-2.0-xl.svg)](https://qubins.org/launch/?image=2.0-xl) | `docker run --rm -p 8888:8888 ghcr.io/qubins/images:2.0-xl` |
+| 1.4     | small  | [![launch QuBins 1.4-small](https://qubins.org/badges/launch-qubins-1.4-small.svg)](https://qubins.org/launch/?image=1.4-small) | `docker run --rm -p 8888:8888 ghcr.io/qubins/images:1.4-small` |
+| 1.4     | xl\*   | [![launch QuBins 1.4-xl](https://qubins.org/badges/launch-qubins-1.4-xl.svg)](https://qubins.org/launch/?image=1.4-xl) | `docker run --rm -p 8888:8888 ghcr.io/qubins/images:1.4-xl` |
 
 `latest` aliases the current Qiskit minor (today: `2.4`); the alias is
 updated when a new minor ships. The bare `:latest` tag (what Docker
@@ -82,7 +82,7 @@ pip install "qiskit~=2.4.0"
 Pull and start any tag, mapping Jupyter's port:
 
 ```sh
-docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:latest-small
+docker run --rm -p 8888:8888 ghcr.io/qubins/images:latest-small
 ```
 
 Watch the container's stdout — Jupyter prints a tokenised URL once
@@ -100,7 +100,7 @@ the container's workspace:
 ```sh
 docker run --rm -p 8888:8888 \
   -v "$PWD:/home/jovyan/work" \
-  ghcr.io/qubins/qiskit:latest-small
+  ghcr.io/qubins/images:latest-small
 ```
 
 Jupyter runs as the unprivileged `jovyan` user (UID 1000); on Linux,
@@ -241,10 +241,10 @@ three stages:
    cache. This stage runs on every branch.
 2. **publish to GHCR** (only on `main` / `workflow_dispatch`) — re-run
    the build with `push: true` so `docker/build-push-action` produces
-   the SLSA provenance attestation alongside `ghcr.io/.../qiskit:<target>-<arch>`.
+   the SLSA provenance attestation alongside `ghcr.io/.../images:<target>-<arch>`.
    All layers are cache hits from step 1, so this is fast.
 3. **manifest + sign** (only on `main` / `workflow_dispatch`) — combine
-   the per-arch tags into a multi-arch `ghcr.io/.../qiskit:<target>` with
+   the per-arch tags into a multi-arch `ghcr.io/.../images:<target>` with
    `docker buildx imagetools create`, sign the manifest with cosign
    keyless OIDC, then force-sync a per-target stub branch containing
    only `binder/Dockerfile` (a one-line `FROM ghcr.io/...` reference).
@@ -275,14 +275,14 @@ rebuilding the dep tree from scratch (cold start ~30s).
 Every multi-arch tag is signed via cosign keyless OIDC:
 
 ```
-cosign verify ghcr.io/qubins/qiskit:2.4-small \
+cosign verify ghcr.io/qubins/images:2.4-small \
   --certificate-identity-regexp='^https://github.com/QuBins/qiskit-images/' \
   --certificate-oidc-issuer=https://token.actions.githubusercontent.com
 ```
 
 Build provenance attestations are produced automatically by
 `docker/build-push-action`; see them via `docker buildx imagetools
-inspect ghcr.io/.../qiskit:<tag> --format '{{ json .Provenance }}'`.
+inspect ghcr.io/.../images:<tag> --format '{{ json .Provenance }}'`.
 
 ## Adding a new Qiskit minor
 

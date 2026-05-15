@@ -109,7 +109,7 @@ def badge_row(flavor: str) -> str:
     return (
         f"| {MINOR}     | {flavor:<6} | "
         f"[![launch QuBins {tag}]({badge})]({target}) | "
-        f"`docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:{tag}` |\n"
+        f"`docker run --rm -p 8888:8888 ghcr.io/qubins/images:{tag}` |\n"
     )
 
 new_rows = badge_row("small") + badge_row("xl")

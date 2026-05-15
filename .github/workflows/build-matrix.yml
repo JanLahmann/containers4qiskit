@@ -39,7 +39,7 @@ permissions:
   id-token: write     # cosign keyless signing via OIDC
 
 env:
-  IMAGE: qiskit
+  IMAGE: images
   # Qiskit minor that the :latest-<flavor> tags and latest-<flavor> stub
   # branches alias to. Bump when a new minor ships.
   LATEST_QISKIT: '2.4'
