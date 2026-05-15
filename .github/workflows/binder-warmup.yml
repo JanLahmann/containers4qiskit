@@ -9,10 +9,14 @@ name: Binder warm-up
 # branch already references a prebuilt GHCR image). Once we see
 # `phase: ready` we close the connection and move on.
 #
-# Triggered after a successful main-branch run of "Build matrix" (push
-# or workflow_dispatch only — daily cron runs are filtered out, since
-# the cache typically survives long enough that re-warming every day
-# is just noise on a shared free service).
+# Triggered:
+#   - after a successful main-branch run of "Build matrix" (push or
+#     workflow_dispatch only — Build matrix's daily cron is filtered
+#     out at the job level so it doesn't double-fire with our own cron).
+#   - daily at 04:00 UTC (= 05:00 CET / 06:00 CEST), shortly after
+#     the daily Build matrix cron finishes its republish, so the
+#     newly-pushed stub branches land on a warm mybinder backend.
+#   - manual workflow_dispatch.
 #
 # Best-effort: warm-up failures do not fail the workflow. mybinder is
 # a shared community service and a flaky backend is not our problem
@@ -22,6 +26,13 @@ on:
     workflows: ["Build matrix"]
     types: [completed]
     branches: [main]
+  schedule:
+    # 04:00 UTC daily. The Build matrix cron at the same minute
+    # typically finishes within ~20 min; this cron picks up the
+    # freshly-pushed stub branches and warms a backend for them.
+    # mybinder is amd64-only, so this single hit per target covers
+    # every user regardless of their local arch.
+    - cron: '0 4 * * *'
   # Manual trigger lets us validate this workflow without waiting for
   # the next Build matrix run on main. Useful after editing this file
   # itself (since workflow_run only fires after another workflow
@@ -33,11 +44,16 @@ permissions:
 
 jobs:
   warmup:
-    # On workflow_run we filter to successful push/dispatch completions
-    # of Build matrix (skipping scheduled cron — see file-level comment).
-    # On workflow_dispatch we run unconditionally.
+    # Allowed triggers:
+    #  - workflow_dispatch (manual): always
+    #  - schedule (our own daily cron): always
+    #  - workflow_run from Build matrix: only when its conclusion is
+    #    success AND its triggering event was push or workflow_dispatch.
+    #    Filter out Build matrix's own scheduled cron so we don't
+    #    double-fire alongside our own cron above.
     if: >-
       github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'schedule' ||
       (github.event.workflow_run.conclusion == 'success' &&
        (github.event.workflow_run.event == 'push' ||
         github.event.workflow_run.event == 'workflow_dispatch'))
