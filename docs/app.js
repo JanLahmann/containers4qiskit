@@ -9,8 +9,11 @@
 (() => {
   "use strict";
 
-  const REPO = "JanLahmann/qubins"; // hardcoded — lowercase for mybinder
-  const PAGES = "https://janlahmann.github.io/QuBins";
+  // Canonical owner/repo. mybinder normalises to lowercase server-side
+  // (we hit that subtlety in the warmup workflow). The case here is
+  // mostly cosmetic; we keep it matching the GitHub org name as shown.
+  const REPO = "QuBins/qiskit-images";
+  const PAGES = "https://qubins.org";
 
   // ---------------------------------------------------------------- data load
   fetch("versions.json")

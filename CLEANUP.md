@@ -14,11 +14,11 @@ From a local checkout with `gh` available:
 
 ```sh
 for b in 1.0-small 1.0-xl 1.1-small 1.1-xl 1.2-small 1.2-xl 1.3-small 1.3-xl; do
-  gh api -X DELETE "/repos/JanLahmann/qubins/git/refs/heads/$b"
+  gh api -X DELETE "/repos/QuBins/qiskit-images/git/refs/heads/$b"
 done
 ```
 
-Or via the UI: <https://github.com/JanLahmann/qubins/branches>
+Or via the UI: <https://github.com/QuBins/qiskit-images/branches>
 → filter for `1.`, click the trash icon on each.
 
 - [ ] `1.0-small`
@@ -32,11 +32,11 @@ Or via the UI: <https://github.com/JanLahmann/qubins/branches>
 
 ## Orphan GHCR package versions
 
-The GHCR package `ghcr.io/janlahmann/qiskit` still has tags + per-arch
+The GHCR package `ghcr.io/qubins/qiskit` still has tags + per-arch
 tags + cosign signatures published from the dropped versions. Delete
 them at:
 
-<https://github.com/users/JanLahmann/packages/container/qiskit/versions>
+<https://github.com/orgs/QuBins/packages/container/qiskit/versions>
 
 Tags to remove (each has an amd64 + arm64 sub-tag and a `sha256-...sig`
 cosign signature; deleting the multi-arch manifest version usually
@@ -55,7 +55,7 @@ takes the children with it, but verify):
 
 - [ ] Rename the GitHub repo `containers4qiskit` → `qubins`. UI:
   Settings → Repository name → "Rename". Or:
-  `gh repo rename qubins --repo JanLahmann/containers4qiskit`.
+  `gh repo rename qubins --repo QuBins/qiskit-images`.
   GitHub auto-redirects clones from the old URL; the README's
   mybinder URLs were already rewritten to point at the new name.
 - [ ] Register `qubins.org`.
@@ -65,7 +65,7 @@ takes the children with it, but verify):
   - Configure DNS at the registrar: `A` records to GitHub Pages
     IPs (185.199.108.153, .109.153, .110.153, .111.153) and an
     `AAAA` set, or a `CNAME` for `www.qubins.org` →
-    `janlahmann.github.io`.
+    `qubins.org`.
   - Enable "Enforce HTTPS" once DNS resolves.
 
 ## After all cleanup
@@ -73,4 +73,4 @@ takes the children with it, but verify):
 - [ ] Delete this file (`git rm CLEANUP.md`)
 - [ ] Delete the long-lived `claude/review-qiskit-versions-sketch-n5ecU`
   branch if it's served its purpose:
-  `gh api -X DELETE /repos/JanLahmann/qubins/git/refs/heads/claude/review-qiskit-versions-sketch-n5ecU`
+  `gh api -X DELETE /repos/QuBins/qiskit-images/git/refs/heads/claude/review-qiskit-versions-sketch-n5ecU`

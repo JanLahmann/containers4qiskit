@@ -18,7 +18,7 @@
 
 (() => {
   "use strict";
-  const REPO = "JanLahmann/qubins";
+  const REPO = "QuBins/qiskit-images";
   const params = new URLSearchParams(location.search);
 
   const image  = (params.get("image") || "latest-xl").trim();
