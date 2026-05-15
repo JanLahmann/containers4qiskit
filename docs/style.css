@@ -193,6 +193,15 @@ th {
   background: rgba(63, 185, 80, 0.06);
 }
 
+/* "Embed in your project" section: keep badge previews on their own
+   line with a hair of vertical space. */
+.badge-row {
+  margin: 0.75rem 0;
+}
+.badge-row img {
+  vertical-align: middle;
+}
+
 .tag {
   display: inline-block;
   padding: 0.05em 0.5em;

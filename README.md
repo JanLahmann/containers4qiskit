@@ -35,20 +35,20 @@ Two flavors per Qiskit version:
 
 | Qiskit  | Flavor | Binder | Docker |
 | ------- | ------ | ------ | ------ |
-| latest  | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/qubins/latest-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:latest-small` |
-| latest  | xl     | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/qubins/latest-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:latest-xl` |
-| 2.4     | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/qubins/2.4-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.4-small` |
-| 2.4     | xl     | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/qubins/2.4-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.4-xl` |
-| 2.3    | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/qubins/2.3-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.3-small` |
-| 2.3    | xl     | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/qubins/2.3-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.3-xl` |
-| 2.2    | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/qubins/2.2-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.2-small` |
-| 2.2    | xl     | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/qubins/2.2-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.2-xl` |
-| 2.1    | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/qubins/2.1-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.1-small` |
-| 2.1    | xl     | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/qubins/2.1-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.1-xl` |
-| 2.0    | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/qubins/2.0-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.0-small` |
-| 2.0    | xl     | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/qubins/2.0-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.0-xl` |
-| 1.4     | small  | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/qubins/1.4-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.4-small` |
-| 1.4     | xl\*   | [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/JanLahmann/qubins/1.4-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.4-xl` |
+| latest  | small  | [![launch on QuBins latest-small](https://janlahmann.github.io/QuBins/badges/launch-on-qubins-latest-small.svg)](https://janlahmann.github.io/QuBins/launch/?image=latest-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:latest-small` |
+| latest  | xl     | [![launch on QuBins latest-xl](https://janlahmann.github.io/QuBins/badges/launch-on-qubins-latest-xl.svg)](https://janlahmann.github.io/QuBins/launch/?image=latest-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:latest-xl` |
+| 2.4     | small  | [![launch on QuBins 2.4-small](https://janlahmann.github.io/QuBins/badges/launch-on-qubins-2.4-small.svg)](https://janlahmann.github.io/QuBins/launch/?image=2.4-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.4-small` |
+| 2.4     | xl     | [![launch on QuBins 2.4-xl](https://janlahmann.github.io/QuBins/badges/launch-on-qubins-2.4-xl.svg)](https://janlahmann.github.io/QuBins/launch/?image=2.4-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.4-xl` |
+| 2.3    | small  | [![launch on QuBins 2.3-small](https://janlahmann.github.io/QuBins/badges/launch-on-qubins-2.3-small.svg)](https://janlahmann.github.io/QuBins/launch/?image=2.3-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.3-small` |
+| 2.3    | xl     | [![launch on QuBins 2.3-xl](https://janlahmann.github.io/QuBins/badges/launch-on-qubins-2.3-xl.svg)](https://janlahmann.github.io/QuBins/launch/?image=2.3-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.3-xl` |
+| 2.2    | small  | [![launch on QuBins 2.2-small](https://janlahmann.github.io/QuBins/badges/launch-on-qubins-2.2-small.svg)](https://janlahmann.github.io/QuBins/launch/?image=2.2-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.2-small` |
+| 2.2    | xl     | [![launch on QuBins 2.2-xl](https://janlahmann.github.io/QuBins/badges/launch-on-qubins-2.2-xl.svg)](https://janlahmann.github.io/QuBins/launch/?image=2.2-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.2-xl` |
+| 2.1    | small  | [![launch on QuBins 2.1-small](https://janlahmann.github.io/QuBins/badges/launch-on-qubins-2.1-small.svg)](https://janlahmann.github.io/QuBins/launch/?image=2.1-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.1-small` |
+| 2.1    | xl     | [![launch on QuBins 2.1-xl](https://janlahmann.github.io/QuBins/badges/launch-on-qubins-2.1-xl.svg)](https://janlahmann.github.io/QuBins/launch/?image=2.1-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.1-xl` |
+| 2.0    | small  | [![launch on QuBins 2.0-small](https://janlahmann.github.io/QuBins/badges/launch-on-qubins-2.0-small.svg)](https://janlahmann.github.io/QuBins/launch/?image=2.0-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.0-small` |
+| 2.0    | xl     | [![launch on QuBins 2.0-xl](https://janlahmann.github.io/QuBins/badges/launch-on-qubins-2.0-xl.svg)](https://janlahmann.github.io/QuBins/launch/?image=2.0-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.0-xl` |
+| 1.4     | small  | [![launch on QuBins 1.4-small](https://janlahmann.github.io/QuBins/badges/launch-on-qubins-1.4-small.svg)](https://janlahmann.github.io/QuBins/launch/?image=1.4-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.4-small` |
+| 1.4     | xl\*   | [![launch on QuBins 1.4-xl](https://janlahmann.github.io/QuBins/badges/launch-on-qubins-1.4-xl.svg)](https://janlahmann.github.io/QuBins/launch/?image=1.4-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.4-xl` |
 
 `latest` aliases the current Qiskit minor (today: `2.4`); the alias is
 updated when a new minor ships. The bare `:latest` tag (what Docker
@@ -205,6 +205,16 @@ does all of this in one shot if you set `MINOR` and `VERSION` in env.
 ## License & acknowledgements
 
 Apache-2.0. See [LICENSE](LICENSE).
+
+Every in-browser launch served from a "launch on QuBins" badge runs
+on **[mybinder.org](https://mybinder.org)** — a free service from the
+[Binder project](https://jupyter.org/binder) (Project Jupyter), with
+federation backends operated by [GESIS](https://www.gesis.org),
+[2i2c](https://2i2c.org), and partners. QuBins is just the curated
+container images they pull; please be patient on cold starts and
+don't hammer the service. Consider
+[donating to Project Jupyter](https://numfocus.org/donate-to-jupyter)
+if you find Binder useful.
 
 Qiskit is a trademark of IBM. This project is independent and not
 affiliated with IBM; it just packages the open-source Qiskit

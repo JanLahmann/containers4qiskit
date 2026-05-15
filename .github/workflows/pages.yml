@@ -17,6 +17,7 @@ on:
       - 'versions/**'
       - '.github/workflows/pages.yml'
       - '.github/scripts/build-pages-data.py'
+      - '.github/scripts/build-badges.py'
       # build-matrix.yml is the source of truth for LATEST_QISKIT
       - '.github/workflows/build-matrix.yml'
   workflow_dispatch:
@@ -40,6 +41,9 @@ jobs:
 
       - name: Build versions.json
         run: python3 .github/scripts/build-pages-data.py
+
+      - name: Build badges
+        run: python3 .github/scripts/build-badges.py
 
       - uses: actions/configure-pages@v5
 
