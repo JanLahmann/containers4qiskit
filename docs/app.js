@@ -87,14 +87,17 @@
       }
       tr.appendChild(flavorCell);
 
+      // QuBins-branded launch badge → /launch/?... redirector,
+      // matching the README catalog rows (PR #42) so all of our
+      // surfaces point at the same badge + redirector pair.
       const binderCell = document.createElement("td");
       const binderLink = document.createElement("a");
-      binderLink.href = `https://mybinder.org/v2/gh/${REPO}/${img.binder_tag}`;
+      binderLink.href = `${PAGES}/launch/?image=${encodeURIComponent(img.binder_tag)}`;
       binderLink.target = "_blank";
       binderLink.rel = "noopener";
       const binderImg = document.createElement("img");
-      binderImg.src = "https://mybinder.org/badge_logo.svg";
-      binderImg.alt = `Launch ${img.binder_tag} on Binder`;
+      binderImg.src = `${PAGES}/badges/launch-qubins-${img.binder_tag}.svg`;
+      binderImg.alt = `launch QuBins ${img.binder_tag}`;
       binderLink.appendChild(binderImg);
       binderCell.appendChild(binderLink);
       tr.appendChild(binderCell);
@@ -358,15 +361,20 @@
   // the URL generator selected; same query params, but routed through
   // the /launch/ redirector so the embedded badge survives future
   // mybinder URL-encoding changes.
+  // The launch tabs always embed a notebook (repo or single .ipynb),
+  // so we use the "launch on QuBins" badge variant ("on" makes the
+  // grammar work: "launch [your notebook] on QuBins"). The catalog
+  // table's per-row badge uses the bare "launch QuBins" variant
+  // (no notebook context — just launches the environment).
   function updateBadge(prefix, image, launchParams) {
     const md      = document.getElementById(`${prefix}-badge-md`);
     const preview = document.getElementById(`${prefix}-badge-preview`);
     if (!md || !preview) return;
-    const badgeUrl  = `${PAGES}/badges/launch-qubins-${image}.svg`;
+    const badgeUrl  = `${PAGES}/badges/launch-on-qubins-${image}.svg`;
     const launchUrl = `${PAGES}/launch/?${launchParams.toString()}`;
-    md.value = `[![launch QuBins ${image}](${badgeUrl})](${launchUrl})`;
+    md.value = `[![launch on QuBins ${image}](${badgeUrl})](${launchUrl})`;
     preview.src = badgeUrl;
-    preview.alt = `launch QuBins ${image}`;
+    preview.alt = `launch on QuBins ${image}`;
     preview.hidden = false;
   }
 

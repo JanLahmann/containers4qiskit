@@ -129,42 +129,56 @@ checked out.
 ## Embed a launch badge in your project
 
 If you maintain a tutorial, course, or sample repo that needs a
-specific Qiskit version, you can embed a **"launch QuBins"** badge
-that opens a chosen notebook in a verified, daily-rebuilt Qiskit
-container on [mybinder.org](https://mybinder.org) — no environment
-setup on the reader's machine, no Qiskit version drift between
-authoring and reading.
+specific Qiskit version, you can embed a launch badge that opens
+your notebook in a verified, daily-rebuilt Qiskit container on
+[mybinder.org](https://mybinder.org) — no environment setup on the
+reader's machine, no Qiskit version drift between authoring and
+reading.
 
-The easiest way to build one is the
+Two grammatical variants of the same badge family:
+
+- **"launch on QuBins"** — when the badge launches *a notebook*
+  (a repo or a single `.ipynb`). Reads as "launch your notebook on
+  QuBins." Used by the URL generator on the landing page.
+- **"launch QuBins"** — when the badge just opens the bare image
+  (no preloaded notebook). Reads as "launch the QuBins environment."
+  Used by the per-row catalog badges above.
+
+The easiest way to build either is the
 **[URL generator](https://janlahmann.github.io/QuBins/#launch)** on
 the QuBins landing page: fill in repo URL (or raw notebook URL),
 optionally branch + path, pick an image, then copy the badge markdown
 that appears next to the Binder URL.
 
-### What the badge looks like
+### What the badges look like
+
+![launch on QuBins 2.4-xl](https://janlahmann.github.io/QuBins/badges/launch-on-qubins-2.4-xl.svg)
+&nbsp; (notebook launch — repo or single file)
 
 ![launch QuBins 2.4-xl](https://janlahmann.github.io/QuBins/badges/launch-qubins-2.4-xl.svg)
+&nbsp; (bare-image launch)
 
 The right half changes per image (`2.4-xl`, `latest-small`, etc.), or
 you can use the generic
-[`launch-qubins.svg`](https://janlahmann.github.io/QuBins/badges/launch-qubins.svg)
+[`launch-on-qubins.svg`](https://janlahmann.github.io/QuBins/badges/launch-on-qubins.svg)
+/ [`launch-qubins.svg`](https://janlahmann.github.io/QuBins/badges/launch-qubins.svg)
 if you don't want to pin a version in the badge text.
 
 ### Markdown snippets
 
-**Open a whole repo in QuBins** (nbgitpuller clones it on launch):
+**Open a whole repo on QuBins** (nbgitpuller clones it on launch):
 
 ```markdown
-[![launch QuBins 2.4-xl](https://janlahmann.github.io/QuBins/badges/launch-qubins-2.4-xl.svg)](https://janlahmann.github.io/QuBins/launch/?image=2.4-xl&repo=https://github.com/YOU/YOUR-REPO)
+[![launch on QuBins 2.4-xl](https://janlahmann.github.io/QuBins/badges/launch-on-qubins-2.4-xl.svg)](https://janlahmann.github.io/QuBins/launch/?image=2.4-xl&repo=https://github.com/YOU/YOUR-REPO)
 ```
 
 Optional extra params: `&branch=BRANCH`, `&path=path/to/notebook.ipynb`.
 
-**Open a single notebook by raw URL** (xl images only — needs the
-`jupyterlab-open-url-parameter` extension):
+**Open a single notebook on QuBins by raw URL** (xl images only —
+needs the `jupyterlab-open-url-parameter` extension):
 
 ```markdown
-[![launch QuBins 2.4-xl](https://janlahmann.github.io/QuBins/badges/launch-qubins-2.4-xl.svg)](https://janlahmann.github.io/QuBins/launch/?image=2.4-xl&file=https://raw.githubusercontent.com/YOU/YOUR-REPO/main/notebook.ipynb)
+[![launch on QuBins 2.4-xl](https://janlahmann.github.io/QuBins/badges/launch-on-qubins-2.4-xl.svg)](https://janlahmann.github.io/QuBins/launch/?image=2.4-xl&file=https://raw.githubusercontent.com/YOU/YOUR-REPO/main/notebook.ipynb)
 ```
 
 **Bare launch into the image** (no preloaded notebook):
