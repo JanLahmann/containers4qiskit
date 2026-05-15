@@ -367,6 +367,7 @@
     md.value = `[![launch QuBins ${image}](${badgeUrl})](${launchUrl})`;
     preview.src = badgeUrl;
     preview.alt = `launch QuBins ${image}`;
+    preview.hidden = false;
   }
 
   // Reset the badge output to an empty state when the launch URL is
@@ -375,6 +376,11 @@
   function clearBadge(prefix) {
     const md = document.getElementById(`${prefix}-badge-md`);
     if (md) md.value = "";
+    const preview = document.getElementById(`${prefix}-badge-preview`);
+    if (preview) {
+      preview.removeAttribute("src");
+      preview.hidden = true;
+    }
   }
 
   // ------------------------------------------------------------------ utils
