@@ -369,26 +369,34 @@
   function updateBadge(prefix, image, launchParams) {
     const md      = document.getElementById(`${prefix}-badge-md`);
     const preview = document.getElementById(`${prefix}-badge-preview`);
-    if (!md || !preview) return;
+    const link    = document.getElementById(`${prefix}-badge-link`);
+    if (!md || !preview || !link) return;
     const badgeUrl  = `${PAGES}/badges/launch-on-qubins-${image}.svg`;
     const launchUrl = `${PAGES}/launch/?${launchParams.toString()}`;
     md.value = `[![launch on QuBins ${image}](${badgeUrl})](${launchUrl})`;
     preview.src = badgeUrl;
     preview.alt = `launch on QuBins ${image}`;
-    preview.hidden = false;
+    // The preview is wrapped in <a target="_blank"> so clicking it
+    // actually tests the redirect — no more "looks like a badge but
+    // does nothing" confusion.
+    link.href = launchUrl;
+    link.hidden = false;
   }
 
   // Reset the badge output to an empty state when the launch URL is
   // not buildable (empty/invalid inputs). Avoids showing a stale badge
-  // markdown that doesn't match the (missing) URL.
+  // markdown that doesn't match the (missing) URL, and hides the
+  // clickable preview so users don't click a stale link.
   function clearBadge(prefix) {
     const md = document.getElementById(`${prefix}-badge-md`);
     if (md) md.value = "";
-    const preview = document.getElementById(`${prefix}-badge-preview`);
-    if (preview) {
-      preview.removeAttribute("src");
-      preview.hidden = true;
+    const link = document.getElementById(`${prefix}-badge-link`);
+    if (link) {
+      link.removeAttribute("href");
+      link.hidden = true;
     }
+    const preview = document.getElementById(`${prefix}-badge-preview`);
+    if (preview) preview.removeAttribute("src");
   }
 
   // ------------------------------------------------------------------ utils

@@ -94,10 +94,20 @@
         </div>
       </div>
       <div class="output">
-        <label>Badge markdown <span class="hint">(paste into a README; goes through /launch/ redirector so it stays current)</span>
+        <label>Badge markdown
           <textarea id="repo-badge-md" readonly rows="2"></textarea>
         </label>
-        <p class="badge-row"><img id="repo-badge-preview" alt="launch QuBins badge preview" hidden></p>
+        <p class="hint">
+          Paste this into a README. The link goes through our
+          <a href="launch/">/launch/ redirector</a> rather than straight
+          to mybinder.org — so when mybinder&rsquo;s URL form changes
+          (it has, historically), every badge already in the wild keeps
+          working with no edit needed on the reader&rsquo;s side. Click
+          the badge below to test.
+        </p>
+        <p class="badge-row">
+          <a id="repo-badge-link" href="#" target="_blank" rel="noopener" hidden><img id="repo-badge-preview" alt="launch on QuBins badge preview"></a>
+        </p>
         <div class="actions">
           <button class="button" id="repo-badge-copy" type="button">Copy markdown</button>
         </div>
@@ -130,10 +140,20 @@
         </div>
       </div>
       <div class="output">
-        <label>Badge markdown <span class="hint">(paste into a README; goes through /launch/ redirector so it stays current)</span>
+        <label>Badge markdown
           <textarea id="file-badge-md" readonly rows="2"></textarea>
         </label>
-        <p class="badge-row"><img id="file-badge-preview" alt="launch QuBins badge preview" hidden></p>
+        <p class="hint">
+          Paste this into a README. The link goes through our
+          <a href="launch/">/launch/ redirector</a> rather than straight
+          to mybinder.org — so when mybinder&rsquo;s URL form changes
+          (it has, historically), every badge already in the wild keeps
+          working with no edit needed on the reader&rsquo;s side. Click
+          the badge below to test.
+        </p>
+        <p class="badge-row">
+          <a id="file-badge-link" href="#" target="_blank" rel="noopener" hidden><img id="file-badge-preview" alt="launch on QuBins badge preview"></a>
+        </p>
         <div class="actions">
           <button class="button" id="file-badge-copy" type="button">Copy markdown</button>
         </div>
