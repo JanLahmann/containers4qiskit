@@ -45,6 +45,24 @@ jobs:
       - name: Build badges
         run: python3 .github/scripts/build-badges.py
 
+      - name: Cache-bust assets with commit SHA
+        # Browsers aggressively cache GitHub Pages assets (no ETag,
+        # ~10 min Cache-Control on Pages itself). Without versioned
+        # URLs, users see a stale app.js / style.css for a while
+        # after each deploy. Append ?v=<short-sha> to <link> and
+        # <script> tags in every .html under docs/ so each deploy
+        # produces unique asset URLs.
+        env:
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          short="${SHA:0:8}"
+          find docs -name '*.html' -print0 | xargs -0 sed -i -E \
+            -e "s|(href=\"[^\"]+\\.css)\"|\\1?v=${short}\"|g" \
+            -e "s|(src=\"[^\"]+\\.js)\"|\\1?v=${short}\"|g"
+          echo "Stamped assets with v=${short}"
+          grep -E 'href="[^"]+\.css|src="[^"]+\.js' docs/index.html | head -5 || true
+
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
