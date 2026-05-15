@@ -305,13 +305,11 @@ Apache-2.0. See [LICENSE](LICENSE).
 
 Every in-browser launch served from a "launch QuBins" badge runs
 on **[mybinder.org](https://mybinder.org)** — a free service from the
-[Binder project](https://jupyter.org/binder) (Project Jupyter), with
-federation backends operated by [GESIS](https://www.gesis.org),
-[2i2c](https://2i2c.org), and partners. QuBins is just the curated
-container images they pull; please be patient on cold starts and
-don't hammer the service. Consider
-[donating to Project Jupyter](https://numfocus.org/donate-to-jupyter)
-if you find Binder useful.
+[Binder project](https://jupyter.org/binder) (part of Project
+Jupyter), with federation backends operated by
+[GESIS](https://www.gesis.org), [2i2c](https://2i2c.org), and
+partners. QuBins is just the curated container images they pull;
+please be patient on cold starts and don't hammer the service.
 
 Qiskit is a trademark of IBM. This project is independent and not
 affiliated with IBM; it just packages the open-source Qiskit
