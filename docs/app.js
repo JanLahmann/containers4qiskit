@@ -226,10 +226,39 @@
     updateFileUrl();
   }
 
+  // If the user pasted a /blob/<ref>/<path> or /tree/<ref>/<path> URL
+  // into the Repo URL field, split out the ref and path into the
+  // dedicated fields and rewrite the URL field to the bare repo form.
+  // Only fills branch/path when they are currently empty, so it never
+  // clobbers values the user typed deliberately.
+  function maybeSplitFullRepoUrl() {
+    const urlField    = document.getElementById("repo-url");
+    const branchField = document.getElementById("repo-branch");
+    const pathField   = document.getElementById("repo-path");
+    const raw = urlField.value.trim();
+    if (!raw) return;
+    let u;
+    try { u = new URL(raw); } catch { return; }
+    if (u.hostname !== "github.com") return;
+    const parts = u.pathname.replace(/\.git$/, "").split("/").filter(Boolean);
+    // [owner, repo, ("blob"|"tree"), ref, ...subpath]
+    if (parts.length < 4) return;
+    const kind = parts[2];
+    if (kind !== "blob" && kind !== "tree") return;
+    const owner   = parts[0];
+    const repo    = parts[1];
+    const ref     = parts[3];
+    const subpath = parts.slice(4).join("/");
+    urlField.value = `https://github.com/${owner}/${repo}`;
+    if (!branchField.value.trim()) branchField.value = ref;
+    if (!pathField.value.trim()   && subpath) pathField.value = subpath;
+  }
+
   // Build the nbgitpuller URL. The outer urlpath is single-encoded; the
   // inner git-pull query string is double-encoded (mybinder unwraps once,
   // JupyterLab/nbgitpuller unwraps once more).
   function updateRepoUrl() {
+    maybeSplitFullRepoUrl();
     const repoUrl = document.getElementById("repo-url").value.trim();
     const branch  = document.getElementById("repo-branch").value.trim();
     const path    = document.getElementById("repo-path").value.trim();
