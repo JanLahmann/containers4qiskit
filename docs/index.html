@@ -50,13 +50,8 @@
   </section>
 
   <section id="launch">
-    <h2>Open a notebook in Binder</h2>
-    <p>
-      Two ways to launch — pick the tab that matches what you need to
-      open. Each produces both a Binder URL you can copy and share, and
-      a markdown snippet for a &ldquo;launch on QuBins&rdquo; badge you
-      can drop in a README.
-    </p>
+    <h2>Open your repo or your notebook in Binder</h2>
+    <p class="hint">Pick a tab. Each produces a Binder URL and a launch-on-QuBins badge markdown.</p>
 
     <div class="tabs">
       <button class="tab active" data-tab="gen-repo">Clone whole repo</button>
@@ -64,25 +59,26 @@
     </div>
 
     <div id="gen-repo" class="tabpanel active">
-      <p class="hint">
-        Builds a Binder URL that clones the entire repository into the
-        session on launch and (optionally) opens a specific file in it.
-      </p>
+      <p class="hint">Clones the whole repo on launch; opens a specific file if you provide one.</p>
       <form id="form-repo" onsubmit="return false">
-        <label>Repo URL <span class="hint">(prefilled with an example — overwrite)</span>
-          <input type="url" id="repo-url" required
-                 placeholder="https://github.com/USER/REPO  —  or paste a /blob/ URL to auto-fill branch + path"
-                 value="https://github.com/Qiskit/documentation/blob/main/learning/courses/use-a-qc-today/build-and-run-your-first-quantum-program.ipynb">
-        </label>
-        <label>Branch (optional)
-          <input type="text" id="repo-branch" placeholder="main">
-        </label>
-        <label>Path inside repo (optional, opens this file on launch)
-          <input type="text" id="repo-path" placeholder="notebooks/intro.ipynb">
-        </label>
-        <label>Image
-          <select id="repo-image"></select>
-        </label>
+        <div class="row">
+          <label class="grow">Repo URL <span class="hint">(prefilled — overwrite, or paste a /blob/ URL to auto-fill branch + path)</span>
+            <input type="url" id="repo-url" required
+                   placeholder="https://github.com/USER/REPO"
+                   value="https://github.com/Qiskit/documentation/blob/main/learning/courses/use-a-qc-today/build-and-run-your-first-quantum-program.ipynb">
+          </label>
+          <label class="image-pick">Image
+            <select id="repo-image"></select>
+          </label>
+        </div>
+        <div class="row">
+          <label class="grow">Branch (optional)
+            <input type="text" id="repo-branch" placeholder="main">
+          </label>
+          <label class="grow">Path inside repo (optional, opens this file on launch)
+            <input type="text" id="repo-path" placeholder="notebooks/intro.ipynb">
+          </label>
+        </div>
       </form>
       <div class="output">
         <label>Generated URL <span class="hint">(direct mybinder.org link — share this)</span>
@@ -94,41 +90,40 @@
         </div>
       </div>
       <div class="output">
-        <label>Badge markdown
+        <label>Badge markdown <span class="hint">(paste into a README; click the badge below to test)</span>
           <textarea id="repo-badge-md" readonly rows="2"></textarea>
         </label>
-        <p class="hint">
-          Paste this into a README. The link goes through our
-          <a href="launch/">/launch/ redirector</a> rather than straight
-          to mybinder.org — so when mybinder&rsquo;s URL form changes
-          (it has, historically), every badge already in the wild keeps
-          working with no edit needed on the reader&rsquo;s side. Click
-          the badge below to test.
-        </p>
         <p class="badge-row">
           <a id="repo-badge-link" href="#" target="_blank" rel="noopener" hidden><img id="repo-badge-preview" alt="launch on QuBins badge preview"></a>
         </p>
         <div class="actions">
           <button class="button" id="repo-badge-copy" type="button">Copy markdown</button>
         </div>
+        <details>
+          <summary>Why does this go through <code>/launch/</code>?</summary>
+          <p class="hint">
+            The link in the badge points at our <a href="launch/">/launch/ redirector</a>
+            rather than straight to mybinder.org. When mybinder's URL form changes
+            (it has, historically), every badge already in the wild keeps working
+            with no edit needed on the reader's side.
+          </p>
+        </details>
       </div>
     </div>
 
     <div id="gen-file" class="tabpanel">
-      <p class="hint">
-        Builds a Binder URL that fetches a single notebook by raw URL —
-        no repo clone. Faster cold start, but only works if the
-        notebook doesn't reference any sibling files.
-      </p>
+      <p class="hint">Fetches a single notebook by raw URL — no clone, faster cold start, only if the notebook is self-contained.</p>
       <form id="form-file" onsubmit="return false">
-        <label>Raw notebook URL <span class="hint">(prefilled with an example — overwrite)</span>
-          <input type="url" id="file-url" required
-                 placeholder="https://raw.githubusercontent.com/USER/REPO/BRANCH/path/to/notebook.ipynb"
-                 value="https://raw.githubusercontent.com/Qiskit/documentation/main/learning/courses/use-a-qc-today/build-and-run-your-first-quantum-program.ipynb">
-        </label>
-        <label>Image (xl only)
-          <select id="file-image"></select>
-        </label>
+        <div class="row">
+          <label class="grow">Raw notebook URL <span class="hint">(prefilled — overwrite)</span>
+            <input type="url" id="file-url" required
+                   placeholder="https://raw.githubusercontent.com/USER/REPO/BRANCH/path/to/notebook.ipynb"
+                   value="https://raw.githubusercontent.com/Qiskit/documentation/main/learning/courses/use-a-qc-today/build-and-run-your-first-quantum-program.ipynb">
+          </label>
+          <label class="image-pick">Image <span class="hint">(xl only)</span>
+            <select id="file-image"></select>
+          </label>
+        </div>
       </form>
       <div class="output">
         <label>Generated URL <span class="hint">(direct mybinder.org link — share this)</span>
@@ -140,23 +135,24 @@
         </div>
       </div>
       <div class="output">
-        <label>Badge markdown
+        <label>Badge markdown <span class="hint">(paste into a README; click the badge below to test)</span>
           <textarea id="file-badge-md" readonly rows="2"></textarea>
         </label>
-        <p class="hint">
-          Paste this into a README. The link goes through our
-          <a href="launch/">/launch/ redirector</a> rather than straight
-          to mybinder.org — so when mybinder&rsquo;s URL form changes
-          (it has, historically), every badge already in the wild keeps
-          working with no edit needed on the reader&rsquo;s side. Click
-          the badge below to test.
-        </p>
         <p class="badge-row">
           <a id="file-badge-link" href="#" target="_blank" rel="noopener" hidden><img id="file-badge-preview" alt="launch on QuBins badge preview"></a>
         </p>
         <div class="actions">
           <button class="button" id="file-badge-copy" type="button">Copy markdown</button>
         </div>
+        <details>
+          <summary>Why does this go through <code>/launch/</code>?</summary>
+          <p class="hint">
+            The link in the badge points at our <a href="launch/">/launch/ redirector</a>
+            rather than straight to mybinder.org. When mybinder's URL form changes
+            (it has, historically), every badge already in the wild keeps working
+            with no edit needed on the reader's side.
+          </p>
+        </details>
       </div>
     </div>
   </section>
