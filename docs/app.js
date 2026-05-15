@@ -35,6 +35,7 @@
     populateGeneratorImages(images, latest);
     wireGenerators(images);
     wireTabs();
+    wireEmbed(images, latest);
   }
 
   // ------------------------------------------------------------- quick start
@@ -351,5 +352,48 @@
     // Surface the open link only after explicit copy, matching the
     // "see the URL before launching" UX choice.
     document.getElementById(openId).hidden = false;
+  }
+
+  // ---------------------------------------------------------------- embed
+  // Populates the image picker for the image-specific badge, keeps
+  // the preview + markdown in sync, and wires the copy buttons.
+  function wireEmbed(images, latest) {
+    const sel = document.getElementById("embed-image");
+    if (!sel) return; // section optional
+
+    const PAGES = "https://janlahmann.github.io/QuBins";
+    const tags = [
+      { value: "latest-xl",    label: `latest-xl (=${latest}-xl)` },
+      { value: "latest-small", label: `latest-small (=${latest}-small)` },
+    ];
+    for (const img of images) tags.push({ value: img.binder_tag, label: img.binder_tag });
+    for (const t of tags) {
+      const opt = document.createElement("option");
+      opt.value = t.value;
+      opt.textContent = t.label;
+      sel.appendChild(opt);
+    }
+    sel.value = "latest-xl";
+
+    const previewImg = document.getElementById("embed-badge-preview");
+    const md         = document.getElementById("embed-pinned-md");
+    const test       = document.getElementById("embed-pinned-test");
+
+    function refresh() {
+      const tag = sel.value;
+      const badgeUrl  = `${PAGES}/badges/launch-on-qubins-${tag}.svg`;
+      const launchUrl = `${PAGES}/launch/?image=${encodeURIComponent(tag)}`;
+      previewImg.src = badgeUrl;
+      previewImg.alt = `launch on QuBins ${tag}`;
+      md.textContent = `[![launch on QuBins ${tag}](${badgeUrl})](${launchUrl})`;
+      test.href = launchUrl;
+    }
+    sel.addEventListener("change", refresh);
+    refresh();
+
+    document.getElementById("embed-generic-copy").addEventListener("click", (e) =>
+      copyToClipboard(document.getElementById("embed-generic-md").textContent, e.currentTarget));
+    document.getElementById("embed-pinned-copy").addEventListener("click", (e) =>
+      copyToClipboard(md.textContent, e.currentTarget));
   }
 })();

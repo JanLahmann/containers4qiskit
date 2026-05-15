@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Launching on QuBins…</title>
+<meta name="description" content="QuBins → mybinder.org launch redirector.">
+<link rel="stylesheet" href="../style.css">
+<style>
+  /* Tiny override so the launching state takes the full viewport. */
+  body { display: flex; flex-direction: column; min-height: 100vh; }
+  main { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+  #status { text-align: center; padding: 2rem 0; }
+  #fallback { display: none; }
+  .badge-row { text-align: center; margin: 1rem 0; }
+  .badge-row img { vertical-align: middle; }
+</style>
+</head>
+<body>
+<header>
+  <h1><a href="../" style="color: inherit; text-decoration: none;">QuBins</a></h1>
+</header>
+<main>
+  <section id="status">
+    <p>Launching on mybinder…</p>
+    <p class="hint">If nothing happens within a few seconds, your destination URL is below.</p>
+  </section>
+  <section id="fallback">
+    <p>Click below to launch (we kept the redirect in JS so the destination URL stays visible):</p>
+    <p class="badge-row">
+      <a id="launch-link" class="button" href="#" target="_self" rel="noopener">Launch on mybinder ↗</a>
+    </p>
+    <p>
+      Generated URL:
+    </p>
+    <pre><code id="launch-url"></code></pre>
+    <p class="hint">
+      Powered by <a href="https://mybinder.org">mybinder.org</a> — free
+      service from the Jupyter community. Please be patient on cold
+      starts and don't hammer it; the project is funded by donations.
+    </p>
+  </section>
+</main>
+<footer>
+  <p>
+    <a href="../">← Back to QuBins</a> ·
+    Hosted on mybinder.org (Jupyter community service).
+  </p>
+</footer>
+<script src="launch.js"></script>
+</body>
+</html>

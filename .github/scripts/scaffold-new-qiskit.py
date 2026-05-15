@@ -102,16 +102,17 @@ db_path.write_text(db)
 readme_path = REPO / "README.md"
 readme = readme_path.read_text()
 
-new_rows = (
-    f"| {MINOR}     | small  | "
-    f"[![Binder](https://mybinder.org/badge_logo.svg)]"
-    f"(https://mybinder.org/v2/gh/JanLahmann/qubins/{MINOR}-small) | "
-    f"`docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:{MINOR}-small` |\n"
-    f"| {MINOR}     | xl     | "
-    f"[![Binder](https://mybinder.org/badge_logo.svg)]"
-    f"(https://mybinder.org/v2/gh/JanLahmann/qubins/{MINOR}-xl) | "
-    f"`docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:{MINOR}-xl` |\n"
-)
+def badge_row(flavor: str) -> str:
+    tag = f"{MINOR}-{flavor}"
+    badge  = f"https://janlahmann.github.io/QuBins/badges/launch-on-qubins-{tag}.svg"
+    target = f"https://janlahmann.github.io/QuBins/launch/?image={tag}"
+    return (
+        f"| {MINOR}     | {flavor:<6} | "
+        f"[![launch on QuBins {tag}]({badge})]({target}) | "
+        f"`docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:{tag}` |\n"
+    )
+
+new_rows = badge_row("small") + badge_row("xl")
 readme = re.sub(
     r"(\| latest  \| xl     \|[^\n]+\n)",
     rf"\g<1>{new_rows}",

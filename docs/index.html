@@ -151,6 +151,65 @@
     <ul id="catalog-notes" class="notes"></ul>
   </section>
 
+  <section id="embed">
+    <h2>Embed in your project</h2>
+    <p>
+      Hosting a notebook that needs a pinned Qiskit version? Drop a
+      &ldquo;launch on QuBins&rdquo; badge in your README so readers
+      can open the notebook directly in a verified, signed Qiskit
+      container on
+      <a href="https://mybinder.org">mybinder.org</a> &mdash; no setup,
+      no version drift.
+    </p>
+
+    <h3>Generic badge</h3>
+    <p>
+      Use this when the badge text shouldn&rsquo;t pin a specific image.
+      The destination URL is what selects the version.
+    </p>
+    <p class="badge-row">
+      <img src="badges/launch-on-qubins.svg" alt="launch on QuBins">
+    </p>
+    <p>Markdown:</p>
+    <pre><code id="embed-generic-md">[![launch on QuBins](https://janlahmann.github.io/QuBins/badges/launch-on-qubins.svg)](https://janlahmann.github.io/QuBins/launch/?image=latest-xl&amp;repo=https%3A%2F%2Fgithub.com%2FUSER%2FREPO)</code></pre>
+    <p>
+      <button class="button secondary" id="embed-generic-copy" type="button">Copy markdown</button>
+    </p>
+
+    <h3>Image-specific badge</h3>
+    <p>
+      Pin the exact image in the badge text. Useful when you want
+      readers to see which version they&rsquo;re about to launch.
+    </p>
+    <div class="filters">
+      <label>Image
+        <select id="embed-image"></select>
+      </label>
+    </div>
+    <p class="badge-row">
+      <img id="embed-badge-preview" src="badges/launch-on-qubins-latest-xl.svg" alt="launch on QuBins image">
+    </p>
+    <p>Markdown (paste into your README):</p>
+    <pre><code id="embed-pinned-md"></code></pre>
+    <p>
+      <button class="button secondary" id="embed-pinned-copy" type="button">Copy markdown</button>
+      &nbsp;
+      <a id="embed-pinned-test" class="button" href="#" target="_blank" rel="noopener">Test launch ↗</a>
+    </p>
+    <p class="hint">
+      The launch URL (<code>/launch/?&hellip;</code>) is a thin
+      JavaScript redirector hosted here on GitHub Pages. It builds the
+      mybinder URL on the fly, which means encoding tweaks land in
+      one place &mdash; every badge in the wild keeps working.
+    </p>
+    <p class="hint">
+      Want to embed a launch URL for a <em>specific notebook</em> in a
+      repo or a raw <code>.ipynb</code> URL? Use the
+      <a href="#launch">launch URL generator</a> above and put its
+      output as the link target on either of the badges here.
+    </p>
+  </section>
+
   <section id="howitworks">
     <h2>How it works</h2>
     <p>
@@ -176,9 +235,22 @@
 
 <footer>
   <p>
+    All in-browser launches here run on
+    <a href="https://mybinder.org">mybinder.org</a>, a free service
+    provided by the
+    <a href="https://jupyter.org/binder">Binder project</a> /
+    <a href="https://www.gesis.org">GESIS</a> /
+    <a href="https://2i2c.org">2i2c</a> and federated partners. QuBins
+    is &ldquo;just&rdquo; the curated container images they pull;
+    please be patient on cold starts and don&rsquo;t hammer the
+    service. Consider
+    <a href="https://numfocus.org/donate-to-jupyter">donating to
+    Project Jupyter</a> if you find Binder useful.
+  </p>
+  <p>
     Apache-2.0 licensed.
     Qiskit is a trademark of IBM; this project is independent and not
-    affiliated with IBM — it just packages the open-source Qiskit
+    affiliated with IBM &mdash; it just packages the open-source Qiskit
     distributions for convenient consumption.
   </p>
 </footer>
