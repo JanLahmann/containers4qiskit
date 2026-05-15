@@ -104,11 +104,11 @@ readme = readme_path.read_text()
 
 def badge_row(flavor: str) -> str:
     tag = f"{MINOR}-{flavor}"
-    badge  = f"https://janlahmann.github.io/QuBins/badges/launch-on-qubins-{tag}.svg"
+    badge  = f"https://janlahmann.github.io/QuBins/badges/launch-qubins-{tag}.svg"
     target = f"https://janlahmann.github.io/QuBins/launch/?image={tag}"
     return (
         f"| {MINOR}     | {flavor:<6} | "
-        f"[![launch on QuBins {tag}]({badge})]({target}) | "
+        f"[![launch QuBins {tag}]({badge})]({target}) | "
         f"`docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:{tag}` |\n"
     )
 
