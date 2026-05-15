@@ -85,20 +85,33 @@ def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
     print(f"Writing badges to {OUT_DIR.relative_to(REPO_ROOT)}/ ...")
-    # Generic "launch QuBins" — for the use case where the embedder
-    # doesn't want to pin a specific image (e.g. a "tap to launch
-    # latest-xl" badge in a tutorial README).
-    write("launch-qubins.svg", render("launch", "QuBins"))
+    # Two parallel variants per image:
+    #   "launch QuBins"     → bare-image launch (open the environment
+    #                         itself; no specific notebook).
+    #   "launch on QuBins"  → notebook launch (a repo or single .ipynb
+    #                         opened on QuBins as the platform).
+    # The grammar of "on" matters: "launch QuBins" reads as "launch
+    # the platform", which is right for the bare-image case; "launch
+    # X on QuBins" reads as "launch your notebook on the platform",
+    # which is right when a repo/file is embedded.
 
-    # One per image: "launch | QuBins 2.4-xl"
+    # Generic ("no image label") for both variants — for the
+    # "tap to launch latest-xl" case in a tutorial README where the
+    # destination URL carries the version.
+    write("launch-qubins.svg",    render("launch",    "QuBins"))
+    write("launch-on-qubins.svg", render("launch on", "QuBins"))
+
+    # Per image: "launch | QuBins 2.4-xl" and "launch on | QuBins 2.4-xl"
     for img in images:
         tag = img["binder_tag"]
-        write(f"launch-qubins-{tag}.svg", render("launch", f"QuBins {tag}"))
+        write(f"launch-qubins-{tag}.svg",    render("launch",    f"QuBins {tag}"))
+        write(f"launch-on-qubins-{tag}.svg", render("launch on", f"QuBins {tag}"))
 
     # latest-* aliases of the current minor
     for flavor in ("small", "xl"):
         tag = f"latest-{flavor}"
-        write(f"launch-qubins-{tag}.svg", render("launch", f"QuBins {tag}"))
+        write(f"launch-qubins-{tag}.svg",    render("launch",    f"QuBins {tag}"))
+        write(f"launch-on-qubins-{tag}.svg", render("launch on", f"QuBins {tag}"))
 
     print(f"Done. latest minor = {latest_minor}.")
 
