@@ -1,12 +1,12 @@
 # QuBins
 
-[![Build matrix](https://github.com/JanLahmann/qubins/actions/workflows/build-matrix.yml/badge.svg)](https://github.com/JanLahmann/qubins/actions/workflows/build-matrix.yml)
+[![Build matrix](https://github.com/QuBins/qiskit-images/actions/workflows/build-matrix.yml/badge.svg)](https://github.com/QuBins/qiskit-images/actions/workflows/build-matrix.yml)
 
 > **QuBins** — the place for your QuBits: prebuilt quantum compartments, pick
 > one, run your Qiskit notebook on (my)binder or as a container ("bin").
 
 **Landing page with image catalog and Binder URL generators:**
-[janlahmann.github.io/qubins](https://janlahmann.github.io/qubins/)
+[qubins.org](https://qubins.org/)
 
 Currently published: 7 Qiskit minors × 2 flavors × 2 architectures =
 28 multi-arch images, daily-rebuilt, Trivy-gated, cosign-signed.
@@ -35,20 +35,20 @@ Two flavors per Qiskit version:
 
 | Qiskit  | Flavor | Binder | Docker |
 | ------- | ------ | ------ | ------ |
-| latest  | small  | [![launch QuBins latest-small](https://janlahmann.github.io/QuBins/badges/launch-qubins-latest-small.svg)](https://janlahmann.github.io/QuBins/launch/?image=latest-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:latest-small` |
-| latest  | xl     | [![launch QuBins latest-xl](https://janlahmann.github.io/QuBins/badges/launch-qubins-latest-xl.svg)](https://janlahmann.github.io/QuBins/launch/?image=latest-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:latest-xl` |
-| 2.4     | small  | [![launch QuBins 2.4-small](https://janlahmann.github.io/QuBins/badges/launch-qubins-2.4-small.svg)](https://janlahmann.github.io/QuBins/launch/?image=2.4-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.4-small` |
-| 2.4     | xl     | [![launch QuBins 2.4-xl](https://janlahmann.github.io/QuBins/badges/launch-qubins-2.4-xl.svg)](https://janlahmann.github.io/QuBins/launch/?image=2.4-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.4-xl` |
-| 2.3    | small  | [![launch QuBins 2.3-small](https://janlahmann.github.io/QuBins/badges/launch-qubins-2.3-small.svg)](https://janlahmann.github.io/QuBins/launch/?image=2.3-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.3-small` |
-| 2.3    | xl     | [![launch QuBins 2.3-xl](https://janlahmann.github.io/QuBins/badges/launch-qubins-2.3-xl.svg)](https://janlahmann.github.io/QuBins/launch/?image=2.3-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.3-xl` |
-| 2.2    | small  | [![launch QuBins 2.2-small](https://janlahmann.github.io/QuBins/badges/launch-qubins-2.2-small.svg)](https://janlahmann.github.io/QuBins/launch/?image=2.2-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.2-small` |
-| 2.2    | xl     | [![launch QuBins 2.2-xl](https://janlahmann.github.io/QuBins/badges/launch-qubins-2.2-xl.svg)](https://janlahmann.github.io/QuBins/launch/?image=2.2-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.2-xl` |
-| 2.1    | small  | [![launch QuBins 2.1-small](https://janlahmann.github.io/QuBins/badges/launch-qubins-2.1-small.svg)](https://janlahmann.github.io/QuBins/launch/?image=2.1-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.1-small` |
-| 2.1    | xl     | [![launch QuBins 2.1-xl](https://janlahmann.github.io/QuBins/badges/launch-qubins-2.1-xl.svg)](https://janlahmann.github.io/QuBins/launch/?image=2.1-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.1-xl` |
-| 2.0    | small  | [![launch QuBins 2.0-small](https://janlahmann.github.io/QuBins/badges/launch-qubins-2.0-small.svg)](https://janlahmann.github.io/QuBins/launch/?image=2.0-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.0-small` |
-| 2.0    | xl     | [![launch QuBins 2.0-xl](https://janlahmann.github.io/QuBins/badges/launch-qubins-2.0-xl.svg)](https://janlahmann.github.io/QuBins/launch/?image=2.0-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:2.0-xl` |
-| 1.4     | small  | [![launch QuBins 1.4-small](https://janlahmann.github.io/QuBins/badges/launch-qubins-1.4-small.svg)](https://janlahmann.github.io/QuBins/launch/?image=1.4-small) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.4-small` |
-| 1.4     | xl\*   | [![launch QuBins 1.4-xl](https://janlahmann.github.io/QuBins/badges/launch-qubins-1.4-xl.svg)](https://janlahmann.github.io/QuBins/launch/?image=1.4-xl) | `docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:1.4-xl` |
+| latest  | small  | [![launch QuBins latest-small](https://qubins.org/badges/launch-qubins-latest-small.svg)](https://qubins.org/launch/?image=latest-small) | `docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:latest-small` |
+| latest  | xl     | [![launch QuBins latest-xl](https://qubins.org/badges/launch-qubins-latest-xl.svg)](https://qubins.org/launch/?image=latest-xl) | `docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:latest-xl` |
+| 2.4     | small  | [![launch QuBins 2.4-small](https://qubins.org/badges/launch-qubins-2.4-small.svg)](https://qubins.org/launch/?image=2.4-small) | `docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:2.4-small` |
+| 2.4     | xl     | [![launch QuBins 2.4-xl](https://qubins.org/badges/launch-qubins-2.4-xl.svg)](https://qubins.org/launch/?image=2.4-xl) | `docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:2.4-xl` |
+| 2.3    | small  | [![launch QuBins 2.3-small](https://qubins.org/badges/launch-qubins-2.3-small.svg)](https://qubins.org/launch/?image=2.3-small) | `docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:2.3-small` |
+| 2.3    | xl     | [![launch QuBins 2.3-xl](https://qubins.org/badges/launch-qubins-2.3-xl.svg)](https://qubins.org/launch/?image=2.3-xl) | `docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:2.3-xl` |
+| 2.2    | small  | [![launch QuBins 2.2-small](https://qubins.org/badges/launch-qubins-2.2-small.svg)](https://qubins.org/launch/?image=2.2-small) | `docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:2.2-small` |
+| 2.2    | xl     | [![launch QuBins 2.2-xl](https://qubins.org/badges/launch-qubins-2.2-xl.svg)](https://qubins.org/launch/?image=2.2-xl) | `docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:2.2-xl` |
+| 2.1    | small  | [![launch QuBins 2.1-small](https://qubins.org/badges/launch-qubins-2.1-small.svg)](https://qubins.org/launch/?image=2.1-small) | `docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:2.1-small` |
+| 2.1    | xl     | [![launch QuBins 2.1-xl](https://qubins.org/badges/launch-qubins-2.1-xl.svg)](https://qubins.org/launch/?image=2.1-xl) | `docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:2.1-xl` |
+| 2.0    | small  | [![launch QuBins 2.0-small](https://qubins.org/badges/launch-qubins-2.0-small.svg)](https://qubins.org/launch/?image=2.0-small) | `docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:2.0-small` |
+| 2.0    | xl     | [![launch QuBins 2.0-xl](https://qubins.org/badges/launch-qubins-2.0-xl.svg)](https://qubins.org/launch/?image=2.0-xl) | `docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:2.0-xl` |
+| 1.4     | small  | [![launch QuBins 1.4-small](https://qubins.org/badges/launch-qubins-1.4-small.svg)](https://qubins.org/launch/?image=1.4-small) | `docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:1.4-small` |
+| 1.4     | xl\*   | [![launch QuBins 1.4-xl](https://qubins.org/badges/launch-qubins-1.4-xl.svg)](https://qubins.org/launch/?image=1.4-xl) | `docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:1.4-xl` |
 
 `latest` aliases the current Qiskit minor (today: `2.4`); the alias is
 updated when a new minor ships. The bare `:latest` tag (what Docker
@@ -82,7 +82,7 @@ pip install "qiskit~=2.4.0"
 Pull and start any tag, mapping Jupyter's port:
 
 ```sh
-docker run --rm -p 8888:8888 ghcr.io/janlahmann/qiskit:latest-small
+docker run --rm -p 8888:8888 ghcr.io/qubins/qiskit:latest-small
 ```
 
 Watch the container's stdout — Jupyter prints a tokenised URL once
@@ -100,7 +100,7 @@ the container's workspace:
 ```sh
 docker run --rm -p 8888:8888 \
   -v "$PWD:/home/jovyan/work" \
-  ghcr.io/janlahmann/qiskit:latest-small
+  ghcr.io/qubins/qiskit:latest-small
 ```
 
 Jupyter runs as the unprivileged `jovyan` user (UID 1000); on Linux,
@@ -115,12 +115,12 @@ which lets a Binder URL auto-clone a notebook repo into the running
 session on first launch. The URL shape:
 
 ```
-https://mybinder.org/v2/gh/JanLahmann/qubins/latest-xl?urlpath=git-pull%3Frepo%3Dhttps%253A%252F%252Fgithub.com%252FYOU%252FYOUR-REPO%26urlpath%3Dlab%252Ftree%252FYOUR-REPO%252Fnotebook.ipynb
+https://mybinder.org/v2/gh/QuBins/qiskit-images/latest-xl?urlpath=git-pull%3Frepo%3Dhttps%253A%252F%252Fgithub.com%252FYOU%252FYOUR-REPO%26urlpath%3Dlab%252Ftree%252FYOUR-REPO%252Fnotebook.ipynb
 ```
 
 The least-painful way to build one is the
 [nbgitpuller link generator](https://nbgitpuller.readthedocs.io/en/latest/link.html):
-set *JupyterHub URL* to `https://mybinder.org/v2/gh/JanLahmann/qubins/<tag>`
+set *JupyterHub URL* to `https://mybinder.org/v2/gh/QuBins/qiskit-images/<tag>`
 (e.g. `latest-xl` or `2.4-xl`), paste your notebook repo URL, optionally
 add a default file path, and copy the result. Share that URL — anyone
 who clicks lands in a fresh QuBins session with your notebooks already
@@ -145,23 +145,23 @@ Two grammatical variants of the same badge family:
   Used by the per-row catalog badges above.
 
 The easiest way to build either is the
-**[URL generator](https://janlahmann.github.io/QuBins/#launch)** on
+**[URL generator](https://qubins.org/#launch)** on
 the QuBins landing page: fill in repo URL (or raw notebook URL),
 optionally branch + path, pick an image, then copy the badge markdown
 that appears next to the Binder URL.
 
 ### What the badges look like
 
-![launch on QuBins 2.4-xl](https://janlahmann.github.io/QuBins/badges/launch-on-qubins-2.4-xl.svg)
+![launch on QuBins 2.4-xl](https://qubins.org/badges/launch-on-qubins-2.4-xl.svg)
 &nbsp; (notebook launch — repo or single file)
 
-![launch QuBins 2.4-xl](https://janlahmann.github.io/QuBins/badges/launch-qubins-2.4-xl.svg)
+![launch QuBins 2.4-xl](https://qubins.org/badges/launch-qubins-2.4-xl.svg)
 &nbsp; (bare-image launch)
 
 The right half changes per image (`2.4-xl`, `latest-small`, etc.), or
 you can use the generic
-[`launch-on-qubins.svg`](https://janlahmann.github.io/QuBins/badges/launch-on-qubins.svg)
-/ [`launch-qubins.svg`](https://janlahmann.github.io/QuBins/badges/launch-qubins.svg)
+[`launch-on-qubins.svg`](https://qubins.org/badges/launch-on-qubins.svg)
+/ [`launch-qubins.svg`](https://qubins.org/badges/launch-qubins.svg)
 if you don't want to pin a version in the badge text.
 
 ### Markdown snippets
@@ -169,7 +169,7 @@ if you don't want to pin a version in the badge text.
 **Open a whole repo on QuBins** (nbgitpuller clones it on launch):
 
 ```markdown
-[![launch on QuBins 2.4-xl](https://janlahmann.github.io/QuBins/badges/launch-on-qubins-2.4-xl.svg)](https://janlahmann.github.io/QuBins/launch/?image=2.4-xl&repo=https://github.com/YOU/YOUR-REPO)
+[![launch on QuBins 2.4-xl](https://qubins.org/badges/launch-on-qubins-2.4-xl.svg)](https://qubins.org/launch/?image=2.4-xl&repo=https://github.com/YOU/YOUR-REPO)
 ```
 
 Optional extra params: `&branch=BRANCH`, `&path=path/to/notebook.ipynb`.
@@ -178,13 +178,13 @@ Optional extra params: `&branch=BRANCH`, `&path=path/to/notebook.ipynb`.
 needs the `jupyterlab-open-url-parameter` extension):
 
 ```markdown
-[![launch on QuBins 2.4-xl](https://janlahmann.github.io/QuBins/badges/launch-on-qubins-2.4-xl.svg)](https://janlahmann.github.io/QuBins/launch/?image=2.4-xl&file=https://raw.githubusercontent.com/YOU/YOUR-REPO/main/notebook.ipynb)
+[![launch on QuBins 2.4-xl](https://qubins.org/badges/launch-on-qubins-2.4-xl.svg)](https://qubins.org/launch/?image=2.4-xl&file=https://raw.githubusercontent.com/YOU/YOUR-REPO/main/notebook.ipynb)
 ```
 
 **Bare launch into the image** (no preloaded notebook):
 
 ```markdown
-[![launch QuBins latest-xl](https://janlahmann.github.io/QuBins/badges/launch-qubins-latest-xl.svg)](https://janlahmann.github.io/QuBins/launch/?image=latest-xl)
+[![launch QuBins latest-xl](https://qubins.org/badges/launch-qubins-latest-xl.svg)](https://qubins.org/launch/?image=latest-xl)
 ```
 
 ### When to use which
@@ -202,7 +202,7 @@ needs the `jupyterlab-open-url-parameter` extension):
 ### Why the `/launch/?…` redirector?
 
 The link target on every badge points at
-`https://janlahmann.github.io/QuBins/launch/?…`, which is a thin
+`https://qubins.org/launch/?…`, which is a thin
 client-side redirector that builds the actual mybinder URL on the
 fly. Two reasons:
 
@@ -220,7 +220,7 @@ about to be sent.
 
 The catalog table in [Versions](#versions) above lists every published
 image with its badge. The
-[landing page](https://janlahmann.github.io/QuBins/) has a filterable
+[landing page](https://qubins.org/) has a filterable
 version of the same table.
 
 ## How it works
@@ -275,8 +275,8 @@ rebuilding the dep tree from scratch (cold start ~30s).
 Every multi-arch tag is signed via cosign keyless OIDC:
 
 ```
-cosign verify ghcr.io/janlahmann/qiskit:2.4-small \
-  --certificate-identity-regexp='^https://github.com/JanLahmann/(qubins|containers4qiskit)/' \
+cosign verify ghcr.io/qubins/qiskit:2.4-small \
+  --certificate-identity-regexp='^https://github.com/QuBins/qiskit-images/' \
   --certificate-oidc-issuer=https://token.actions.githubusercontent.com
 ```
 
