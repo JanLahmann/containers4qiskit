@@ -383,6 +383,14 @@ th {
   background: rgba(63, 185, 80, 0.06);
 }
 
+/* Secondary line under a catalog cell — image size / build date.
+   Smaller and muted so it doesn't compete with the flavor name. */
+.row-sub {
+  color: var(--fg-muted);
+  font-size: 0.8em;
+  margin-top: 0.1em;
+}
+
 /* "Embed in your project" section: keep badge previews on their own
    line with a hair of vertical space. */
 .badge-row {

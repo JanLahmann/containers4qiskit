@@ -308,6 +308,25 @@ jobs:
               --output /tmp/out.ipynb \
               /tmp/canary/canary.ipynb
 
+      - name: Capture installed qiskit patch version
+        id: qversion
+        env:
+          IMAGE_REF: ghcr.io/${{ steps.repo.outputs.owner_lc }}/${{ env.IMAGE }}:${{ matrix.version }}-${{ matrix.platform.arch }}
+        # Pull the patch version (e.g. "2.4.1") off the just-built
+        # image. requirements.txt only constrains the minor; the
+        # actual patch is whatever pip resolved at build time, which
+        # is what we want to record on the manifest. Exposed as a
+        # step output and fed into the publish step's `labels:`
+        # below, where it lands in the image config and becomes
+        # readable via docker buildx imagetools inspect or the
+        # registry's blob API (consumed by build-pages-data.py).
+        run: |
+          set -euo pipefail
+          patch="$(docker run --rm --entrypoint python "$IMAGE_REF" \
+            -c 'import qiskit; print(qiskit.__version__)')"
+          echo "patch=${patch}" >> "$GITHUB_OUTPUT"
+          echo "Captured qiskit==${patch}"
+
       - name: Push to GHCR (with provenance attestation)
         if: env.PUBLISH == 'true'
         uses: docker/build-push-action@v7
@@ -318,6 +337,18 @@ jobs:
           platforms: ${{ matrix.platform.name }}
           tags: ghcr.io/${{ steps.repo.outputs.owner_lc }}/${{ env.IMAGE }}:${{ matrix.version }}-${{ matrix.platform.arch }}
           push: true
+          # OCI standard image-source / image-description labels +
+          # a project-namespaced label for the qiskit patch version.
+          # The base image (jupyter/base-notebook → ubuntu) ships
+          # its own `org.opencontainers.image.version` value (the
+          # Ubuntu release, e.g. "24.04"), so a same-name override
+          # is fragile and confusing. Use a dedicated key instead.
+          # build-pages-data.py reads org.qubins.qiskit.patch from
+          # the image config blob and surfaces it in versions.json.
+          labels: |
+            org.qubins.qiskit.patch=${{ steps.qversion.outputs.patch }}
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.description=QuBins ${{ matrix.version }} — prebuilt Qiskit ${{ steps.qversion.outputs.patch }} environment
           # All layers are cache hits from the previous step, so this
           # is fast; the work it does is producing the registry push +
           # SLSA provenance attestation that load: true can't generate.

@@ -86,6 +86,9 @@
 
       const minorCell = document.createElement("td");
       minorCell.textContent = img.qiskit_minor;
+      if (img.qiskit_patch) {
+        minorCell.title = `Installed: qiskit==${img.qiskit_patch}`;
+      }
       if (img.is_latest) {
         const tag = document.createElement("span");
         tag.className = "tag";
@@ -108,6 +111,18 @@
         flavorCell.append(flavorText, sup);
       } else {
         flavorCell.textContent = flavorText;
+      }
+      // Size subtext: helps users decide between flavors before they
+      // wait through a pull. Hidden when the size is missing (e.g.
+      // local builds where the GHCR enrichment didn't run).
+      if (typeof img.size_mb === "number") {
+        const sub = document.createElement("div");
+        sub.className = "row-sub";
+        sub.textContent = formatSize(img.size_mb);
+        if (img.updated_at) {
+          sub.title = `Built ${formatDate(img.updated_at)}`;
+        }
+        flavorCell.appendChild(sub);
       }
       tr.appendChild(flavorCell);
 
@@ -529,6 +544,26 @@
   }
 
   // ------------------------------------------------------------------ utils
+  function formatSize(mb) {
+    // Show MB up to ~1 GB, then GB with one decimal. Image sizes
+    // here range from ~250 MB (small) to ~3.5 GB (xl).
+    if (mb < 1024) return `${Math.round(mb)} MB`;
+    return `${(mb / 1024).toFixed(1)} GB`;
+  }
+
+  function formatDate(iso) {
+    // ISO timestamp → "16 May 2026". Tolerate parse failures by
+    // falling back to the raw string.
+    try {
+      const d = new Date(iso);
+      return d.toLocaleDateString(undefined, {
+        day: "numeric", month: "short", year: "numeric",
+      });
+    } catch (_) {
+      return iso;
+    }
+  }
+
   function copyToClipboard(text, btn) {
     navigator.clipboard.writeText(text).then(
       () => {
