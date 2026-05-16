@@ -256,10 +256,10 @@ a:hover {
   font-weight: 500;
 }
 
-/* small vs xl comparison table. First column is a row header, slightly
-   muted so the meaningful cells stand out. The two data columns split
-   the remaining width evenly so the package list in xl doesn't push
-   small into a narrow strip. */
+/* small vs xl comparison table. Row header narrow & muted; small
+   gets just enough width for short prose; xl takes the rest so its
+   long package list wraps less aggressively (it's the column with
+   actual content to display). */
 table.flavors {
   table-layout: fixed;
 }
@@ -269,15 +269,18 @@ table.flavors th {
 }
 table.flavors tbody th {
   color: var(--fg-muted);
-  width: 9rem;
+  width: 7rem;
   font-weight: 500;
   vertical-align: top;
   white-space: nowrap;
 }
-table.flavors thead th:nth-child(2),
+table.flavors thead th:nth-child(2) {
+  font-weight: 600;
+  width: 11rem;
+}
 table.flavors thead th:nth-child(3) {
   font-weight: 600;
-  width: calc((100% - 9rem) / 2);
+  width: auto;
 }
 table.flavors td {
   vertical-align: top;

@@ -85,15 +85,22 @@
       }
 
       const minorCell = document.createElement("td");
-      minorCell.textContent = img.qiskit_minor;
-      if (img.qiskit_patch) {
-        minorCell.title = `Installed: qiskit==${img.qiskit_patch}`;
-      }
+      minorCell.append(img.qiskit_minor);
       if (img.is_latest) {
         const tag = document.createElement("span");
         tag.className = "tag";
         tag.textContent = "latest";
         minorCell.appendChild(tag);
+      }
+      // Visible patch subtext (e.g. "2.4.1"). Same muted styling as
+      // the size/build subtext on the flavor cell, for consistency.
+      // Tooltip carries the long form for screen readers.
+      if (img.qiskit_patch) {
+        const sub = document.createElement("div");
+        sub.className = "row-sub";
+        sub.textContent = img.qiskit_patch;
+        sub.title = `Installed: qiskit==${img.qiskit_patch}`;
+        minorCell.appendChild(sub);
       }
       tr.appendChild(minorCell);
 
