@@ -43,25 +43,24 @@
 
   <section id="quickstart">
     <h2>Quick start</h2>
-    <p class="hero">
+    <div class="hero">
       <a id="qs-binder-xl" class="button button-hero" href="#" target="_blank" rel="noopener">
         Launch latest Qiskit (<code id="qs-latest">…</code>) in your browser
       </a>
-    </p>
-    <p class="hint hero-hint">
-      Opens <code id="qs-latest-tag">latest-xl</code> on mybinder.org.
-      First start is slow (image pull); subsequent launches are
-      cached.
-    </p>
+      <span class="hint hero-hint">
+        Opens <code id="qs-latest-tag">latest-xl</code> on mybinder.org.
+        First start is slow (image pull); subsequent launches are
+        cached.
+      </span>
+    </div>
     <p class="hero-pick">
       <strong>Which flavor?</strong> <code>xl</code> for tutorials,
-      documentation notebooks, and the addons + scientific stack.
-      <code>small</code> for a lean image with just core Qiskit.
-      <a href="#catalog-flavors" class="hint">Full comparison &rarr;</a>
+      addons + scientific stack. <code>small</code> for a lean image
+      with just core Qiskit.
     </p>
 
-    <details class="qs-docker">
-      <summary>Or run locally with Docker</summary>
+    <div class="qs-docker">
+      <p class="qs-docker-label">Or run locally with Docker:</p>
       <p class="qs-line">
         <code id="qs-docker">docker run --rm -p 8888:8888 ghcr.io/qubins/images:latest-small</code>
         <button class="button secondary" id="qs-docker-copy" type="button">Copy</button>
@@ -70,7 +69,7 @@
         Watch stdout for the tokenised <code>http://127.0.0.1:8888/lab?token=…</code> URL.
         Mount a folder with <code>-v "$PWD:/home/jovyan/work"</code>.
       </p>
-    </details>
+    </div>
   </section>
 
   <section id="launch">
@@ -235,8 +234,9 @@
 
 <footer>
   <p>
-    QuBins is an independent open-source project (Apache-2.0). The
-    images are hosted free on
+    QuBins is an independent open-source project (Apache-2.0). It
+    packages the open-source Qiskit distributions for convenient
+    consumption. The images are hosted free on
     <a href="https://github.com/QuBins/qiskit-images/pkgs/container/images">GitHub Container Registry</a>;
     in-browser launches use the free public
     <a href="https://mybinder.org">mybinder.org</a> service. No
@@ -247,14 +247,13 @@
     <a href="https://jupyter.org/binder">Binder project</a> (part of
     Project Jupyter), with federation backends operated by
     <a href="https://www.gesis.org">GESIS</a>,
-    <a href="https://2i2c.org">2i2c</a>, and partners. QuBins is just
-    curated container images they pull; please be patient on cold
-    starts and don&rsquo;t hammer the service.
+    <a href="https://2i2c.org">2i2c</a>, and partners; please be
+    patient on cold starts and don&rsquo;t hammer the service. QuBins
+    is just curated container images they pull.
   </p>
   <p>
-    Qiskit is a trademark of IBM. This project is independent and not
-    affiliated with IBM &mdash; it just packages the open-source Qiskit
-    distributions for convenient consumption.
+    Qiskit is a trademark of IBM. QuBins is independent and not
+    affiliated with IBM.
   </p>
 </footer>
 
