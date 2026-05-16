@@ -89,12 +89,6 @@ need a 1.x environment, or one of the 2.x tags for any new work.
 `qiskit-ibm-catalog`, and `qiskit-ibm-transpiler` are 2.x-only and not
 included.
 
-For users not using Docker or Binder:
-
-```sh
-pip install "qiskit~=2.4.0"
-```
-
 ## Launch your repo or notebook on QuBins
 
 If you maintain a tutorial, course, or sample repo that needs a

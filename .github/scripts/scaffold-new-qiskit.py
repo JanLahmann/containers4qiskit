@@ -103,16 +103,11 @@ db_path.write_text(db)
 readme_path = REPO / "README.md"
 readme = readme_path.read_text()
 # The per-version catalog now lives on qubins.org (generated from
-# versions/ at deploy time). Only the "today: <minor>" hint and the
-# pip-install snippet need bumping in README.
+# versions/ at deploy time). Only the "today: <minor>" hint needs
+# bumping in README.
 readme = re.sub(
     r"\(today: `\d+\.\d+`\)",
     f"(today: `{MINOR}`)",
-    readme,
-)
-readme = re.sub(
-    r'pip install "qiskit~=\d+\.\d+\.0"',
-    f'pip install "qiskit~={MINOR}.0"',
     readme,
 )
 readme_path.write_text(readme)
