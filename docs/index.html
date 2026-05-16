@@ -10,14 +10,27 @@
 <body>
 <header>
   <h1>QuBins</h1>
+  <p class="lede">
+    Prebuilt Qiskit environments. Click a badge to run in your
+    browser, or <code>docker pull</code> on your laptop.
+  </p>
   <p class="tagline">
-    <strong>QuBins</strong> — the place for your QuBits: prebuilt quantum
-    compartments, pick one, run your Qiskit notebook on (my)binder or as
-    a container (&ldquo;bin&rdquo;).
+    <em>QuBins</em> — the place for your QuBits: prebuilt quantum
+    compartments, pick one, run your Qiskit notebook on (my)binder or
+    as a container (&ldquo;bin&rdquo;).
+  </p>
+  <p class="trust-strip">
+    <span title="cosign keyless OIDC">cosign-signed</span>
+    <span title="Trivy HIGH/CRITICAL gated on every build">Trivy-scanned</span>
+    <span title="Daily cron at 04:00 UTC absorbs upstream base-image CVE fixes">daily-rebuilt</span>
+    <span title="linux/amd64 + linux/arm64 (Apple Silicon, Graviton)">multi-arch</span>
+    <span title="Build provenance attestations attached to every published manifest">SLSA-attested</span>
   </p>
   <p class="badges">
     <a href="https://github.com/QuBins/qiskit-images/actions/workflows/build-matrix.yml"><img src="https://github.com/QuBins/qiskit-images/actions/workflows/build-matrix.yml/badge.svg" alt="Build matrix status"></a>
     <a href="https://github.com/QuBins/qiskit-images">GitHub repo</a>
+    <span class="sep">·</span>
+    <a href="#launch">Embed a launch badge in your repo &rarr;</a>
   </p>
 </header>
 
@@ -25,38 +38,87 @@
 
   <section id="quickstart">
     <h2>Quick start</h2>
-    <p class="qs-line">
-      <span>Run the latest Qiskit (<code id="qs-latest">…</code>) in your browser via Binder:</span>
-      <a id="qs-binder-small" class="button" href="#" target="_blank" rel="noopener">Launch latest-small in Binder</a>
-      <a id="qs-binder-xl"    class="button" href="#" target="_blank" rel="noopener">Launch latest-xl in Binder</a>
+    <p class="hero">
+      <a id="qs-binder-xl" class="button button-hero" href="#" target="_blank" rel="noopener">
+        Launch latest Qiskit (<code id="qs-latest">…</code>) in your browser
+      </a>
     </p>
-    <p class="qs-line">
-      <span>Or pull with Docker:</span>
-      <code id="qs-docker">docker run --rm -p 8888:8888 ghcr.io/qubins/images:latest-small</code>
-      <button class="button secondary" id="qs-docker-copy" type="button">Copy</button>
+    <p class="hint hero-hint">
+      Opens <code id="qs-latest-tag">latest-xl</code> on mybinder.org.
+      First start is slow (image pull); subsequent launches are
+      cached. <a href="#flavors">small vs xl?</a>
     </p>
-    <p class="hint">
-      <strong>small</strong> = lean (qiskit + aer + ibm-runtime).
-      <strong>xl</strong> = broad, with addons + scientific stack + nbgitpuller +
-      single-file <code>?fromURL=</code> launcher.
-      <a href="https://github.com/QuBins/qiskit-images#readme">Full details in the README.</a>
-    </p>
+
+    <details class="qs-docker">
+      <summary>Or run locally with Docker</summary>
+      <p class="qs-line">
+        <code id="qs-docker">docker run --rm -p 8888:8888 ghcr.io/qubins/images:latest-small</code>
+        <button class="button secondary" id="qs-docker-copy" type="button">Copy</button>
+      </p>
+      <p class="hint">
+        Watch stdout for the tokenised <code>http://127.0.0.1:8888/lab?token=…</code> URL.
+        Mount a folder with <code>-v "$PWD:/home/jovyan/work"</code>.
+      </p>
+    </details>
+  </section>
+
+  <section id="flavors">
+    <h2>small vs xl</h2>
+    <table class="flavors">
+      <thead>
+        <tr>
+          <th></th>
+          <th>small</th>
+          <th>xl</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>Use for</th>
+          <td>Lean image, fast pull, core Qiskit work</td>
+          <td>Tutorials, documentation notebooks, addons, scientific stack</td>
+        </tr>
+        <tr>
+          <th>Included</th>
+          <td><code>qiskit</code> + <code>qiskit-aer</code> + <code>qiskit-ibm-runtime</code></td>
+          <td><code>qiskit[all]</code>, all <code>qiskit-addon-*</code>, <code>qiskit-experiments</code>,
+              <code>qiskit-ibm-transpiler[ai-local-mode]</code>, <code>qiskit-serverless</code>,
+              <code>qiskit-ibm-catalog</code>, scipy/sklearn/pyscf/plotly/sympy/ffsim/pandas,
+              <code>pylatexenc</code>, <code>nbgitpuller</code>, <code>jupyterlab-open-url-parameter</code></td>
+        </tr>
+        <tr>
+          <th>Single-notebook <code>?fromURL=</code></th>
+          <td>—</td>
+          <td>✓ (via <code>jupyterlab-open-url-parameter</code>)</td>
+        </tr>
+        <tr>
+          <th>arm64 caveats</th>
+          <td>none</td>
+          <td><code>qiskit-ibm-transpiler</code> and <code>gem-suite</code> omitted (no aarch64 wheels)</td>
+        </tr>
+      </tbody>
+    </table>
   </section>
 
   <section id="launch">
-    <h2>Open your repo or your notebook in Binder</h2>
-    <p class="hint">Paste a GitHub repo URL (or a /blob/ URL, or a raw .ipynb URL). Output: a Binder URL and a launch-on-QuBins badge markdown.</p>
+    <h2>Embed a launch badge in your repo</h2>
+    <p class="hint">
+      Got a tutorial, course, or sample repo that needs a specific
+      Qiskit version? Paste the repo or notebook URL below and copy
+      the badge markdown. Readers click and land in a fresh QuBins
+      session with your notebook already open.
+    </p>
     <p id="launch-mode-note" class="hint" hidden></p>
 
     <form id="form-launch" onsubmit="return false">
       <div class="row">
-        <label class="grow">URL <span class="hint">(prefilled — overwrite)</span>
-          <input type="url" id="launch-url" required
-                 placeholder="https://github.com/USER/REPO  or a /blob/ URL  or a raw .ipynb URL"
-                 value="https://github.com/Qiskit/documentation/blob/main/learning/courses/use-a-qc-today/build-and-run-your-first-quantum-program.ipynb">
-        </label>
         <label class="image-pick">Image
           <select id="launch-image"></select>
+        </label>
+        <label class="grow">Repo or notebook URL
+          <input type="url" id="launch-url" required
+                 placeholder="https://github.com/USER/REPO  or  /blob/  or  raw .ipynb URL"
+                 value="https://github.com/Qiskit/documentation/blob/main/learning/courses/use-a-qc-today/build-and-run-your-first-quantum-program.ipynb">
         </label>
       </div>
       <div id="launch-clone-fields">
@@ -104,14 +166,16 @@
     <h2>All images</h2>
     <p class="hint">
       Every image is daily-rebuilt, Trivy-scanned (HIGH/CRITICAL gated),
-      and cosign-signed via GitHub Actions OIDC.
+      and cosign-signed via GitHub Actions OIDC. Use the filters to
+      narrow down.
     </p>
 
-    <div class="filters">
-      <label>Qiskit version:
+    <div class="filters" role="group" aria-label="Filter catalog">
+      <span class="filters-label">Filter:</span>
+      <label>Qiskit version
         <select id="filter-minor"><option value="">All</option></select>
       </label>
-      <label>Flavor:
+      <label>Flavor
         <select id="filter-flavor">
           <option value="">All</option>
           <option value="small">small</option>
@@ -155,6 +219,18 @@
     </p>
   </section>
 
+  <section id="about">
+    <h2>Who runs this?</h2>
+    <p class="hint">
+      QuBins is an independent open-source project (Apache-2.0). The
+      images are hosted free on
+      <a href="https://github.com/QuBins/qiskit-images/pkgs/container/images">GitHub Container Registry</a>;
+      in-browser launches use the free public
+      <a href="https://mybinder.org">mybinder.org</a> service. No
+      account or sign-up is required to use anything here.
+    </p>
+  </section>
+
 </main>
 
 <footer>
@@ -165,9 +241,9 @@
     <a href="https://jupyter.org/binder">Binder project</a> (part of
     Project Jupyter), with federation backends operated by
     <a href="https://www.gesis.org">GESIS</a>,
-    <a href="https://2i2c.org">2i2c</a>, and partners. QuBins is
-    &ldquo;just&rdquo; the curated container images they pull; please
-    be patient on cold starts and don&rsquo;t hammer the service.
+    <a href="https://2i2c.org">2i2c</a>, and partners. QuBins is just
+    curated container images they pull; please be patient on cold
+    starts and don&rsquo;t hammer the service.
   </p>
   <p>
     Qiskit is a trademark of IBM. This project is independent and not
