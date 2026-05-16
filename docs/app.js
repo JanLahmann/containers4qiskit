@@ -15,6 +15,18 @@
   const REPO = "QuBins/qiskit-images";
   const PAGES = "https://qubins.org";
 
+  // Umami event-tracking helper. The Umami script loads with `defer`,
+  // so `window.umami` may not exist yet by the time early renders
+  // bind their listeners. Read it lazily on each call; do nothing if
+  // the script failed to load or is blocked.
+  function track(name, props) {
+    try {
+      if (window.umami && typeof window.umami.track === "function") {
+        window.umami.track(name, props || {});
+      }
+    } catch (_) { /* analytics is best-effort */ }
+  }
+
   // ---------------------------------------------------------------- data load
   fetch("versions.json")
     .then((r) => {
@@ -45,10 +57,14 @@
     document.getElementById("qs-latest").textContent = latest;
     const tagEl = document.getElementById("qs-latest-tag");
     if (tagEl) tagEl.textContent = `latest-xl (= ${latest}-xl)`;
-    document.getElementById("qs-binder-xl").href =
-      `https://mybinder.org/v2/gh/${REPO}/latest-xl`;
-    document.getElementById("qs-docker-copy").addEventListener("click", (e) =>
-      copyToClipboard(document.getElementById("qs-docker").textContent, e.currentTarget));
+    const heroBtn = document.getElementById("qs-binder-xl");
+    heroBtn.href = `https://mybinder.org/v2/gh/${REPO}/latest-xl`;
+    heroBtn.addEventListener("click", () =>
+      track("hero-launch-click", { tag: "latest-xl" }));
+    document.getElementById("qs-docker-copy").addEventListener("click", (e) => {
+      copyToClipboard(document.getElementById("qs-docker").textContent, e.currentTarget);
+      track("hero-docker-copy");
+    });
   }
 
   // ------------------------------------------------------------ catalog table
@@ -103,6 +119,8 @@
       binderLink.href = `${PAGES}/launch/?image=${encodeURIComponent(img.binder_tag)}`;
       binderLink.target = "_blank";
       binderLink.rel = "noopener";
+      binderLink.addEventListener("click", () =>
+        track("catalog-launch-click", { tag: img.binder_tag }));
       const binderImg = document.createElement("img");
       binderImg.src = `${PAGES}/badges/launch-qubins-${img.binder_tag}.svg`;
       binderImg.alt = `launch QuBins ${img.binder_tag}`;
@@ -125,8 +143,10 @@
       copyBtn.type = "button";
       copyBtn.title = `Copy: ${fullCmd}`;
       copyBtn.textContent = "Copy";
-      copyBtn.addEventListener("click", () =>
-        copyToClipboard(fullCmd, copyBtn));
+      copyBtn.addEventListener("click", () => {
+        copyToClipboard(fullCmd, copyBtn);
+        track("catalog-docker-copy", { tag: img.binder_tag });
+      });
       dockerCell.appendChild(copyBtn);
       tr.appendChild(dockerCell);
 
@@ -170,12 +190,19 @@
     // alongside the dropdown, hidden when "All" is selected) returns
     // to the unfiltered view in one click.
     minorSel.value = "latest";
-    minorSel.addEventListener("change", applyFilters);
-    document.getElementById("filter-flavor").addEventListener("change", applyFilters);
+    minorSel.addEventListener("change", () => {
+      track("catalog-filter-minor", { value: minorSel.value || "(all)" });
+      applyFilters();
+    });
+    document.getElementById("filter-flavor").addEventListener("change", (e) => {
+      track("catalog-filter-flavor", { value: e.target.value || "(all)" });
+      applyFilters();
+    });
 
     const showAll = document.getElementById("filter-show-all");
     if (showAll) {
       showAll.addEventListener("click", () => {
+        track("catalog-show-all");
         minorSel.value = "";
         applyFilters();
       });
@@ -264,10 +291,19 @@
       overrideMode = null;
     });
     document.getElementById("launch-copy")
-      .addEventListener("click", () => copyOutput("launch-out", "launch-copy", "launch-open"));
+      .addEventListener("click", () => {
+        copyOutput("launch-out", "launch-copy", "launch-open");
+        track("launch-url-copy", {
+          image: document.getElementById("launch-image").value,
+        });
+      });
     document.getElementById("launch-badge-copy")
-      .addEventListener("click", (e) =>
-        copyToClipboard(document.getElementById("launch-badge-md").value, e.currentTarget));
+      .addEventListener("click", (e) => {
+        copyToClipboard(document.getElementById("launch-badge-md").value, e.currentTarget);
+        track("launch-badge-copy", {
+          image: document.getElementById("launch-image").value,
+        });
+      });
     refreshLaunch();
   }
 
@@ -359,6 +395,7 @@
       note.appendChild(span);
       if (det.owner && det.repo) {
         note.appendChild(makeOverrideLink("Clone full repo instead?", () => {
+          track("launch-mode-override", { from: "file", to: "clone" });
           // Synthesise a github.com URL so detectMode re-runs in clone mode.
           urlField.value = `https://github.com/${det.owner}/${det.repo}`;
           if (det.branch) branchField.value = det.branch;
@@ -388,6 +425,7 @@
         if (m) {
           const owner = m[1], repo = m[2];
           note.appendChild(makeOverrideLink("Open just this notebook (no repo clone) instead?", () => {
+            track("launch-mode-override", { from: "clone", to: "file" });
             urlField.value = `https://raw.githubusercontent.com/${owner}/${repo}/${branchNow}/${pathNow}`;
             overrideMode = "file";
             refreshLaunch();

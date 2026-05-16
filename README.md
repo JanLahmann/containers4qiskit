@@ -288,6 +288,32 @@ docker buildx imagetools inspect ghcr.io/qubins/images:<tag> \
   --format '{{ json .Provenance }}'
 ```
 
+## Usage stats (maintainer notes)
+
+The Pages deploy workflow also builds `/admin/`, an unlisted page on
+qubins.org that shows GHCR pull counts (from the Packages API) and
+mybinder launch counts (from the public events archive, last 30
+days). It refreshes daily via the cron in `pages.yml` and on every
+`workflow_dispatch` of that workflow.
+
+The page is gated by a SHA-256(salt:password) hash baked into
+`admin.js` at deploy time. To set or rotate the password:
+
+1. Repo → Settings → Secrets and variables → Actions → New
+   repository secret. Name: `ADMIN_PASSWORD`, value: the plaintext.
+2. Re-run **Deploy Pages** to bake the new hash into the next
+   deploy. The salt is regenerated on every deploy, so the hash
+   rotates automatically.
+
+If the secret is unset the deploy logs a warning and the page stays
+locked (the placeholder hash never matches). The hash + the
+`stats.json` it gates both sit on a public Pages site — treat the
+gate as a speed bump, not authentication.
+
+Live usage analytics for the homepage come from Umami; the script
+tag in `docs/index.html` + `docs/launch/index.html` points at the
+maintainer's Umami Cloud instance.
+
 ## License & acknowledgements
 
 QuBins is an independent open-source project (Apache-2.0; see

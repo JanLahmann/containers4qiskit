@@ -1,9 +1,10 @@
 name: Deploy Pages
 
-# Builds versions.json (generated from versions/ + LATEST_QISKIT) and
-# deploys docs/ to GitHub Pages. Runs on pushes to main that change
-# the docs source or anything the data builder consumes; manual
-# dispatch is also enabled for re-deploys without a content change.
+# Builds versions.json (generated from versions/ + LATEST_QISKIT),
+# the admin stats.json (GHCR pulls + mybinder launches), then deploys
+# docs/ to GitHub Pages. Runs on pushes to main that change the docs
+# source or anything the data builder consumes, on a daily cron to
+# refresh the admin stats, and on manual dispatch.
 #
 # Not triggered by Build matrix completions: the page references
 # tag *names*, not digests, so a rebuild of an existing tag doesn't
@@ -18,14 +19,22 @@ on:
       - '.github/workflows/pages.yml'
       - '.github/scripts/build-pages-data.py'
       - '.github/scripts/build-badges.py'
+      - '.github/scripts/build-admin-stats.py'
       # build-matrix.yml is the source of truth for LATEST_QISKIT
       - '.github/workflows/build-matrix.yml'
+  schedule:
+    # Refresh admin/stats.json daily so GHCR pull counts and the
+    # mybinder rolling 30-day window stay current.
+    - cron: '15 5 * * *'
   workflow_dispatch:
 
 permissions:
   contents: read
   pages: write
   id-token: write
+  # `packages: read` lets the build job's GITHUB_TOKEN authenticate
+  # GHCR API calls in build-admin-stats.py.
+  packages: read
 
 # Pages deployments are intrinsically serial; this prevents two
 # concurrent deploys from racing.
@@ -44,6 +53,38 @@ jobs:
 
       - name: Build badges
         run: python3 .github/scripts/build-badges.py
+
+      - name: Build admin stats (GHCR pulls + mybinder launches)
+        # Best-effort: the script writes a partial JSON with an
+        # `errors` array if a source fails, so a transient archive
+        # outage doesn't fail the deploy.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 .github/scripts/build-admin-stats.py
+
+      - name: Substitute admin password hash
+        # The admin page is gated by a SHA-256(salt:password) hash
+        # baked into admin.js at deploy time. The plaintext password
+        # lives in the ADMIN_PASSWORD secret; the salt is generated
+        # per deploy so the hash rotates even when the password
+        # doesn't. If the secret is unset, admin.js keeps the
+        # placeholder hash (which never matches), so the page stays
+        # locked rather than becoming open.
+        env:
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ADMIN_PASSWORD:-}" ]; then
+            echo "::warning::ADMIN_PASSWORD secret is unset; admin page will remain locked."
+            exit 0
+          fi
+          salt="$(openssl rand -hex 16)"
+          hash="$(printf '%s:%s' "$salt" "$ADMIN_PASSWORD" | openssl dgst -sha256 -hex | awk '{print $NF}')"
+          # Use a separator that can't appear in salt/hash (hex only)
+          # so the sed substitutions stay anchored.
+          sed -i "s|__ADMIN_SALT__|${salt}|" docs/admin/admin.js
+          sed -i "s|__ADMIN_HASH__|${hash}|" docs/admin/admin.js
+          echo "Admin gate primed (salt=${salt:0:6}…, hash=${hash:0:8}…)"
 
       - name: Cache-bust assets with commit SHA
         # Browsers aggressively cache GitHub Pages assets (no ETag,

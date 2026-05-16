@@ -54,6 +54,16 @@
   document.getElementById("launch-link").href = url;
   document.getElementById("launch-url").textContent = url;
   document.getElementById("fallback").style.display = "block";
+
+  // Fire-and-forget Umami event: which image/mode actually got
+  // launched. Best-effort — guard for the script not loading.
+  try {
+    if (window.umami && typeof window.umami.track === "function") {
+      const mode = file ? "file" : (repo ? "repo" : "bare");
+      window.umami.track("launch-redirect", { image, mode });
+    }
+  } catch (_) { /* analytics is best-effort */ }
+
   // Brief delay so the user can see the destination before the jump.
   setTimeout(() => { location.replace(url); }, 400);
 })();

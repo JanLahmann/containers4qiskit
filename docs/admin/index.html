@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QuBins admin · usage stats</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="../style.css">
+<style>
+  /* Centre the gate while it's open; lift it once unlocked. */
+  body.locked main { display: flex; align-items: center; justify-content: center; min-height: 60vh; }
+  #gate { max-width: 26rem; }
+  #gate input { width: 100%; }
+  #gate-error { color: #cf222e; margin-top: 0.5rem; min-height: 1.2em; }
+  @media (prefers-color-scheme: dark) {
+    #gate-error { color: #ff7b72; }
+  }
+  body:not(.locked) #gate { display: none; }
+  body.locked #content { display: none; }
+
+  /* Stats layout */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+  .stat-card {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem;
+  }
+  .stat-card .label { color: var(--fg-muted); font-size: 0.9em; }
+  .stat-card .value { font-size: 1.8rem; font-weight: 600; }
+  .stat-card .sub   { color: var(--fg-muted); font-size: 0.85em; }
+
+  table.stats-tbl { font-size: 0.95em; }
+  table.stats-tbl th, table.stats-tbl td { padding: 0.35rem 0.6rem; }
+  table.stats-tbl td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+  .meta { color: var(--fg-muted); font-size: 0.85em; }
+  .errors {
+    background: rgba(207, 34, 46, 0.08);
+    border: 1px solid rgba(207, 34, 46, 0.3);
+    border-radius: 6px;
+    padding: 0.5rem 0.8rem;
+    margin: 1rem 0;
+    font-size: 0.9em;
+  }
+</style>
+</head>
+<body class="locked">
+<header>
+  <h1><a href="../" style="color: inherit; text-decoration: none;">QuBins</a> &middot; admin</h1>
+</header>
+<main>
+  <section id="gate">
+    <h2>Locked</h2>
+    <p class="hint">This page is unlisted and shows usage stats for QuBins. Enter the admin password to continue.</p>
+    <form id="gate-form">
+      <label>Password
+        <input type="password" id="gate-pw" autocomplete="current-password" autofocus>
+      </label>
+      <p class="actions">
+        <button type="submit" class="button">Unlock</button>
+      </p>
+      <p id="gate-error" role="alert"></p>
+    </form>
+  </section>
+
+  <section id="content">
+    <h2>Usage stats</h2>
+    <p class="meta" id="generated-at">Loading&hellip;</p>
+
+    <div id="errors-block"></div>
+
+    <h3>GHCR pulls</h3>
+    <p class="hint">Cumulative pull counts reported by the GHCR API for <code>ghcr.io/qubins/images:&lt;tag&gt;</code>. Per-arch sub-tags and cosign signature objects are excluded.</p>
+    <div class="stats-grid" id="ghcr-cards"></div>
+    <table class="stats-tbl" id="ghcr-tbl">
+      <thead>
+        <tr><th>Tag</th><th class="num">Pulls</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <h3>mybinder launches (last 30 days)</h3>
+    <p class="hint">From the public <a href="https://archive.analytics.mybinder.org/" target="_blank" rel="noopener">mybinder events archive</a>. The archive lags a day or two; any missing days are listed below.</p>
+    <div class="stats-grid" id="mybinder-cards"></div>
+    <table class="stats-tbl" id="mybinder-branch-tbl">
+      <thead>
+        <tr><th>Branch / tag</th><th class="num">Launches</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <details>
+      <summary>Daily breakdown</summary>
+      <table class="stats-tbl" id="mybinder-day-tbl">
+        <thead>
+          <tr><th>Date</th><th class="num">Launches</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </details>
+
+    <p class="meta" id="missing-days"></p>
+
+    <p class="actions">
+      <button id="lock-btn" class="button secondary" type="button">Lock</button>
+    </p>
+  </section>
+</main>
+<script src="admin.js"></script>
+</body>
+</html>
