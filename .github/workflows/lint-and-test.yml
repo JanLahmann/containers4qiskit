@@ -1,0 +1,68 @@
+name: Lint and test
+
+# Lightweight gate for the deploy-time Python scripts and the static
+# site JS. These never trigger the image Build matrix, so without this
+# a syntax error or a weakened security invariant would only surface
+# as a broken qubins.org deploy (or a silently-failing scaffold cron).
+#
+# Deliberately minimal: byte-compile + node --check + a small stdlib
+# unittest suite (no pytest/network/infra). Runs in well under a
+# minute. Scope-limited via path filters so it doesn't fire on image
+# or docs-content-only changes.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/scripts/**'
+      - '.github/workflows/lint-and-test.yml'
+      - 'docs/**/*.js'
+      - 'tests/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/scripts/**'
+      - '.github/workflows/lint-and-test.yml'
+      - 'docs/**/*.js'
+      - 'tests/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Byte-compile Python scripts
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            .github/scripts/build-pages-data.py \
+            .github/scripts/build-admin-stats.py \
+            .github/scripts/build-badges.py \
+            .github/scripts/scaffold-new-qiskit.py
+
+      - name: Syntax-check site JS
+        run: |
+          set -euo pipefail
+          # node --check parses without executing — catches the kind of
+          # syntax break that would otherwise only show as a broken
+          # Pages deploy in production.
+          for f in docs/app.js docs/launch/launch.js docs/admin/admin.js; do
+            echo "node --check $f"
+            node --check "$f"
+          done
+
+      - name: Run security-invariant regression tests
+        run: python -m unittest discover -s tests -v
