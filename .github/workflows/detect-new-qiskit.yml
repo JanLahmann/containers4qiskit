@@ -29,6 +29,18 @@ jobs:
         run: |
           set -euo pipefail
           version=$(curl -sf https://pypi.org/pypi/qiskit/json | jq -r '.info.version')
+          # Hard-validate the upstream string before it propagates into
+          # $GITHUB_OUTPUT, branch names, git/gh commands, and (via the
+          # scaffolder) filesystem paths + workflow-YAML edits. PyPI is a
+          # trusted source and the resulting PR is human-reviewed, so
+          # this is defense-in-depth — but it makes the trust boundary
+          # explicit and fails loud if upstream ever emits something
+          # unexpected (pre-release suffixes, epochs, junk).
+          if ! printf '%s' "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Refusing to proceed: unexpected qiskit version string from PyPI: '$version'" >&2
+            echo "Expected a bare X.Y.Z release. Aborting scaffold." >&2
+            exit 1
+          fi
           minor=$(printf '%s' "$version" | cut -d. -f1-2)
           branch="bot/qiskit-${minor}"
           echo "Latest qiskit on PyPI: $version (minor $minor)"

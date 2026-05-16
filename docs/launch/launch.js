@@ -21,7 +21,16 @@
   const REPO = "QuBins/qiskit-images";
   const params = new URLSearchParams(location.search);
 
-  const image  = (params.get("image") || "latest-xl").trim();
+  // `image` lands in the path of the mybinder URL we navigate to.
+  // A fixed `https://mybinder.org/...` prefix and the hardcoded REPO
+  // mean URL parsing keeps the host pinned to mybinder.org regardless
+  // of the value — but we still constrain it to the real tag shape so
+  // the invariant doesn't depend on subtle URL-parser reasoning and a
+  // future refactor can't turn this into an open redirect. Anything
+  // off-shape falls back to the safe default.
+  const TAG_RE = /^[a-z0-9][a-z0-9._-]{0,40}$/;
+  let image = (params.get("image") || "latest-xl").trim();
+  if (!TAG_RE.test(image)) image = "latest-xl";
   const repo   = params.get("repo");
   const branch = params.get("branch");
   const path   = params.get("path");
@@ -46,6 +55,19 @@
     url = `https://mybinder.org/v2/gh/${REPO}/${image}?urlpath=${innerEncoded}`;
   } else {
     url = `https://mybinder.org/v2/gh/${REPO}/${image}`;
+  }
+
+  // Belt-and-braces: never wire a navigation sink to anything whose
+  // origin isn't mybinder.org. With the inputs above this can't fail,
+  // but asserting it here means any future change that weakens the
+  // construction degrades to the safe default instead of silently
+  // becoming an open redirect.
+  try {
+    if (new URL(url).origin !== "https://mybinder.org") {
+      url = `https://mybinder.org/v2/gh/${REPO}/latest-xl`;
+    }
+  } catch (_) {
+    url = `https://mybinder.org/v2/gh/${REPO}/latest-xl`;
   }
 
   // Reveal fallback first (in case the redirect is blocked) and only

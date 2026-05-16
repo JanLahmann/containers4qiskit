@@ -66,6 +66,35 @@ import urllib.error
 import urllib.request
 from collections import Counter, defaultdict
 from pathlib import Path
+from urllib.parse import urlsplit
+
+
+class _SafeRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Redirect handler that does not leak GITHUB_TOKEN.
+
+    CPython's default HTTPRedirectHandler copies a caller-set
+    ``Authorization`` header onto the redirected request verbatim,
+    including across a host change. The GHCR/GitHub API call here
+    carries a privileged ``GITHUB_TOKEN``; if any response 302s to a
+    different host we strip the credential before following, and we
+    refuse to follow a downgrade to a non-HTTPS target. (The default
+    stdlib handler does NOT do either of these.)
+    """
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        new = super().redirect_request(req, fp, code, msg, headers, newurl)
+        if new is None:
+            return None
+        if urlsplit(newurl).scheme != "https":
+            return None  # never downgrade a credentialed request
+        if urlsplit(newurl).hostname != urlsplit(req.full_url).hostname:
+            new.remove_header("Authorization")
+        return new
+
+
+# Default handlers minus the stock redirect handler, plus our
+# credential-stripping one. Used for every request in this script.
+_OPENER = urllib.request.build_opener(_SafeRedirectHandler)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 OUT_PATH = REPO_ROOT / "docs" / "admin" / "stats.json"
@@ -102,7 +131,7 @@ def fetch_ghcr_versions(token: str) -> list[dict]:
                 "User-Agent": "qubins-admin-stats",
             },
         )
-        with urllib.request.urlopen(req, timeout=30) as resp:
+        with _OPENER.open(req, timeout=30) as resp:
             data = json.loads(resp.read())
         if not data:
             break
@@ -164,7 +193,7 @@ def fetch_mybinder_day(date: dt.date) -> list[dict] | None:
     missing (e.g. archive lag for the most recent day)."""
     url = MYBINDER_ARCHIVE.format(date=date.isoformat())
     try:
-        with urllib.request.urlopen(url, timeout=30) as resp:
+        with _OPENER.open(url, timeout=30) as resp:
             raw = resp.read()
     except urllib.error.HTTPError as e:
         if e.code == 404:
