@@ -1,9 +1,10 @@
 name: Binder warm-up
 
 # Pre-warm the mybinder.org image cache for the latest two Qiskit minors
-# (small + xl) plus the `latest-{small,xl}` aliases, so the first user
-# after a fresh image publish lands on a warm cache instead of paying
-# the ~30s cold-pull cost. mybinder.org has no official warm-up API;
+# (small + xl only — xxl is excluded; see "Resolve targets" below) plus
+# the `latest-{small,xl}` aliases, so the first user after a fresh image
+# publish lands on a warm cache instead of paying the ~30s cold-pull
+# cost. mybinder.org has no official warm-up API;
 # we drive it via the public /build endpoint, which serves a
 # text/event-stream while it builds (or simply pulls, when the stub
 # branch already references a prebuilt GHCR image). Once we see
@@ -72,11 +73,19 @@ jobs:
 
       - name: Resolve targets
         id: targets
-        # Targets = first 4 entries from build-matrix.yml's planner
-        # `ALL` bash array (= latest minor's small+xl and previous
-        # minor's small+xl, in scaffolder order) + the latest-* aliases.
-        # Hard fail if the count is wrong; that means the matrix file
-        # changed shape and someone needs to look at it.
+        # Targets = the latest two Qiskit minors' small+xl variants
+        # (in scaffolder order) + the latest-{small,xl} aliases.
+        #
+        # We derive these from build-matrix.yml's planner `ALL` bash
+        # array, but xxl is deliberately excluded: it's a large
+        # (~3.5 GB), amd64-only, niche flavor, and warming it every
+        # 12h is a poor use of mybinder's shared community infra.
+        # xxl images are still prebuilt in GHCR and launch fine — they
+        # just pay the one-off cold-pull on first use instead of being
+        # kept warm. So we filter `*-xxl` out *before* taking the
+        # first four entries; otherwise the interleaved xxl rows
+        # (`2.4-small 2.4-xl 2.4-xxl 2.3-small ...`) would shove the
+        # previous minor's xl out of the window.
         #
         # Before #31 this read jobs.build.strategy.matrix.version via
         # yq; after #31 that key holds a fromJSON template and the
@@ -91,15 +100,23 @@ jobs:
             | grep -oE "'[^']+'" \
             | tr -d "'"
           )
-          if [ "${#all_versions[@]}" -lt 4 ]; then
-            echo "Expected at least 4 versions in planner ALL array; got ${#all_versions[@]}" >&2
+          # Drop xxl (and any future heavy flavor) — small + xl only.
+          warmable=()
+          for v in "${all_versions[@]}"; do
+            case "${v}" in
+              *-xxl) continue ;;
+              *) warmable+=("${v}") ;;
+            esac
+          done
+          if [ "${#warmable[@]}" -lt 4 ]; then
+            echo "Expected at least 4 small/xl versions in planner ALL array; got ${#warmable[@]}" >&2
             echo "Has build-matrix.yml's planner block changed shape?" >&2
             exit 1
           fi
-          # First 4 are latest minor (small, xl) + previous minor (small, xl),
-          # in scaffolder order.
-          targets=("${all_versions[0]}" "${all_versions[1]}" \
-                   "${all_versions[2]}" "${all_versions[3]}" \
+          # First 4 of the xxl-filtered list = latest minor (small, xl)
+          # + previous minor (small, xl), in scaffolder order.
+          targets=("${warmable[0]}" "${warmable[1]}" \
+                   "${warmable[2]}" "${warmable[3]}" \
                    "latest-small" "latest-xl")
           printf 'target: %s\n' "${targets[@]}"
           {
