@@ -1,0 +1,21 @@
+# Shared "scientific stack + notebook tools" base for every xl flavor.
+# Per-minor `versions/<X.Y>-xl/requirements.txt` files include this via
+# `-r ../_xl-base.txt`. pip resolves -r paths relative to the including
+# file's directory; the build-matrix planner treats touching this file
+# as a universal rebuild trigger for every -xl target.
+#
+# Only put truly version-agnostic packages here. Anything Qiskit-ecosystem
+# (qiskit*, qiskit-addon-*, runtime/serverless/catalog/transpiler/etc.)
+# is per-minor-pinned and stays in the per-minor file.
+
+ffsim; sys.platform != 'win32'
+jupyterlab-open-url-parameter
+nbgitpuller
+pandas
+plotly
+pylatexenc
+pyscf; sys.platform != 'win32'
+python-sat
+scikit-learn
+scipy
+sympy

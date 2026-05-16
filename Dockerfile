@@ -23,12 +23,17 @@ RUN if [[ "${QISKIT_VERSION}" == *-xl ]]; then \
       && rm -rf /var/lib/apt/lists/* ; \
     fi
 
-COPY versions/${QISKIT_VERSION}/requirements.txt /tmp/req.txt
+# Copy the whole versions/ tree so pip can resolve the relative
+# `-r ../_xl-base.txt` reference inside each xl requirements file.
+# small flavors don't reference _xl-base.txt; copying it is harmless
+# (a single ~250-byte text file) and the layer cache gets keyed on
+# ${QISKIT_VERSION} via the next RUN anyway.
+COPY versions /tmp/versions
 # jupyter-server upgrade patches CVE-2026-35397 / -40110 / -40934 that the
 # base image still ships at 2.17.0; remove once the base bumps it.
-RUN pip install --no-cache-dir --no-compile -r /tmp/req.txt \
+RUN pip install --no-cache-dir --no-compile -r /tmp/versions/${QISKIT_VERSION}/requirements.txt \
  && pip install --no-cache-dir --no-compile --upgrade 'jupyter-server>=2.18.0' \
- && rm /tmp/req.txt \
+ && rm -rf /tmp/versions \
  && fix-permissions "${CONDA_DIR}" \
  && fix-permissions "/home/${NB_USER}"
 
