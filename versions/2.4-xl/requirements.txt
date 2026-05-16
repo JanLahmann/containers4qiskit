@@ -38,7 +38,11 @@ qiskit-ibm-catalog~=0.14.0
 qiskit-addon-sqd~=0.12.1
 qiskit-addon-utils~=0.3.1
 qiskit-addon-mpf~=0.3.0
-qiskit-addon-aqc-tensor[aer,quimb-jax]~=0.3.0; sys.platform != 'darwin'
+# quimb-jax extra dropped in 0.3.x: pulls jax + jaxlib (~2.5 GB) as
+# a hard transitive, ballooning the image from ~700 MB to ~3.4 GB.
+# Most tutorial users don't need JAX-accelerated quimb; users who do
+# can `pip install jax` from inside the running container.
+qiskit-addon-aqc-tensor[aer]~=0.3.0; sys.platform != 'darwin'
 qiskit-addon-obp~=0.3.0
 qiskit-addon-cutting~=0.10.0
 qiskit-experiments~=0.14.0
