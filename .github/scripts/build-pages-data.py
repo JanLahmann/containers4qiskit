@@ -10,7 +10,7 @@ Schema (one entry per published image):
 
     {
       "qiskit_minor": "2.4",
-      "flavor":       "small" | "xl",
+      "flavor":       "small" | "xl" | "xxl",
       "is_latest":    true,      # current LATEST_QISKIT minor
       "binder_tag":   "2.4-small",
       "docker_tag":   "ghcr.io/qubins/images:2.4-small",
@@ -48,6 +48,12 @@ NOTES: dict[tuple[str, str], str] = {
         "qiskit-ibm-catalog, and qiskit-ibm-transpiler are 2.x-only "
         "and not included."
     ),
+    ("2.4", "xxl"): (
+        "Everything in xl plus qiskit-ibm-transpiler[ai-local-mode], "
+        "which pulls PyTorch + the full CUDA 13 wheelset (~3.4 GB "
+        "total). The AI transpiler bits are amd64-only (no aarch64 "
+        "wheels). Use xl unless you need the local AI transpiler."
+    ),
 }
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -67,7 +73,8 @@ def latest_qiskit() -> str:
 
 
 def discover_versions() -> list[dict]:
-    pattern = re.compile(r"^(\d+\.\d+)-(small|xl)$")
+    pattern = re.compile(r"^(\d+\.\d+)-(small|xl|xxl)$")
+    flavor_rank = {"small": 0, "xl": 1, "xxl": 2}
     entries: list[tuple[tuple[int, int], str, str]] = []
     for child in VERSIONS_DIR.iterdir():
         if not child.is_dir():
@@ -78,8 +85,8 @@ def discover_versions() -> list[dict]:
         minor, flavor = m.group(1), m.group(2)
         sort_key = tuple(int(p) for p in minor.split("."))
         entries.append((sort_key, minor, flavor))
-    # newest minor first, small before xl within a minor
-    entries.sort(key=lambda x: (-x[0][0], -x[0][1], 0 if x[2] == "small" else 1))
+    # newest minor first, then small -> xl -> xxl within a minor
+    entries.sort(key=lambda x: (-x[0][0], -x[0][1], flavor_rank.get(x[2], 99)))
     return [
         {"qiskit_minor": minor, "flavor": flavor}
         for _, minor, flavor in entries

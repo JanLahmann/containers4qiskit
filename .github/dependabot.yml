@@ -24,6 +24,7 @@ updates:
     directories:
       - /versions/2.4-small
       - /versions/2.4-xl
+      - /versions/2.4-xxl
     schedule:
       interval: weekly
     ignore:
