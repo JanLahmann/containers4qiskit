@@ -32,6 +32,20 @@ from pathlib import Path
 MINOR = os.environ["MINOR"]      # e.g. "2.5"
 VERSION = os.environ["VERSION"]  # e.g. "2.5.1"
 
+# Schema-gate the inputs at startup. The detector workflow already
+# validates the PyPI string, but this script is also runnable by hand
+# and writes filesystem paths + does regex substitutions into
+# build-matrix.yml / dependabot.yml from MINOR. Anchoring the shape
+# here means a malformed value (path traversal via "../", YAML-breaking
+# characters, pre-release junk) fails loudly before any file is
+# written rather than corrupting tracked files.
+if not re.fullmatch(r"\d+\.\d+", MINOR):
+    sys.exit(f"MINOR must be X.Y (got {MINOR!r}); refusing to scaffold.")
+if not re.fullmatch(r"\d+\.\d+\.\d+", VERSION):
+    sys.exit(f"VERSION must be X.Y.Z (got {VERSION!r}); refusing to scaffold.")
+if not VERSION.startswith(f"{MINOR}."):
+    sys.exit(f"VERSION {VERSION!r} is not within MINOR {MINOR!r}.")
+
 REPO = Path.cwd()
 VERSIONS = REPO / "versions"
 

@@ -39,6 +39,39 @@ import sys
 import urllib.error
 import urllib.request
 from pathlib import Path
+from urllib.parse import urlsplit
+
+
+class _SafeRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Redirect handler that does not leak the bearer token.
+
+    CPython's default HTTPRedirectHandler copies a caller-set
+    ``Authorization`` header (added via ``Request(headers=...)``) onto
+    the redirected request verbatim — including across a host change.
+    GHCR legitimately 302s blob/manifest fetches to a separate CDN
+    host, so following with the registry bearer attached would send
+    that credential off-host. (An earlier comment here claimed urllib
+    "does the right thing"; it does not.) We strip ``Authorization``
+    whenever the redirect target's host differs from the original, and
+    refuse to follow a downgrade to a non-HTTPS scheme. The GHCR CDN
+    does not need the bearer (its URL carries a signed query string),
+    so stripping is both safe and correct.
+    """
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        new = super().redirect_request(req, fp, code, msg, headers, newurl)
+        if new is None:
+            return None
+        if urlsplit(newurl).scheme != "https":
+            return None  # never downgrade a credentialed request
+        if urlsplit(newurl).hostname != urlsplit(req.full_url).hostname:
+            new.remove_header("Authorization")
+        return new
+
+
+# Module-level opener: default handlers minus the stock redirect
+# handler, plus our credential-stripping one.
+_OPENER = urllib.request.build_opener(_SafeRedirectHandler)
 
 # Hand-maintained notes per image (mirrors the README footnotes).
 # Empty if no special note applies.
@@ -116,7 +149,7 @@ def _registry_token() -> str | None:
         return _REGISTRY_TOKEN
     url = f"https://{GHCR_HOST}/token?scope=repository:{GHCR_REPO}:pull&service={GHCR_HOST}"
     try:
-        with urllib.request.urlopen(url, timeout=15) as r:
+        with _OPENER.open(url, timeout=15) as r:
             _REGISTRY_TOKEN = json.loads(r.read())["token"]
             return _REGISTRY_TOKEN
     except Exception:  # noqa: BLE001 — best-effort
@@ -124,9 +157,10 @@ def _registry_token() -> str | None:
 
 
 def _ghcr_get(path: str, accept: str) -> dict | None:
-    """GET /v2/<repo>/<path>. Follows redirects (blob fetches 302 to a
-    CDN URL that drops the Authorization header — urllib does the right
-    thing because we don't restamp the header on the redirect target).
+    """GET /v2/<repo>/<path>. Follows redirects via _OPENER, which
+    strips the Authorization header on any host change (GHCR 302s
+    blob/manifest fetches to a separate CDN host) and refuses non-HTTPS
+    redirect targets, so the registry bearer never leaves ghcr.io.
     """
     token = _registry_token()
     if not token:
@@ -137,7 +171,7 @@ def _ghcr_get(path: str, accept: str) -> dict | None:
         headers={"Authorization": f"Bearer {token}", "Accept": accept},
     )
     try:
-        with urllib.request.urlopen(req, timeout=20) as r:
+        with _OPENER.open(req, timeout=20) as r:
             return json.loads(r.read())
     except urllib.error.HTTPError:
         return None
