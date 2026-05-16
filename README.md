@@ -51,6 +51,22 @@ The bare `:latest` tag (what Docker pulls when no tag is specified) is
 
 Two flavors per Qiskit minor:
 
+- **`xl`** — for tutorials, documentation notebooks, addons, and the
+  scientific stack.
+- **`small`** — lean image with just core Qiskit (`qiskit` +
+  `qiskit-aer` + `qiskit-ibm-runtime`).
+
+Currently published: 7 Qiskit minors × 2 flavors × 2 architectures =
+28 multi-arch images. The xl flavor is based on the [Qiskit-documentation
+notebook tester](https://github.com/Qiskit/documentation/tree/main/scripts/nb-tester);
+notebooks from the Qiskit documentation site should run unmodified.
+
+**Full catalog with badges and copyable docker tags:
+[qubins.org](https://qubins.org/#catalog).**
+
+<details>
+<summary>small vs xl — full comparison</summary>
+
 | | **small** | **xl** |
 | - | - | - |
 | Use for | Lean image, fast pull, core Qiskit work | Tutorials, documentation notebooks, addons, scientific stack |
@@ -61,13 +77,7 @@ Two flavors per Qiskit minor:
 Qiskit-ecosystem packages are pinned in the xl flavor; the scientific
 stack is unpinned and resolved by pip.
 
-Currently published: 7 Qiskit minors × 2 flavors × 2 architectures =
-28 multi-arch images. The xl flavor is based on the [Qiskit-documentation
-notebook tester](https://github.com/Qiskit/documentation/tree/main/scripts/nb-tester);
-notebooks from the Qiskit documentation site should run unmodified.
-
-**Full catalog with badges and copyable docker commands:
-[qubins.org](https://qubins.org/#catalog).**
+</details>
 
 Older Qiskit minors `1.0`/`1.1`/`1.2`/`1.3` are no longer published.
 They carried unfixable QPY-deserialisation CVEs (RCE in `< 1.4.2`,
@@ -85,18 +95,20 @@ For users not using Docker or Binder:
 pip install "qiskit~=2.4.0"
 ```
 
-## Embed a launch badge in your project
+## Launch your repo or notebook on QuBins
 
 If you maintain a tutorial, course, or sample repo that needs a
-specific Qiskit version, embed a launch badge. Readers click and land
-in a verified, daily-rebuilt Qiskit container on
+specific Qiskit version, you can give readers a one-click Binder
+launch link, and optionally a Markdown badge to embed in your README.
+Readers land in a verified, daily-rebuilt Qiskit container on
 [mybinder.org](https://mybinder.org) — no environment setup on the
 reader's machine, no Qiskit-version drift between authoring and
 reading.
 
 **The easiest way to build one** is the
-[badge generator at qubins.org](https://qubins.org/#launch): paste
-the repo or notebook URL, pick an image, copy the markdown.
+[launch generator at qubins.org](https://qubins.org/#launch): paste
+the repo or notebook URL, pick an image, copy the Binder URL (and the
+badge Markdown, if you want one).
 
 ### What the badges look like
 
@@ -283,18 +295,22 @@ couple of addon pins relaxed because addons lag the qiskit minor —
 and merge.
 
 If you ever need to scaffold by hand: create
-`versions/<X.Y>-{small,xl}/requirements.txt`, add the entries to both
-matrix lists in `.github/workflows/build-matrix.yml`, bump
-`LATEST_QISKIT`, swap the `dependabot.yml` pip directories, and
-prepend two rows to the table above. `.github/scripts/scaffold-new-qiskit.py`
-does all of this in one shot if you set `MINOR` and `VERSION` in env.
+`versions/<X.Y>-{small,xl}/requirements.txt`, add the new minor to
+the planner's `ALL` array in `.github/workflows/build-matrix.yml`,
+bump `LATEST_QISKIT`, and swap the `dependabot.yml` pip directories.
+The per-minor catalog on qubins.org regenerates from `versions/` at
+deploy time, so no README edit is needed.
+`.github/scripts/scaffold-new-qiskit.py` does all of this in one shot
+if you set `MINOR` and `VERSION` in env.
 
 ## License & acknowledgements
 
-Apache-2.0. See [LICENSE](LICENSE).
+QuBins is an independent open-source project (Apache-2.0; see
+[LICENSE](LICENSE)). The images are hosted free on GHCR; in-browser
+launches use the free public mybinder.org service. No account or
+sign-up is required to use anything here.
 
-Every in-browser launch served from a "launch QuBins" badge runs on
-**[mybinder.org](https://mybinder.org)** — a free service from the
+[mybinder.org](https://mybinder.org) is provided by the
 [Binder project](https://jupyter.org/binder) (part of Project
 Jupyter), with federation backends operated by
 [GESIS](https://www.gesis.org), [2i2c](https://2i2c.org), and

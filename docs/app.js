@@ -35,7 +35,7 @@
 
     renderQuickStart(latest);
     renderCatalog(images);
-    populateFilters(images);
+    populateFilters(images, latest);
     populateGeneratorImages(images, latest);
     wireGenerators(images);
   }
@@ -106,16 +106,23 @@
       binderCell.appendChild(binderLink);
       tr.appendChild(binderCell);
 
+      // Tag-only docker cell: the section intro shows the
+      // `docker run … ghcr.io/qubins/images:<tag>` template once,
+      // so each row only needs the per-image tag string (e.g.
+      // `2.4-small`) plus a one-click "copy the full command" button.
       const dockerCell = document.createElement("td");
+      dockerCell.className = "docker-tag-cell";
       const code = document.createElement("code");
-      code.textContent = `docker run --rm -p 8888:8888 ${img.docker_tag}`;
+      code.textContent = img.binder_tag;
       dockerCell.appendChild(code);
+      const fullCmd = `docker run --rm -p 8888:8888 ${img.docker_tag}`;
       const copyBtn = document.createElement("button");
       copyBtn.className = "button secondary";
-      copyBtn.style.marginLeft = "0.4rem";
+      copyBtn.type = "button";
+      copyBtn.title = `Copy: ${fullCmd}`;
       copyBtn.textContent = "Copy";
       copyBtn.addEventListener("click", () =>
-        copyToClipboard(code.textContent, copyBtn));
+        copyToClipboard(fullCmd, copyBtn));
       dockerCell.appendChild(copyBtn);
       tr.appendChild(dockerCell);
 
@@ -130,7 +137,10 @@
   }
 
   // ---------------------------------------------------------------- filters
-  function populateFilters(images) {
+  // Catalog defaults to showing only the latest Qiskit minor. The
+  // 14-row full table is one filter-click away (via the dropdown) or
+  // one button-click away (the "Show all versions" affordance).
+  function populateFilters(images, latest) {
     const minorSel = document.getElementById("filter-minor");
     const seenMinors = new Set();
     for (const img of images) {
@@ -141,8 +151,21 @@
       opt.textContent = img.qiskit_minor;
       minorSel.appendChild(opt);
     }
+    // Default: show the latest minor only. The "Show all versions"
+    // button (rendered in the filter row, hidden when "All" is
+    // selected) gives a single click back to the unfiltered view.
+    minorSel.value = latest;
     minorSel.addEventListener("change", applyFilters);
     document.getElementById("filter-flavor").addEventListener("change", applyFilters);
+
+    const showAll = document.getElementById("filter-show-all");
+    if (showAll) {
+      showAll.addEventListener("click", () => {
+        minorSel.value = "";
+        applyFilters();
+      });
+    }
+    applyFilters();
   }
 
   function applyFilters() {
@@ -153,6 +176,8 @@
       const flavorOk = !flavor || tr.dataset.flavor === flavor;
       tr.hidden = !(minorOk && flavorOk);
     }
+    const showAll = document.getElementById("filter-show-all");
+    if (showAll) showAll.hidden = !minor;
   }
 
   // ----------------------------------------------------- generator dropdown
