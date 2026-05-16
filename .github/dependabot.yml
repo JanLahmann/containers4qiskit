@@ -1,8 +1,9 @@
 version: 2
 updates:
-  # Base image. Bumps when quay.io/jupyter/base-notebook publishes a
-  # newer python-3.X tag (or, if we ever pin to a digest, a newer
-  # digest of the current tag).
+  # Base image. The Dockerfile pins to a digest, so Dependabot
+  # proposes a new digest whenever quay.io/jupyter/base-notebook
+  # re-publishes the python-3.X tag. Each PR runs through the full
+  # Trivy + smoke gate before merging.
   - package-ecosystem: docker
     directory: /
     schedule:
