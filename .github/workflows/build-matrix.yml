@@ -373,6 +373,38 @@ jobs:
             cosign sign --yes "$tag"
           done
 
+      - name: Verify the signatures we just made
+        env:
+          REPO: ghcr.io/${{ steps.repo.outputs.owner_lc }}/${{ env.IMAGE }}
+          VERSION: ${{ matrix.version }}
+        # Run the exact `cosign verify` invocation we document in the
+        # README against every tag we just signed. Catches regressions
+        # in the identity-regexp / OIDC-issuer pair: a repo rename,
+        # a workflow-path change, or a sigstore policy change would
+        # silently leave users unable to verify published images.
+        # Failing this fails the publish job — which is the right
+        # blast radius, since an unverifiable image shouldn't be
+        # advertised as signed.
+        run: |
+          set -euo pipefail
+          tags=("${REPO}:${VERSION}")
+          if [[ "${VERSION%-*}" == "${LATEST_QISKIT}" ]]; then
+            flavor="${VERSION#*-}"
+            tags+=("${REPO}:latest-${flavor}")
+            if [[ "$flavor" == "small" ]]; then
+              tags+=("${REPO}:latest")
+            fi
+          fi
+          for tag in "${tags[@]}"; do
+            echo "::group::cosign verify ${tag}"
+            cosign verify \
+              --certificate-identity-regexp="^https://github.com/${GITHUB_REPOSITORY}/" \
+              --certificate-oidc-issuer=https://token.actions.githubusercontent.com \
+              "${tag}" >/dev/null
+            echo "ok"
+            echo "::endgroup::"
+          done
+
       - name: Sync stub branch(es) for mybinder
         env:
           OWNER_LC: ${{ steps.repo.outputs.owner_lc }}
