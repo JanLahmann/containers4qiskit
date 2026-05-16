@@ -63,7 +63,10 @@
       const tr = document.createElement("tr");
       tr.dataset.minor = img.qiskit_minor;
       tr.dataset.flavor = img.flavor;
-      if (img.is_latest) tr.classList.add("row-latest");
+      if (img.is_latest) {
+        tr.classList.add("row-latest");
+        tr.dataset.latest = "true";
+      }
 
       const minorCell = document.createElement("td");
       minorCell.textContent = img.qiskit_minor;
@@ -85,6 +88,7 @@
         }
         const sup = document.createElement("sup");
         sup.textContent = `[${idx}]`;
+        sup.dataset.note = String(idx);
         flavorCell.append(flavorText, sup);
       } else {
         flavorCell.textContent = flavorText;
@@ -132,16 +136,27 @@
     for (const [text, idx] of seenNotes) {
       const li = document.createElement("li");
       li.textContent = `[${idx}] ${text}`;
+      li.dataset.note = String(idx);
       notesUl.appendChild(li);
     }
   }
 
   // ---------------------------------------------------------------- filters
-  // Catalog defaults to showing only the latest Qiskit minor. The
-  // 14-row full table is one filter-click away (via the dropdown) or
-  // one button-click away (the "Show all versions" affordance).
+  // Catalog defaults to showing only `latest` (= the rows currently
+  // tagged is_latest). The full 14-row table is one dropdown selection
+  // or one "Show all versions" click away.
+  //
+  // The minor dropdown carries a special `latest` value that maps to
+  // tr.dataset.latest === "true" rather than a literal minor match,
+  // so the dropdown shows: All / latest / 2.4 / 2.3 / ... / 1.4.
   function populateFilters(images, latest) {
     const minorSel = document.getElementById("filter-minor");
+    // Insert "latest" as the first option after "All" so it's the
+    // top of the visible list and matches the badge convention.
+    const latestOpt = document.createElement("option");
+    latestOpt.value = "latest";
+    latestOpt.textContent = `latest (= ${latest})`;
+    minorSel.appendChild(latestOpt);
     const seenMinors = new Set();
     for (const img of images) {
       if (seenMinors.has(img.qiskit_minor)) continue;
@@ -151,10 +166,10 @@
       opt.textContent = img.qiskit_minor;
       minorSel.appendChild(opt);
     }
-    // Default: show the latest minor only. The "Show all versions"
-    // button (rendered in the filter row, hidden when "All" is
-    // selected) gives a single click back to the unfiltered view.
-    minorSel.value = latest;
+    // Default to "latest" — the "Show all versions" button (rendered
+    // alongside the dropdown, hidden when "All" is selected) returns
+    // to the unfiltered view in one click.
+    minorSel.value = "latest";
     minorSel.addEventListener("change", applyFilters);
     document.getElementById("filter-flavor").addEventListener("change", applyFilters);
 
@@ -172,12 +187,29 @@
     const minor = document.getElementById("filter-minor").value;
     const flavor = document.getElementById("filter-flavor").value;
     for (const tr of document.querySelectorAll("#catalog-table tbody tr")) {
-      const minorOk = !minor || tr.dataset.minor === minor;
+      let minorOk;
+      if (!minor) minorOk = true;
+      else if (minor === "latest") minorOk = tr.dataset.latest === "true";
+      else minorOk = tr.dataset.minor === minor;
       const flavorOk = !flavor || tr.dataset.flavor === flavor;
       tr.hidden = !(minorOk && flavorOk);
     }
     const showAll = document.getElementById("filter-show-all");
     if (showAll) showAll.hidden = !minor;
+
+    // Notes list: only show a footnote if at least one visible row
+    // references it (e.g. the 1.x-reduced-set note only matters when
+    // a 1.x row is in view).
+    const referencedNotes = new Set();
+    for (const tr of document.querySelectorAll("#catalog-table tbody tr")) {
+      if (tr.hidden) continue;
+      for (const sup of tr.querySelectorAll("sup[data-note]")) {
+        referencedNotes.add(sup.dataset.note);
+      }
+    }
+    for (const li of document.querySelectorAll("#catalog-notes li[data-note]")) {
+      li.hidden = !referencedNotes.has(li.dataset.note);
+    }
   }
 
   // ----------------------------------------------------- generator dropdown
@@ -355,7 +387,7 @@
         const m = det.repoUrl.match(/^https:\/\/github\.com\/([^/]+)\/([^/]+)/);
         if (m) {
           const owner = m[1], repo = m[2];
-          note.appendChild(makeOverrideLink("Open just this notebook (no clone) instead?", () => {
+          note.appendChild(makeOverrideLink("Open just this notebook (no repo clone) instead?", () => {
             urlField.value = `https://raw.githubusercontent.com/${owner}/${repo}/${branchNow}/${pathNow}`;
             overrideMode = "file";
             refreshLaunch();

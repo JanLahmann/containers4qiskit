@@ -227,46 +227,64 @@ a:hover {
   font-size: inherit;
 }
 
+/* Hero row: big launch button and its explanatory hint side-by-side,
+   wrapping below the breakpoint. The hint stays vertically centred
+   relative to the (taller) button so the two read as one unit. */
 .hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
   margin: 1rem 0 0.5rem 0;
 }
-.hero-pick {
-  margin: 0.25rem 0 0.5rem 0;
-}
-.hero-pick a {
-  margin-left: 0.4rem;
-  font-size: 0.9em;
-}
 .hero-hint {
-  margin: 0 0 1rem 0;
+  flex: 1 1 18rem;
+  margin: 0;
+}
+.hero-pick {
+  margin: 0.25rem 0 1rem 0;
 }
 
-/* The fold-out "Or run locally with Docker" details — collapsed by
-   default so the hero stays the focus. */
-details.qs-docker {
+/* "Or run locally with Docker" block. No longer folded — it's short
+   enough to live inline. The label sits on its own line above the
+   command + copy button. */
+.qs-docker {
   margin-top: 0.5rem;
 }
-details.qs-docker > summary {
-  font-size: 1em;
-  color: var(--fg);
+.qs-docker-label {
+  margin: 0.25rem 0 0.25rem 0;
   font-weight: 500;
 }
 
 /* small vs xl comparison table. First column is a row header, slightly
-   muted so the meaningful cells stand out. */
+   muted so the meaningful cells stand out. The two data columns split
+   the remaining width evenly so the package list in xl doesn't push
+   small into a narrow strip. */
+table.flavors {
+  table-layout: fixed;
+}
 table.flavors th {
   background: transparent;
   font-weight: 500;
 }
 table.flavors tbody th {
   color: var(--fg-muted);
-  width: 12rem;
+  width: 9rem;
   font-weight: 500;
   vertical-align: top;
+  white-space: nowrap;
 }
 table.flavors thead th:nth-child(2),
 table.flavors thead th:nth-child(3) {
   font-weight: 600;
+  width: calc((100% - 9rem) / 2);
+}
+table.flavors td {
+  vertical-align: top;
+}
+table.flavors td code {
+  white-space: normal;
+  word-break: break-word;
 }
 
 /* The full small-vs-xl comparison is collapsed by default inside the

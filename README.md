@@ -253,19 +253,22 @@ instead of rebuilding the dep tree from scratch (cold start ~30s).
 
 ### Staying current
 
-- A daily cron at **04:00 UTC** (= 05:00 CET) reruns the full matrix
-  on `main`, so upstream base-image CVE fixes flow into published
-  images within a day even when no one pushes a commit.
+- A daily cron reruns the full matrix on `main`, so upstream
+  base-image CVE fixes flow into published images within a day even
+  when no one pushes a commit.
 - Dependabot watches three ecosystems: the docker base image, the GHA
   action versions, and the pip pins in the `LATEST_QISKIT` minor's
   `requirements.txt` files. Each Dependabot PR runs through the same
   Trivy + smoke gate.
-- A second daily workflow (`detect-new-qiskit.yml`, also at 04:00 UTC)
-  polls PyPI for the latest qiskit version. If a new minor appears,
-  the workflow auto-scaffolds `versions/<X.Y>-{small,xl}/`, updates
-  the matrix + `LATEST_QISKIT` + `dependabot.yml` directories + README,
-  and opens a PR. The xl flavor commonly needs a human nudge to relax
-  addon pins that don't yet support the new minor.
+- A detector workflow polls PyPI for the latest Qiskit version. When
+  a new minor ships, it opens a `bot/qiskit-<X.Y>` PR with the
+  small + xl scaffolding, matrix entries, `LATEST_QISKIT` bump, and
+  updated `dependabot.yml` directories. Review and merge — the xl
+  flavor commonly needs a human nudge to relax addon pins that don't
+  yet support the new minor.
+  [`scaffold-new-qiskit.py`](.github/scripts/scaffold-new-qiskit.py)
+  is the same script the workflow uses, if you need to scaffold by
+  hand.
 
 ## Verifying images
 
@@ -285,38 +288,21 @@ docker buildx imagetools inspect ghcr.io/qubins/images:<tag> \
   --format '{{ json .Provenance }}'
 ```
 
-## Adding a new Qiskit minor
-
-The detector workflow handles this automatically: when PyPI ships a
-new minor, it opens a `bot/qiskit-<X.Y>` PR with the small + xl
-scaffolding, matrix entries, `LATEST_QISKIT` bump, `dependabot.yml`
-directories, and README rows. Review the PR — usually the xl needs a
-couple of addon pins relaxed because addons lag the qiskit minor —
-and merge.
-
-If you ever need to scaffold by hand: create
-`versions/<X.Y>-{small,xl}/requirements.txt`, add the new minor to
-the planner's `ALL` array in `.github/workflows/build-matrix.yml`,
-bump `LATEST_QISKIT`, and swap the `dependabot.yml` pip directories.
-The per-minor catalog on qubins.org regenerates from `versions/` at
-deploy time, so no README edit is needed.
-`.github/scripts/scaffold-new-qiskit.py` does all of this in one shot
-if you set `MINOR` and `VERSION` in env.
-
 ## License & acknowledgements
 
 QuBins is an independent open-source project (Apache-2.0; see
-[LICENSE](LICENSE)). The images are hosted free on GHCR; in-browser
-launches use the free public mybinder.org service. No account or
-sign-up is required to use anything here.
+[LICENSE](LICENSE)). It packages the open-source Qiskit distributions
+for convenient consumption. The images are hosted free on GHCR;
+in-browser launches use the free public
+[mybinder.org](https://mybinder.org) service. No account or sign-up
+is required to use anything here.
 
 [mybinder.org](https://mybinder.org) is provided by the
 [Binder project](https://jupyter.org/binder) (part of Project
 Jupyter), with federation backends operated by
 [GESIS](https://www.gesis.org), [2i2c](https://2i2c.org), and
-partners. QuBins is just curated container images they pull; please
-be patient on cold starts and don't hammer the service.
+partners; please be patient on cold starts and don't hammer the
+service. QuBins is just curated container images they pull.
 
-Qiskit is a trademark of IBM. This project is independent and not
-affiliated with IBM; it just packages the open-source Qiskit
-distributions for convenient consumption.
+Qiskit is a trademark of IBM. QuBins is independent and not
+affiliated with IBM.
