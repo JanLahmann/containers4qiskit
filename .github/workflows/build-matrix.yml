@@ -161,11 +161,22 @@ jobs:
                 if echo "${changed}" | grep -qE '^(Dockerfile|\.github/workflows/build-matrix\.yml)$'; then
                   versions_json=$(full "Dockerfile or workflow changed")
                 else
+                  # versions/_xl-base.txt is the shared "scientific stack +
+                  # notebook tools" base that every -xl requirements file
+                  # references via `-r ../_xl-base.txt`. A change there
+                  # affects every xl flavor but doesn't live under a
+                  # versions/<v>/ path, so add it as a separate trigger.
+                  xl_base_changed=0
+                  if echo "${changed}" | grep -qE '^versions/_xl-base\.txt$'; then
+                    xl_base_changed=1
+                  fi
                   # Filter to versions/<v>/** changes and map back to
                   # canonical names; preserve ALL ordering and de-dupe.
                   selected=()
                   for v in "${ALL[@]}"; do
                     if echo "${changed}" | grep -qE "^versions/${v}/"; then
+                      selected+=("${v}")
+                    elif [ "${xl_base_changed}" -eq 1 ] && [[ "${v}" == *-xl ]]; then
                       selected+=("${v}")
                     fi
                   done

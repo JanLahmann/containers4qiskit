@@ -5,26 +5,14 @@
 # qiskit-ibm-catalog, qiskit-ibm-transpiler, and the docs-tester pinned
 # versions of qiskit-aer/-ibm-runtime/-experiments all require qiskit
 # >=2.x and are dropped here. What's left: a qiskit 1.4 core, the older
-# resolved versions of aer/runtime/experiments, plus the same scientific
-# stack as 2.x-xl.
+# resolved versions of aer/runtime/experiments, plus the shared
+# scientific stack from ../_xl-base.txt — and matplotlib, which the
+# 2.x flavors don't bundle but 1.x notebooks more commonly assume.
+
+-r ../_xl-base.txt
 
 qiskit~=1.4.0
 qiskit-aer
 qiskit-ibm-runtime
 qiskit-experiments
-
-scipy
-scikit-learn
-pyscf; sys.platform != 'win32'
-python-sat
-plotly
-ffsim; sys.platform != 'win32'
-sympy
 matplotlib
-pylatexenc
-pandas
-nbgitpuller
-# Opens a notebook fetched from a raw URL via the ?fromURL= JupyterLab
-# query parameter — lets users land directly on a single notebook
-# without a full nbgitpuller clone, when the notebook is self-contained.
-jupyterlab-open-url-parameter
