@@ -70,7 +70,7 @@ notebooks from the Qiskit documentation site should run unmodified.
 | | **small** | **xl** |
 | - | - | - |
 | Use for | Lean image, fast pull, core Qiskit work | Tutorials, documentation notebooks, addons, scientific stack |
-| Includes | `qiskit` + `qiskit-aer` + `qiskit-ibm-runtime` | `qiskit[all]`, all `qiskit-addon-*`, `qiskit-experiments`, `qiskit-ibm-transpiler[ai-local-mode]`, `qiskit-serverless`, `qiskit-ibm-catalog`, scipy/sklearn/pyscf/plotly/sympy/ffsim/pandas, `pylatexenc`, `nbgitpuller`, `jupyterlab-open-url-parameter` |
+| Includes | `qiskit` <br> `qiskit-aer` <br> `qiskit-ibm-runtime` | **Qiskit ecosystem:** `qiskit[all]`, all `qiskit-addon-*`, `qiskit-experiments`, `qiskit-ibm-transpiler[ai-local-mode]`, `qiskit-serverless`, `qiskit-ibm-catalog` <br> **Scientific stack:** scipy, sklearn, pyscf, plotly, sympy, ffsim, pandas <br> **Notebook tooling:** `pylatexenc`, `nbgitpuller`, `jupyterlab-open-url-parameter` |
 | Single-notebook `?fromURL=` | — | ✓ |
 | arm64 caveats | none | `qiskit-ibm-transpiler` and `gem-suite` omitted (no aarch64 wheels) |
 
