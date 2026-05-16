@@ -107,8 +107,15 @@ def main() -> None:
         write(f"launch-qubins-{tag}.svg",    render("launch",    f"QuBins {tag}"))
         write(f"launch-on-qubins-{tag}.svg", render("launch on", f"QuBins {tag}"))
 
-    # latest-* aliases of the current minor
-    for flavor in ("small", "xl"):
+    # latest-* aliases of the current minor. Derive the flavor set from
+    # the images actually published for latest_minor so a new flavor
+    # (e.g. xxl, introduced at 2.4) gets its latest-* badge with no
+    # edit here, and minors that lack a flavor don't get a dead alias.
+    latest_flavors = [
+        img["flavor"] for img in images
+        if img["qiskit_minor"] == latest_minor
+    ]
+    for flavor in latest_flavors:
         tag = f"latest-{flavor}"
         write(f"launch-qubins-{tag}.svg",    render("launch",    f"QuBins {tag}"))
         write(f"launch-on-qubins-{tag}.svg", render("launch on", f"QuBins {tag}"))

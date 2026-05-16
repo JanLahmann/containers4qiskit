@@ -87,7 +87,7 @@ jobs:
         run: |
           set -euo pipefail
           ALL=(
-            '2.4-small' '2.4-xl'
+            '2.4-small' '2.4-xl' '2.4-xxl'
             '2.3-small' '2.3-xl'
             '2.2-small' '2.2-xl'
             '2.1-small' '2.1-xl'
@@ -161,11 +161,12 @@ jobs:
                 if echo "${changed}" | grep -qE '^(Dockerfile|\.github/workflows/build-matrix\.yml)$'; then
                   versions_json=$(full "Dockerfile or workflow changed")
                 else
-                  # versions/_xl-base.txt is the shared "scientific stack +
-                  # notebook tools" base that every -xl requirements file
-                  # references via `-r ../_xl-base.txt`. A change there
-                  # affects every xl flavor but doesn't live under a
-                  # versions/<v>/ path, so add it as a separate trigger.
+                  # Requirements dependency graph (pip `-r` includes):
+                  #   <minor>-xxl  -r  <minor>-xl  -r  _xl-base.txt
+                  # so a change must rebuild not just the touched dir
+                  # but everything that includes it transitively:
+                  #   - _xl-base.txt changed -> every -xl AND -xxl
+                  #   - <minor>-xl/ changed  -> that minor's -xxl too
                   xl_base_changed=0
                   if echo "${changed}" | grep -qE '^versions/_xl-base\.txt$'; then
                     xl_base_changed=1
@@ -176,8 +177,22 @@ jobs:
                   for v in "${ALL[@]}"; do
                     if echo "${changed}" | grep -qE "^versions/${v}/"; then
                       selected+=("${v}")
-                    elif [ "${xl_base_changed}" -eq 1 ] && [[ "${v}" == *-xl ]]; then
+                      continue
+                    fi
+                    # _xl-base.txt feeds every -xl and (via -xl) every -xxl.
+                    if [ "${xl_base_changed}" -eq 1 ] \
+                       && { [[ "${v}" == *-xl ]] || [[ "${v}" == *-xxl ]]; }; then
                       selected+=("${v}")
+                      continue
+                    fi
+                    # A minor's -xxl includes that same minor's -xl, so an
+                    # -xl edit must also rebuild the sibling -xxl.
+                    if [[ "${v}" == *-xxl ]]; then
+                      sibling_xl="${v%-xxl}-xl"
+                      if echo "${changed}" | grep -qE "^versions/${sibling_xl}/"; then
+                        selected+=("${v}")
+                        continue
+                      fi
                     fi
                   done
                   if [ "${#selected[@]}" -eq 0 ]; then
@@ -224,10 +239,10 @@ jobs:
 
       # The ubuntu-latest / ubuntu-24.04-arm runners ship with ~14 GB
       # of preinstalled toolchains (.NET, Android SDK, Haskell, Swift
-      # CodeQL, Boost, etc.) we don't use. The 2.4-xl amd64 build has
-      # been bumping the disk-space ceiling intermittently — most
-      # recently a "no space left on device" failure while extracting
-      # Ray's jar. Free up the bloat before docker buildx starts so
+      # CodeQL, Boost, etc.) we don't use. The xxl amd64 build (torch +
+      # the full CUDA 13 wheelset, ~3.4 GB) bumps the disk-space ceiling
+      # — "no space left on device" while extracting CUDA/Ray blobs.
+      # Free up the bloat before docker buildx starts so
       # the layer cache + pulled base image + final image fit
       # comfortably. Applied to every job for symmetry; ~30s overhead.
       - name: Free up runner disk

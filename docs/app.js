@@ -265,14 +265,25 @@
   // Single image picker for the consolidated launch form. Each <option>
   // carries a data-flavor attribute so we can mark small options as
   // disabled when the form switches into single-file mode (the
-  // jupyterlab-open-url-parameter extension only ships in xl).
+  // jupyterlab-open-url-parameter extension ships in xl and, via the
+  // xl include, in xxl — but not in small).
   function populateGeneratorImages(images, latest) {
     const sel = document.getElementById("launch-image");
     if (!sel) return;
+    const hasXxl = images.some(
+      (img) => img.qiskit_minor === latest && img.flavor === "xxl",
+    );
     const options = [
       { value: "latest-xl",    label: `latest-xl (=${latest}-xl)`,    flavor: "xl" },
       { value: "latest-small", label: `latest-small (=${latest}-small)`, flavor: "small" },
     ];
+    if (hasXxl) {
+      options.push({
+        value: "latest-xxl",
+        label: `latest-xxl (=${latest}-xxl)`,
+        flavor: "xxl",
+      });
+    }
     for (const img of images) {
       options.push({ value: img.binder_tag, label: img.binder_tag, flavor: img.flavor });
     }
@@ -367,8 +378,8 @@
 
   // Apply a detection result to the form: split a /blob/ URL into its
   // pieces (matching the previous maybeSplitFullRepoUrl behaviour),
-  // show/hide Branch + Path, set the mode note, and gate image
-  // options to xl when in file mode.
+  // show/hide Branch + Path, set the mode note, and gate out the
+  // small image when in file mode (xl/xxl carry the ?fromURL= ext).
   function applyDetection(det) {
     const urlField    = document.getElementById("launch-url");
     const branchField = document.getElementById("launch-branch");
@@ -393,9 +404,11 @@
     // Show clone-only fields only in clone mode.
     cloneFields.hidden = effectiveMode !== "clone";
 
-    // xl-only when in file mode.
+    // File mode needs jupyterlab-open-url-parameter, which ships in xl
+    // and (via the xl include) xxl, but not small. Disable small only.
     for (const opt of imageSel.options) {
-      const disabled = effectiveMode === "file" && opt.dataset.flavor !== "xl";
+      const disabled =
+        effectiveMode === "file" && opt.dataset.flavor === "small";
       opt.disabled = disabled;
     }
     if (effectiveMode === "file" && imageSel.selectedOptions[0]?.disabled) {
@@ -553,7 +566,8 @@
   // ------------------------------------------------------------------ utils
   function formatSize(mb) {
     // Show MB up to ~1 GB, then GB with one decimal. Image sizes
-    // here range from ~250 MB (small) to ~3.5 GB (xl).
+    // here range from ~250 MB (small) through ~1 GB (xl) to
+    // ~3.4 GB (xxl, torch + CUDA).
     if (mb < 1024) return `${Math.round(mb)} MB`;
     return `${(mb / 1024).toFixed(1)} GB`;
   }

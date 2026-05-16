@@ -10,13 +10,14 @@ ENV QISKIT_VERSION=${QISKIT_VERSION}
 
 USER root
 
-# xl images bundle nbgitpuller, which shells out to `git` at runtime
-# to clone the user's notebook repo into the running session. The
-# Jupyter base-notebook image is intentionally minimal and ships
+# xl and xxl images bundle nbgitpuller (xxl pulls the xl set via
+# `-r ../<minor>-xl/requirements.txt`), which shells out to `git` at
+# runtime to clone the user's notebook repo into the running session.
+# The Jupyter base-notebook image is intentionally minimal and ships
 # without git, so without this step nbgitpuller raises FileNotFoundError
 # on every git-pull URL. small images don't ship nbgitpuller and stay
 # git-less to preserve the "small = small" property.
-RUN if [[ "${QISKIT_VERSION}" == *-xl ]]; then \
+RUN if [[ "${QISKIT_VERSION}" == *-xl || "${QISKIT_VERSION}" == *-xxl ]]; then \
       apt-get update \
       && apt-get install -y --no-install-recommends git \
       && apt-get clean \

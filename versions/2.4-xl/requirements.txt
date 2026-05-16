@@ -11,38 +11,35 @@
 # Pins are kept on Qiskit-ecosystem packages (tightly coupled, validated as
 # a set). Scientific-stack packages stay unpinned and resolved by pip.
 #
-# Some packages are amd64-only because no aarch64 wheels exist and the
-# base image has no Rust/C++ toolchain to build from source:
-#   - qiskit-ibm-transpiler: every 0.15.x hard-depends on
-#     qiskit_ibm_ai_local_transpiler~=0.5, whose torch chain has no
-#     aarch64 wheels.
-#   - gem-suite: Rust extension, sdist only on aarch64. (Also pulls
-#     pymatching, which is sdist only on aarch64 and needs cmake + g++.)
-# arm64 users who want these can pip install them on demand after
-# adding the relevant toolchain.
+# qiskit-ibm-transpiler is intentionally NOT here: in 0.18 it hard-pulls
+# qiskit-gym -> twisterl -> torch + the full CUDA 13 wheelset (~2.5 GB),
+# which is unconditional (not gated by the [ai-local-mode] extra). To
+# keep xl lean it lives only in the xxl flavor (../2.4-xxl). xl users
+# who want it can pip install it on demand.
+#
+# gem-suite is amd64-only: Rust extension, sdist only on aarch64, and
+# the base image has no Rust/C++ toolchain to build from source (also
+# pulls pymatching, sdist-only on aarch64, needing cmake + g++). arm64
+# users who want it can pip install it after adding the toolchain.
 
 -r ../_xl-base.txt
 
 qiskit[all]~=2.4.0
-# runtime stays at 0.45 because serverless 0.30 caps it at <0.46.0;
-# bumping to 0.46 needs serverless 0.31, which no transpiler release
-# supports yet (see comment below).
+# runtime stays at 0.45 because serverless 0.30 caps it at <0.46.0.
+# This set (runtime 0.45 + serverless 0.30 + catalog 0.14) is also the
+# one transpiler 0.18 is consistent with, so the xxl flavor (which adds
+# transpiler on top of this file) resolves without conflict.
 qiskit-ibm-runtime~=0.45.1
-qiskit-ibm-transpiler[ai-local-mode]~=0.18.0; platform_machine == "x86_64"
 qiskit-aer~=0.17
 qiskit-serverless~=0.30.0
-# catalog 0.15 demands serverless ~=0.31, but no transpiler release supports
-# serverless 0.31 yet; the latest mutually-consistent set is catalog 0.14 +
-# serverless 0.30 + transpiler 0.18 + runtime 0.45.
+# catalog 0.15 demands serverless ~=0.31, but no transpiler release
+# supports serverless 0.31 yet; the latest mutually-consistent set is
+# catalog 0.14 + serverless 0.30 + runtime 0.45 (+ transpiler 0.18 in xxl).
 qiskit-ibm-catalog~=0.14.0
 qiskit-addon-sqd~=0.12.1
 qiskit-addon-utils~=0.3.1
 qiskit-addon-mpf~=0.3.0
-# quimb-jax extra dropped in 0.3.x: pulls jax + jaxlib (~2.5 GB) as
-# a hard transitive, ballooning the image from ~700 MB to ~3.4 GB.
-# Most tutorial users don't need JAX-accelerated quimb; users who do
-# can `pip install jax` from inside the running container.
-qiskit-addon-aqc-tensor[aer]~=0.3.0; sys.platform != 'darwin'
+qiskit-addon-aqc-tensor[aer,quimb-jax]~=0.3.0; sys.platform != 'darwin'
 qiskit-addon-obp~=0.3.0
 qiskit-addon-cutting~=0.10.0
 qiskit-experiments~=0.14.0

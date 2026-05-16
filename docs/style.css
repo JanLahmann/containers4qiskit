@@ -256,10 +256,11 @@ a:hover {
   font-weight: 500;
 }
 
-/* small vs xl comparison table. Row header narrow & muted; small
-   gets just enough width for short prose; xl takes the rest so its
-   long package list wraps less aggressively (it's the column with
-   actual content to display). */
+/* small vs xl vs xxl comparison table. Row header narrow & muted;
+   small + xxl take just enough for their short prose; xl gets the
+   widest share because it carries the long package list (the column
+   with the most content to display). 4 columns total: row-header +
+   small + xl + xxl. */
 table.flavors {
   table-layout: fixed;
 }
@@ -274,13 +275,17 @@ table.flavors tbody th {
   vertical-align: top;
   white-space: nowrap;
 }
-table.flavors thead th:nth-child(2) {
+table.flavors thead th {
   font-weight: 600;
-  width: 11rem;
 }
-table.flavors thead th:nth-child(3) {
-  font-weight: 600;
+table.flavors thead th:nth-child(2) {  /* small */
+  width: 9rem;
+}
+table.flavors thead th:nth-child(3) {  /* xl — widest, the package list */
   width: auto;
+}
+table.flavors thead th:nth-child(4) {  /* xxl */
+  width: 13rem;
 }
 table.flavors td {
   vertical-align: top;

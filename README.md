@@ -49,33 +49,41 @@ The bare `:latest` tag (what Docker pulls when no tag is specified) is
 
 ## Versions
 
-Two flavors per Qiskit minor:
+Three flavors:
 
 - **`xl`** — for tutorials, documentation notebooks, addons, and the
-  scientific stack.
+  scientific stack. The usual pick. (Every Qiskit minor.)
 - **`small`** — lean image with just core Qiskit (`qiskit` +
-  `qiskit-aer` + `qiskit-ibm-runtime`).
+  `qiskit-aer` + `qiskit-ibm-runtime`). (Every Qiskit minor.)
+- **`xxl`** — everything in `xl` plus
+  `qiskit-ibm-transpiler[ai-local-mode]`, which pulls PyTorch and the
+  full CUDA 13 wheelset (~3.4 GB, amd64-only). Only where the AI
+  transpiler is applicable — introduced at `2.4`. Use `xl` unless you
+  specifically need the local AI transpiler.
 
-Currently published: 7 Qiskit minors × 2 flavors × 2 architectures =
-28 multi-arch images. The xl flavor is based on the [Qiskit-documentation
-notebook tester](https://github.com/Qiskit/documentation/tree/main/scripts/nb-tester);
+Currently published: 12 multi-arch (amd64 + arm64) images — 6 Qiskit
+minors × {small, xl} — plus 1 amd64-only `xxl` image, for 13 total.
+The xl flavor is based on the [Qiskit-documentation notebook
+tester](https://github.com/Qiskit/documentation/tree/main/scripts/nb-tester);
 notebooks from the Qiskit documentation site should run unmodified.
 
 **Full catalog with badges and copyable docker tags:
 [qubins.org](https://qubins.org/#catalog).**
 
 <details>
-<summary>small vs xl — full comparison</summary>
+<summary>small vs xl vs xxl — full comparison</summary>
 
-| | **small** | **xl** |
-| - | - | - |
-| Use for | Lean image, fast pull, core Qiskit work | Tutorials, documentation notebooks, addons, scientific stack |
-| Includes | `qiskit` <br> `qiskit-aer` <br> `qiskit-ibm-runtime` | **Qiskit ecosystem:** `qiskit[all]`, all `qiskit-addon-*`, `qiskit-experiments`, `qiskit-ibm-transpiler[ai-local-mode]`, `qiskit-serverless`, `qiskit-ibm-catalog` <br> **Scientific stack:** scipy, sklearn, pyscf, plotly, sympy, ffsim, pandas <br> **Notebook tooling:** `pylatexenc`, `nbgitpuller`, `jupyterlab-open-url-parameter` |
-| Single-notebook `?fromURL=` | — | ✓ |
-| arm64 caveats | none | `qiskit-ibm-transpiler` and `gem-suite` omitted (no aarch64 wheels) |
+| | **small** | **xl** | **xxl** |
+| - | - | - | - |
+| Use for | Lean image, fast pull, core Qiskit work | Tutorials, docs notebooks, addons, scientific stack *(the usual pick)* | Everything in xl plus the local AI transpiler |
+| Approx. size | ~250 MB | ~1 GB | ~3.4 GB |
+| Includes | `qiskit` <br> `qiskit-aer` <br> `qiskit-ibm-runtime` | **Qiskit ecosystem:** `qiskit[all]`, all `qiskit-addon-*`, `qiskit-experiments`, `qiskit-serverless`, `qiskit-ibm-catalog` <br> **Scientific stack:** scipy, sklearn, pyscf, plotly, sympy, ffsim, pandas <br> **Notebook tooling:** `pylatexenc`, `nbgitpuller`, `jupyterlab-open-url-parameter` | Everything in **xl**, plus `qiskit-ibm-transpiler[ai-local-mode]` (pulls PyTorch + the full CUDA 13 wheelset) |
+| Single-notebook `?fromURL=` | — | ✓ | ✓ (inherits from xl) |
+| arm64 caveats | none | `gem-suite` omitted (no aarch64 wheels) | amd64-only — the AI transpiler chain has no aarch64 wheels |
 
-Qiskit-ecosystem packages are pinned in the xl flavor; the scientific
-stack is unpinned and resolved by pip.
+Qiskit-ecosystem packages are pinned in the xl flavor (xxl reuses
+xl's pins via a pip `-r` include and adds the transpiler pin on top);
+the scientific stack is unpinned and resolved by pip.
 
 </details>
 
@@ -256,8 +264,10 @@ instead of rebuilding the dep tree from scratch (cold start ~30s).
   Trivy + smoke gate.
 - A detector workflow polls PyPI for the latest Qiskit version. When
   a new minor ships, it opens a `bot/qiskit-<X.Y>` PR with the
-  small + xl scaffolding, matrix entries, `LATEST_QISKIT` bump, and
-  updated `dependabot.yml` directories. Review and merge — the xl
+  small + xl + xxl scaffolding (xxl mirrors the previous minor's xxl,
+  with its `-r ../<minor>-xl` include repointed), matrix entries,
+  `LATEST_QISKIT` bump, and updated `dependabot.yml` directories.
+  Review and merge — the xl
   flavor commonly needs a human nudge to relax addon pins that don't
   yet support the new minor.
   [`scaffold-new-qiskit.py`](.github/scripts/scaffold-new-qiskit.py)
