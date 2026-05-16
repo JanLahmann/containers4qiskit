@@ -89,6 +89,27 @@ header h1 {
   margin-right: 0.4rem;
 }
 
+/* In-page nav strip under the header. Plain anchors, no JS; matches
+   the section ordering so it doubles as a TOC for long pages. */
+nav.topnav {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0.5rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+  font-size: 0.95em;
+}
+nav.topnav a {
+  color: var(--fg-muted);
+  padding: 0.2rem 0;
+}
+nav.topnav a:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
 .badges img {
   vertical-align: middle;
 }
@@ -209,6 +230,13 @@ a:hover {
 .hero {
   margin: 1rem 0 0.5rem 0;
 }
+.hero-pick {
+  margin: 0.25rem 0 0.5rem 0;
+}
+.hero-pick a {
+  margin-left: 0.4rem;
+  font-size: 0.9em;
+}
 .hero-hint {
   margin: 0 0 1rem 0;
 }
@@ -239,6 +267,38 @@ table.flavors tbody th {
 table.flavors thead th:nth-child(2),
 table.flavors thead th:nth-child(3) {
   font-weight: 600;
+}
+
+/* The full small-vs-xl comparison is collapsed by default inside the
+   catalog section; this gives the summary line a bit more weight than
+   the generic accent-blue link styling so it reads as a section
+   subhead. */
+details.catalog-flavors {
+  margin: 0.5rem 0 1rem 0;
+}
+details.catalog-flavors > summary {
+  color: var(--fg);
+  font-size: 1em;
+  font-weight: 500;
+}
+details.catalog-flavors[open] {
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.5rem 0.8rem;
+}
+details.catalog-flavors[open] > summary {
+  margin-bottom: 0.5rem;
+}
+
+/* Catalog "Docker tag" cell: tag string + small copy button on one
+   line. Keep the tag selectable; the button copies the *full* docker
+   run command (template + tag) per its title attribute. */
+td.docker-tag-cell {
+  white-space: nowrap;
+}
+td.docker-tag-cell code {
+  margin-right: 0.4rem;
 }
 
 .hint {
