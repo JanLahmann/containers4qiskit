@@ -2,26 +2,39 @@ name: Deploy Pages
 
 # Builds versions.json (generated from versions/ + LATEST_QISKIT),
 # the admin stats.json (GHCR pulls + mybinder launches), then deploys
-# docs/ to GitHub Pages. Runs on pushes to main that change the docs
-# source or anything the data builder consumes, on a daily cron to
-# refresh the admin stats, and on manual dispatch.
+# docs/ to GitHub Pages.
 #
-# Not triggered by Build matrix completions: the page references
-# tag *names*, not digests, so a rebuild of an existing tag doesn't
-# require a Pages redeploy.
+# Trigger split — why two paths into this workflow:
+#
+#   * workflow_run after "Build matrix": versions.json is *enriched*
+#     by build-pages-data.py with per-tag size/created/patch fetched
+#     live from GHCR. If a versions/** or Dockerfile change triggered
+#     a rebuild, the new images aren't in GHCR until the (~25 min)
+#     Build matrix finishes. Deploying on the bare `push` would race
+#     the publish and bake stale sizes into the site (observed: xl
+#     showed 3.4 GB for ~30 min after the xxl split landed). Gating
+#     the deploy on Build matrix completion closes that race. The
+#     job-level `if` restricts this to successful main-branch runs.
+#
+#   * push for docs/scripts only: changes that don't alter any
+#     published image (page markup/CSS/JS, the generator scripts,
+#     this workflow) should deploy immediately and must NOT wait on
+#     a 25-minute build. versions/** and Dockerfile are deliberately
+#     NOT in this list — they flow through the workflow_run path so
+#     the enrichment sees the rebuilt images.
 
 on:
+  workflow_run:
+    workflows: ["Build matrix"]
+    types: [completed]
   push:
     branches: [main]
     paths:
       - 'docs/**'
-      - 'versions/**'
       - '.github/workflows/pages.yml'
       - '.github/scripts/build-pages-data.py'
       - '.github/scripts/build-badges.py'
       - '.github/scripts/build-admin-stats.py'
-      # build-matrix.yml is the source of truth for LATEST_QISKIT
-      - '.github/workflows/build-matrix.yml'
   schedule:
     # Refresh admin/stats.json daily so GHCR pull counts and the
     # mybinder rolling 30-day window stay current.
@@ -45,6 +58,16 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # For the workflow_run trigger, only deploy after a *successful*
+    # Build matrix run on main — a failed/cancelled build means the
+    # new images never published, so redeploying would still enrich
+    # against stale (or missing) tags. push / schedule /
+    # workflow_dispatch are unconditional (they don't depend on a
+    # build at all).
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main')
     steps:
       - uses: actions/checkout@v6
 
