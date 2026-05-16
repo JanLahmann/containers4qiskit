@@ -284,6 +284,30 @@ jobs:
             --exit-code 1 \
             "$IMAGE_REF"
 
+      - name: Launch canary notebook inside the image
+        env:
+          IMAGE_REF: ghcr.io/${{ steps.repo.outputs.owner_lc }}/${{ env.IMAGE }}:${{ matrix.version }}-${{ matrix.platform.arch }}
+        # The Dockerfile already runs `import qiskit` at build time;
+        # this goes one level deeper by actually executing a 2-qubit
+        # Bell-pair notebook through Jupyter's nbconvert. Catches:
+        #  - kernel startup failures (broken ipykernel, missing
+        #    dependency at runtime that pip-resolve didn't see)
+        #  - Aer simulator failures (e.g. arch-specific BLAS issues)
+        #  - assertion-level result regressions
+        # Runs against the just-built single-arch image still loaded
+        # in the local docker daemon. Read-only bind-mount of the
+        # canary directory; output notebook goes to /tmp and is
+        # discarded with the container. ~10s overhead per build.
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            -v "$PWD/.github/canary:/tmp/canary:ro" \
+            "$IMAGE_REF" \
+            jupyter nbconvert --to notebook --execute \
+              --ExecutePreprocessor.timeout=120 \
+              --output /tmp/out.ipynb \
+              /tmp/canary/canary.ipynb
+
       - name: Push to GHCR (with provenance attestation)
         if: env.PUBLISH == 'true'
         uses: docker/build-push-action@v7
