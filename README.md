@@ -2,62 +2,72 @@
 
 [![Build matrix](https://github.com/QuBins/qiskit-images/actions/workflows/build-matrix.yml/badge.svg)](https://github.com/QuBins/qiskit-images/actions/workflows/build-matrix.yml)
 
-> **QuBins** — the place for your QuBits: prebuilt quantum compartments, pick
-> one, run your Qiskit notebook on (my)binder or as a container ("bin").
+**Prebuilt Qiskit environments.** Click a launch badge to run in your
+browser via mybinder, or `docker pull` on your laptop. Pick the
+Qiskit version you need; the image is signed, scanned, and rebuilt
+daily.
 
-**Landing page with image catalog and Binder URL generators:**
-[qubins.org](https://qubins.org/)
+> *QuBins* — the place for your QuBits: prebuilt quantum compartments,
+> pick one, run your Qiskit notebook on (my)binder or as a container
+> ("bin").
 
-Currently published: 7 Qiskit minors × 2 flavors × 2 architectures =
-28 multi-arch images, daily-rebuilt, Trivy-gated, cosign-signed.
+**Landing page & catalog:** [qubins.org](https://qubins.org/)
 
-Docker images and Binder URLs for specific Qiskit versions, so you can spin up
-a Jupyter environment running exactly the Qiskit version you need.
+## Why trust this
 
-Two flavors per Qiskit version:
+- **cosign-signed** — every published manifest, keyless OIDC, verifiable
+  identity scoped to this repo (see [Verifying images](#verifying-images)).
+- **Trivy-scanned** — HIGH/CRITICAL findings with available fixes
+  block the build.
+- **Daily rebuilt** — a cron at 04:00 UTC absorbs upstream base-image
+  CVE fixes within a day, even when no commit lands.
+- **Multi-arch** — `linux/amd64` and `linux/arm64` (Apple Silicon,
+  Graviton). Both arches must build for a release to publish.
+- **SLSA provenance** — build attestations attached to every published
+  multi-arch manifest by `docker/build-push-action`.
+- **No accounts, no lock-in** — images live on GHCR (free, public);
+  in-browser launches use the free public mybinder.org service.
 
-- **small** — `qiskit` + `qiskit-aer` + `qiskit-ibm-runtime`. Lean image,
-  fast `docker pull`.
-- **xl** — broad environment based on
-  [Qiskit-documentation's notebook tester](https://github.com/JanLahmann/Qiskit-documentation/blob/main/scripts/nb-tester/requirements.txt):
-  `qiskit[all]`, all `qiskit-addon-*`, `qiskit-experiments`,
-  `qiskit-ibm-transpiler[ai-local-mode]`, `qiskit-serverless`,
-  `qiskit-ibm-catalog`, a scientific stack (`scipy`, `scikit-learn`,
-  `pyscf`, `plotly`, `sympy`, `ffsim`, `gem-suite`, `python-sat`,
-  `pandas`), plus `pylatexenc` for LaTeX rendering and `nbgitpuller`
-  for git-backed notebook distribution. Qiskit-ecosystem packages are
-  pinned; the rest is resolved by pip. Notebooks from the Qiskit
-  documentation site should run unmodified. On arm64,
-  `qiskit-ibm-transpiler` and `gem-suite` are omitted because they
-  lack aarch64 wheels and need a Rust/C++ toolchain to build.
+## Quick start
+
+In your browser:
+
+[![launch QuBins latest-xl](https://qubins.org/badges/launch-qubins-latest-xl.svg)](https://qubins.org/launch/?image=latest-xl)
+
+On your laptop:
+
+```sh
+docker run --rm -p 8888:8888 ghcr.io/qubins/images:latest-small
+```
+
+Watch stdout for `http://127.0.0.1:8888/lab?token=…`. Add
+`-v "$PWD:/home/jovyan/work"` to mount your notebooks.
+
+The bare `:latest` tag (what Docker pulls when no tag is specified) is
+`latest-small`; the alias `latest` follows the current Qiskit minor
+(today: `2.4`).
 
 ## Versions
 
-| Qiskit  | Flavor | Binder | Docker |
-| ------- | ------ | ------ | ------ |
-| latest  | small  | [![launch QuBins latest-small](https://qubins.org/badges/launch-qubins-latest-small.svg)](https://qubins.org/launch/?image=latest-small) | `docker run --rm -p 8888:8888 ghcr.io/qubins/images:latest-small` |
-| latest  | xl     | [![launch QuBins latest-xl](https://qubins.org/badges/launch-qubins-latest-xl.svg)](https://qubins.org/launch/?image=latest-xl) | `docker run --rm -p 8888:8888 ghcr.io/qubins/images:latest-xl` |
-| 2.4     | small  | [![launch QuBins 2.4-small](https://qubins.org/badges/launch-qubins-2.4-small.svg)](https://qubins.org/launch/?image=2.4-small) | `docker run --rm -p 8888:8888 ghcr.io/qubins/images:2.4-small` |
-| 2.4     | xl     | [![launch QuBins 2.4-xl](https://qubins.org/badges/launch-qubins-2.4-xl.svg)](https://qubins.org/launch/?image=2.4-xl) | `docker run --rm -p 8888:8888 ghcr.io/qubins/images:2.4-xl` |
-| 2.3    | small  | [![launch QuBins 2.3-small](https://qubins.org/badges/launch-qubins-2.3-small.svg)](https://qubins.org/launch/?image=2.3-small) | `docker run --rm -p 8888:8888 ghcr.io/qubins/images:2.3-small` |
-| 2.3    | xl     | [![launch QuBins 2.3-xl](https://qubins.org/badges/launch-qubins-2.3-xl.svg)](https://qubins.org/launch/?image=2.3-xl) | `docker run --rm -p 8888:8888 ghcr.io/qubins/images:2.3-xl` |
-| 2.2    | small  | [![launch QuBins 2.2-small](https://qubins.org/badges/launch-qubins-2.2-small.svg)](https://qubins.org/launch/?image=2.2-small) | `docker run --rm -p 8888:8888 ghcr.io/qubins/images:2.2-small` |
-| 2.2    | xl     | [![launch QuBins 2.2-xl](https://qubins.org/badges/launch-qubins-2.2-xl.svg)](https://qubins.org/launch/?image=2.2-xl) | `docker run --rm -p 8888:8888 ghcr.io/qubins/images:2.2-xl` |
-| 2.1    | small  | [![launch QuBins 2.1-small](https://qubins.org/badges/launch-qubins-2.1-small.svg)](https://qubins.org/launch/?image=2.1-small) | `docker run --rm -p 8888:8888 ghcr.io/qubins/images:2.1-small` |
-| 2.1    | xl     | [![launch QuBins 2.1-xl](https://qubins.org/badges/launch-qubins-2.1-xl.svg)](https://qubins.org/launch/?image=2.1-xl) | `docker run --rm -p 8888:8888 ghcr.io/qubins/images:2.1-xl` |
-| 2.0    | small  | [![launch QuBins 2.0-small](https://qubins.org/badges/launch-qubins-2.0-small.svg)](https://qubins.org/launch/?image=2.0-small) | `docker run --rm -p 8888:8888 ghcr.io/qubins/images:2.0-small` |
-| 2.0    | xl     | [![launch QuBins 2.0-xl](https://qubins.org/badges/launch-qubins-2.0-xl.svg)](https://qubins.org/launch/?image=2.0-xl) | `docker run --rm -p 8888:8888 ghcr.io/qubins/images:2.0-xl` |
-| 1.4     | small  | [![launch QuBins 1.4-small](https://qubins.org/badges/launch-qubins-1.4-small.svg)](https://qubins.org/launch/?image=1.4-small) | `docker run --rm -p 8888:8888 ghcr.io/qubins/images:1.4-small` |
-| 1.4     | xl\*   | [![launch QuBins 1.4-xl](https://qubins.org/badges/launch-qubins-1.4-xl.svg)](https://qubins.org/launch/?image=1.4-xl) | `docker run --rm -p 8888:8888 ghcr.io/qubins/images:1.4-xl` |
+Two flavors per Qiskit minor:
 
-`latest` aliases the current Qiskit minor (today: `2.4`); the alias is
-updated when a new minor ships. The bare `:latest` tag (what Docker
-pulls when no tag is specified) is `latest-small`.
+| | **small** | **xl** |
+| - | - | - |
+| Use for | Lean image, fast pull, core Qiskit work | Tutorials, documentation notebooks, addons, scientific stack |
+| Includes | `qiskit` + `qiskit-aer` + `qiskit-ibm-runtime` | `qiskit[all]`, all `qiskit-addon-*`, `qiskit-experiments`, `qiskit-ibm-transpiler[ai-local-mode]`, `qiskit-serverless`, `qiskit-ibm-catalog`, scipy/sklearn/pyscf/plotly/sympy/ffsim/pandas, `pylatexenc`, `nbgitpuller`, `jupyterlab-open-url-parameter` |
+| Single-notebook `?fromURL=` | — | ✓ |
+| arm64 caveats | none | `qiskit-ibm-transpiler` and `gem-suite` omitted (no aarch64 wheels) |
 
-\* `1.4-xl` is a reduced set: `qiskit-addon-*`, `qiskit-serverless`,
-`qiskit-ibm-catalog`, and `qiskit-ibm-transpiler` are 2.x-only and not
-included. Contents: qiskit 1.4 core + aer + ibm-runtime + experiments
-(unpinned, resolved against 1.x) + the same scientific stack as 2.x-xl.
+Qiskit-ecosystem packages are pinned in the xl flavor; the scientific
+stack is unpinned and resolved by pip.
+
+Currently published: 7 Qiskit minors × 2 flavors × 2 architectures =
+28 multi-arch images. The xl flavor is based on the [Qiskit-documentation
+notebook tester](https://github.com/Qiskit/documentation/tree/main/scripts/nb-tester);
+notebooks from the Qiskit documentation site should run unmodified.
+
+**Full catalog with badges and copyable docker commands:
+[qubins.org](https://qubins.org/#catalog).**
 
 Older Qiskit minors `1.0`/`1.1`/`1.2`/`1.3` are no longer published.
 They carried unfixable QPY-deserialisation CVEs (RCE in `< 1.4.2`,
@@ -65,104 +75,41 @@ DoS in `< 1.3.0`) and were holding the base image back to a
 python-3.12 stream with a much larger CVE backlog. Use `1.4` if you
 need a 1.x environment, or one of the 2.x tags for any new work.
 
-Images are published as multi-arch manifests covering `linux/amd64` and
-`linux/arm64` (Apple Silicon, Graviton). Both arches must build for a
-release to publish; addons that lack arm64 wheels are arch-gated in the
-relevant `requirements.txt` (e.g. `qiskit-ibm-transpiler` and `gem-suite`
-in 2.x-xl).
+`1.4-xl` is a reduced set: `qiskit-addon-*`, `qiskit-serverless`,
+`qiskit-ibm-catalog`, and `qiskit-ibm-transpiler` are 2.x-only and not
+included.
 
 For users not using Docker or Binder:
 
-```
+```sh
 pip install "qiskit~=2.4.0"
 ```
-
-## Run on your laptop (Docker)
-
-Pull and start any tag, mapping Jupyter's port:
-
-```sh
-docker run --rm -p 8888:8888 ghcr.io/qubins/images:latest-small
-```
-
-Watch the container's stdout — Jupyter prints a tokenised URL once
-ready, looking like:
-
-```
-http://127.0.0.1:8888/lab?token=<long-hex-string>
-```
-
-Open that URL in your browser. The token is required on first connect.
-
-To work on notebooks already on your laptop, mount your folder into
-the container's workspace:
-
-```sh
-docker run --rm -p 8888:8888 \
-  -v "$PWD:/home/jovyan/work" \
-  ghcr.io/qubins/images:latest-small
-```
-
-Jupyter runs as the unprivileged `jovyan` user (UID 1000); on Linux,
-either make the host directory readable/writable by that UID or pass
-`--user $(id -u):$(id -g)` to match your own. Add `-d` if you want it
-detached, and `--name qubins` if you want to `docker stop qubins` later.
-
-## Pull your own notebook repo (nbgitpuller)
-
-The **xl** images bundle [nbgitpuller](https://github.com/jupyterhub/nbgitpuller),
-which lets a Binder URL auto-clone a notebook repo into the running
-session on first launch. The URL shape:
-
-```
-https://mybinder.org/v2/gh/QuBins/qiskit-images/latest-xl?urlpath=git-pull%3Frepo%3Dhttps%253A%252F%252Fgithub.com%252FYOU%252FYOUR-REPO%26urlpath%3Dlab%252Ftree%252FYOUR-REPO%252Fnotebook.ipynb
-```
-
-The least-painful way to build one is the
-[nbgitpuller link generator](https://nbgitpuller.readthedocs.io/en/latest/link.html):
-set *JupyterHub URL* to `https://mybinder.org/v2/gh/QuBins/qiskit-images/<tag>`
-(e.g. `latest-xl` or `2.4-xl`), paste your notebook repo URL, optionally
-add a default file path, and copy the result. Share that URL — anyone
-who clicks lands in a fresh QuBins session with your notebooks already
-checked out.
 
 ## Embed a launch badge in your project
 
 If you maintain a tutorial, course, or sample repo that needs a
-specific Qiskit version, you can embed a launch badge that opens
-your notebook in a verified, daily-rebuilt Qiskit container on
+specific Qiskit version, embed a launch badge. Readers click and land
+in a verified, daily-rebuilt Qiskit container on
 [mybinder.org](https://mybinder.org) — no environment setup on the
-reader's machine, no Qiskit version drift between authoring and
+reader's machine, no Qiskit-version drift between authoring and
 reading.
 
-Two grammatical variants of the same badge family:
-
-- **"launch on QuBins"** — when the badge launches *a notebook*
-  (a repo or a single `.ipynb`). Reads as "launch your notebook on
-  QuBins." Used by the URL generator on the landing page.
-- **"launch QuBins"** — when the badge just opens the bare image
-  (no preloaded notebook). Reads as "launch the QuBins environment."
-  Used by the per-row catalog badges above.
-
-The easiest way to build either is the
-**[URL generator](https://qubins.org/#launch)** on
-the QuBins landing page: fill in repo URL (or raw notebook URL),
-optionally branch + path, pick an image, then copy the badge markdown
-that appears next to the Binder URL.
+**The easiest way to build one** is the
+[badge generator at qubins.org](https://qubins.org/#launch): paste
+the repo or notebook URL, pick an image, copy the markdown.
 
 ### What the badges look like
 
 ![launch on QuBins 2.4-xl](https://qubins.org/badges/launch-on-qubins-2.4-xl.svg)
-&nbsp; (notebook launch — repo or single file)
+&nbsp; — notebook launch (repo or single file)
 
 ![launch QuBins 2.4-xl](https://qubins.org/badges/launch-qubins-2.4-xl.svg)
-&nbsp; (bare-image launch)
+&nbsp; — bare-image launch
 
 The right half changes per image (`2.4-xl`, `latest-small`, etc.), or
-you can use the generic
-[`launch-on-qubins.svg`](https://qubins.org/badges/launch-on-qubins.svg)
-/ [`launch-qubins.svg`](https://qubins.org/badges/launch-qubins.svg)
-if you don't want to pin a version in the badge text.
+use generic [`launch-on-qubins.svg`](https://qubins.org/badges/launch-on-qubins.svg)
+/ [`launch-qubins.svg`](https://qubins.org/badges/launch-qubins.svg) if
+you don't want to pin a version in the badge text.
 
 ### Markdown snippets
 
@@ -172,10 +119,9 @@ if you don't want to pin a version in the badge text.
 [![launch on QuBins 2.4-xl](https://qubins.org/badges/launch-on-qubins-2.4-xl.svg)](https://qubins.org/launch/?image=2.4-xl&repo=https://github.com/YOU/YOUR-REPO)
 ```
 
-Optional extra params: `&branch=BRANCH`, `&path=path/to/notebook.ipynb`.
+Optional: `&branch=BRANCH`, `&path=path/to/notebook.ipynb`.
 
-**Open a single notebook on QuBins by raw URL** (xl images only —
-needs the `jupyterlab-open-url-parameter` extension):
+**Open a single notebook on QuBins by raw URL** (xl images only):
 
 ```markdown
 [![launch on QuBins 2.4-xl](https://qubins.org/badges/launch-on-qubins-2.4-xl.svg)](https://qubins.org/launch/?image=2.4-xl&file=https://raw.githubusercontent.com/YOU/YOUR-REPO/main/notebook.ipynb)
@@ -191,18 +137,18 @@ needs the `jupyterlab-open-url-parameter` extension):
 
 - **Whole repo** — the notebook has sibling files (data, images,
   helper modules) or you want a working copy with `git pull` updates
-  available from inside the session. Works with any image (small or xl).
-  Cold-start cost: image pull + repo clone.
+  available from inside the session. Works with any image. Cold-start
+  cost: image pull + repo clone.
 - **Single notebook by URL** — the notebook is self-contained (only
   standard imports, no relative `open()`). Faster cold start because
-  only the `.ipynb` itself is fetched. xl only.
-- **Bare launch** — you just want to drop the reader into a fresh
-  Qiskit environment to experiment.
+  only the `.ipynb` itself is fetched. xl only (needs the
+  `jupyterlab-open-url-parameter` extension).
+- **Bare launch** — drop the reader into a fresh Qiskit environment
+  to experiment.
 
 ### Why the `/launch/?…` redirector?
 
-The link target on every badge points at
-`https://qubins.org/launch/?…`, which is a thin
+Every badge points at `https://qubins.org/launch/?…`, a thin
 client-side redirector that builds the actual mybinder URL on the
 fly. Two reasons:
 
@@ -212,53 +158,92 @@ fly. Two reasons:
    its URL shape, only the redirector needs to update — every badge
    already published in the wild keeps working.
 
-The destination URL is always visible (rendered into the page
-before the JS redirect fires), so the reader sees where they're
-about to be sent.
+The destination URL is always visible (rendered into the page before
+the JS redirect fires), so the reader sees where they're about to be
+sent.
 
-### Image picker
+## Run on your laptop (Docker)
 
-The catalog table in [Versions](#versions) above lists every published
-image with its badge. The
-[landing page](https://qubins.org/) has a filterable
-version of the same table.
+Pull and start any tag, mapping Jupyter's port:
+
+```sh
+docker run --rm -p 8888:8888 ghcr.io/qubins/images:latest-small
+```
+
+Jupyter prints a tokenised URL once ready:
+
+```
+http://127.0.0.1:8888/lab?token=<long-hex-string>
+```
+
+Open it; the token is required on first connect.
+
+To work on notebooks already on your laptop, mount your folder:
+
+```sh
+docker run --rm -p 8888:8888 \
+  -v "$PWD:/home/jovyan/work" \
+  ghcr.io/qubins/images:latest-small
+```
+
+Jupyter runs as `jovyan` (UID 1000); on Linux, either make the host
+directory readable/writable by that UID or pass
+`--user $(id -u):$(id -g)`. Add `-d` for detached, `--name qubins` to
+allow `docker stop qubins`.
+
+## Pull your own notebook repo (nbgitpuller)
+
+The **xl** images bundle [nbgitpuller](https://github.com/jupyterhub/nbgitpuller),
+which lets a Binder URL auto-clone a notebook repo into the running
+session on first launch. The URL shape:
+
+```
+https://mybinder.org/v2/gh/QuBins/qiskit-images/latest-xl?urlpath=git-pull%3Frepo%3Dhttps%253A%252F%252Fgithub.com%252FYOU%252FYOUR-REPO%26urlpath%3Dlab%252Ftree%252FYOUR-REPO%252Fnotebook.ipynb
+```
+
+The least painful way to build one is the
+[badge generator at qubins.org](https://qubins.org/#launch) — it
+produces both the raw mybinder URL and the badge markdown.
 
 ## How it works
 
 `Dockerfile` is parameterised by `QISKIT_VERSION` (which is really a
-`<qiskit-minor>-<flavor>` build target) and installs the dependency list at
-`versions/<target>/requirements.txt`. The `build-matrix.yml` workflow has
-three stages:
+`<qiskit-minor>-<flavor>` build target) and installs the dependency
+list at `versions/<target>/requirements.txt`. The `build-matrix.yml`
+workflow has three stages:
 
-1. **build + scan** — for each `<target>`, build an image per architecture
-   on a native runner (`ubuntu-latest` for amd64, `ubuntu-24.04-arm` for
-   arm64), load the result into the local docker daemon, and run Trivy
-   against it (HIGH/CRITICAL with available fixes block the run). A
-   final `RUN python -c 'import qiskit; from qiskit import QuantumCircuit;
-   QuantumCircuit(2).measure_all()'` smoke test catches wheels that
-   resolve cleanly but break at import. The base image is force-pulled
-   so security fixes flow through instead of riding on the GHA layer
-   cache. This stage runs on every branch.
+1. **build + scan** — for each `<target>`, build an image per
+   architecture on a native runner (`ubuntu-latest` for amd64,
+   `ubuntu-24.04-arm` for arm64), load the result into the local
+   docker daemon, and run Trivy against it (HIGH/CRITICAL with
+   available fixes block the run). A final `RUN python -c 'import
+   qiskit; from qiskit import QuantumCircuit; QuantumCircuit(2).measure_all()'`
+   smoke test catches wheels that resolve cleanly but break at import.
+   The base image is force-pulled so security fixes flow through
+   instead of riding on the GHA layer cache. This stage runs on every
+   branch.
 2. **publish to GHCR** (only on `main` / `workflow_dispatch`) — re-run
    the build with `push: true` so `docker/build-push-action` produces
-   the SLSA provenance attestation alongside `ghcr.io/.../images:<target>-<arch>`.
-   All layers are cache hits from step 1, so this is fast.
-3. **manifest + sign** (only on `main` / `workflow_dispatch`) — combine
-   the per-arch tags into a multi-arch `ghcr.io/.../images:<target>` with
-   `docker buildx imagetools create`, sign the manifest with cosign
-   keyless OIDC, then force-sync a per-target stub branch containing
-   only `binder/Dockerfile` (a one-line `FROM ghcr.io/...` reference).
+   the SLSA provenance attestation alongside
+   `ghcr.io/.../images:<target>-<arch>`. All layers are cache hits
+   from step 1, so this is fast.
+3. **manifest + sign** (only on `main` / `workflow_dispatch`) —
+   combine the per-arch tags into a multi-arch
+   `ghcr.io/.../images:<target>` with `docker buildx imagetools
+   create`, sign the manifest with cosign keyless OIDC, then
+   force-sync a per-target stub branch containing only
+   `binder/Dockerfile` (a one-line `FROM ghcr.io/...` reference).
    Targets matching the `LATEST_QISKIT` env var also get a
    `latest-<flavor>` tag and stub branch.
 
-mybinder consumes the stub branch and pulls the pre-built image instead of
-rebuilding the dep tree from scratch (cold start ~30s).
+mybinder consumes the stub branch and pulls the pre-built image
+instead of rebuilding the dep tree from scratch (cold start ~30s).
 
 ### Staying current
 
-- A daily cron at **04:00 UTC** (= 05:00 CET) reruns the full matrix on
-  `main`, so upstream base-image CVE fixes flow into published images
-  within a day even when no one pushes a commit.
+- A daily cron at **04:00 UTC** (= 05:00 CET) reruns the full matrix
+  on `main`, so upstream base-image CVE fixes flow into published
+  images within a day even when no one pushes a commit.
 - Dependabot watches three ecosystems: the docker base image, the GHA
   action versions, and the pip pins in the `LATEST_QISKIT` minor's
   `requirements.txt` files. Each Dependabot PR runs through the same
@@ -274,23 +259,28 @@ rebuilding the dep tree from scratch (cold start ~30s).
 
 Every multi-arch tag is signed via cosign keyless OIDC:
 
-```
+```sh
 cosign verify ghcr.io/qubins/images:2.4-small \
   --certificate-identity-regexp='^https://github.com/QuBins/qiskit-images/' \
   --certificate-oidc-issuer=https://token.actions.githubusercontent.com
 ```
 
 Build provenance attestations are produced automatically by
-`docker/build-push-action`; see them via `docker buildx imagetools
-inspect ghcr.io/.../images:<tag> --format '{{ json .Provenance }}'`.
+`docker/build-push-action`; see them via:
+
+```sh
+docker buildx imagetools inspect ghcr.io/qubins/images:<tag> \
+  --format '{{ json .Provenance }}'
+```
 
 ## Adding a new Qiskit minor
 
-The detector workflow handles this automatically: when PyPI ships a new
-minor, it opens a `bot/qiskit-<X.Y>` PR with the small + xl scaffolding,
-matrix entries, `LATEST_QISKIT` bump, `dependabot.yml` directories, and
-README rows. Review the PR — usually the xl needs a couple of addon
-pins relaxed because addons lag the qiskit minor — and merge.
+The detector workflow handles this automatically: when PyPI ships a
+new minor, it opens a `bot/qiskit-<X.Y>` PR with the small + xl
+scaffolding, matrix entries, `LATEST_QISKIT` bump, `dependabot.yml`
+directories, and README rows. Review the PR — usually the xl needs a
+couple of addon pins relaxed because addons lag the qiskit minor —
+and merge.
 
 If you ever need to scaffold by hand: create
 `versions/<X.Y>-{small,xl}/requirements.txt`, add the entries to both
@@ -303,13 +293,13 @@ does all of this in one shot if you set `MINOR` and `VERSION` in env.
 
 Apache-2.0. See [LICENSE](LICENSE).
 
-Every in-browser launch served from a "launch QuBins" badge runs
-on **[mybinder.org](https://mybinder.org)** — a free service from the
+Every in-browser launch served from a "launch QuBins" badge runs on
+**[mybinder.org](https://mybinder.org)** — a free service from the
 [Binder project](https://jupyter.org/binder) (part of Project
 Jupyter), with federation backends operated by
 [GESIS](https://www.gesis.org), [2i2c](https://2i2c.org), and
-partners. QuBins is just the curated container images they pull;
-please be patient on cold starts and don't hammer the service.
+partners. QuBins is just curated container images they pull; please
+be patient on cold starts and don't hammer the service.
 
 Qiskit is a trademark of IBM. This project is independent and not
 affiliated with IBM; it just packages the open-source Qiskit

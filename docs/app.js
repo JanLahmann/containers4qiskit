@@ -43,8 +43,8 @@
   // ------------------------------------------------------------- quick start
   function renderQuickStart(latest) {
     document.getElementById("qs-latest").textContent = latest;
-    document.getElementById("qs-binder-small").href =
-      `https://mybinder.org/v2/gh/${REPO}/latest-small`;
+    const tagEl = document.getElementById("qs-latest-tag");
+    if (tagEl) tagEl.textContent = `latest-xl (= ${latest}-xl)`;
     document.getElementById("qs-binder-xl").href =
       `https://mybinder.org/v2/gh/${REPO}/latest-xl`;
     document.getElementById("qs-docker-copy").addEventListener("click", (e) =>

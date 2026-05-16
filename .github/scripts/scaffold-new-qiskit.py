@@ -11,7 +11,8 @@ every place that needs to know about the new minor:
   build and manifest jobs; bump LATEST_QISKIT
 - .github/dependabot.yml: point the pip ecosystem's directories at the
   new minor's small + xl dirs
-- README.md: prepend two table rows; update the "today: ..." line
+- README.md: update the "today: ..." line (the per-version catalog
+  lives on qubins.org, generated from versions/ — no edit needed)
 
 Idempotent: refuses to do anything if versions/<MINOR>-small/ already
 exists.
@@ -101,27 +102,17 @@ db_path.write_text(db)
 
 readme_path = REPO / "README.md"
 readme = readme_path.read_text()
-
-def badge_row(flavor: str) -> str:
-    tag = f"{MINOR}-{flavor}"
-    badge  = f"https://qubins.org/badges/launch-qubins-{tag}.svg"
-    target = f"https://qubins.org/launch/?image={tag}"
-    return (
-        f"| {MINOR}     | {flavor:<6} | "
-        f"[![launch QuBins {tag}]({badge})]({target}) | "
-        f"`docker run --rm -p 8888:8888 ghcr.io/qubins/images:{tag}` |\n"
-    )
-
-new_rows = badge_row("small") + badge_row("xl")
+# The per-version catalog now lives on qubins.org (generated from
+# versions/ at deploy time). Only the "today: <minor>" hint and the
+# pip-install snippet need bumping in README.
 readme = re.sub(
-    r"(\| latest  \| xl     \|[^\n]+\n)",
-    rf"\g<1>{new_rows}",
+    r"\(today: `\d+\.\d+`\)",
+    f"(today: `{MINOR}`)",
     readme,
-    count=1,
 )
 readme = re.sub(
-    r"`latest` aliases the current Qiskit minor \(today: `\d+\.\d+`\)",
-    f"`latest` aliases the current Qiskit minor (today: `{MINOR}`)",
+    r'pip install "qiskit~=\d+\.\d+\.0"',
+    f'pip install "qiskit~={MINOR}.0"',
     readme,
 )
 readme_path.write_text(readme)
